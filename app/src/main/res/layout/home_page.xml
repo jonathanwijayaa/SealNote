@@ -1,41 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF"
+    android:background="@color/background"
     tools:context=".MainActivity">
 
     <!-- Toolbar sebagai SearchBar -->
+
+    <!-- RecyclerView untuk daftar catatan dalam grid -->
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
+        style="@style/InputField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#152332"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/areainput"
         android:padding="10dp"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Dark">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
         <EditText
             android:id="@+id/search_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Search your note..."
             android:background="@android:color/transparent"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="8dp"
+            android:hint="Search your note..."
             android:paddingHorizontal="10dp"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:drawableStart="@android:drawable/ic_menu_search"
-            android:drawablePadding="8dp"/>
+            android:textColorHint="@color/warnatext"
+            android:textSize="16sp" />
     </androidx.appcompat.widget.Toolbar>
 
-    <!-- RecyclerView untuk daftar catatan dalam grid -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="412dp"
+        android:layout_height="803dp"
         android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:listitem="@layout/item_note" />
-</LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="212dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="76dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.845"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_add" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
