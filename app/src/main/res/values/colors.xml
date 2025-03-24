@@ -2,4 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gradientStart">#6C5DD3</color>
+    <color name="gradientEnd">#A855F7</color>
+    <color name="background">#152332</color>
+    <color name="warnatext">#FFF3DB</color>
+    <color name="warnaicon">#FFF3DB</color>
+    <color name="warnabox">#3C4177</color>
 </resources>
