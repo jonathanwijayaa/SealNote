@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_all_notes"
+        android:title="All notes"
+        android:icon="@drawable/ic_notes"/>
+
+    <item
+        android:id="@+id/nav_bookmarks"
+        android:title="Bookmarks"
+        android:icon="@drawable/ic_bookmark"/>
+
+    <item
+        android:id="@+id/nav_secret_notes"
+        android:title="Secret Notes"
+        android:icon="@drawable/ic_secret"/>
+
+    <item
+        android:id="@+id/nav_trash"
+        android:title="Trash"
+        android:icon="@drawable/ic_trash"/>
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_profile"
+            android:title="Profile"
+            android:icon="@drawable/ic_profile"/>
+        <item
+            android:id="@+id/nav_settings"
+            android:title="Settings"
+            android:icon="@drawable/ic_settings"/>
+    </group>
+
+</menu>
