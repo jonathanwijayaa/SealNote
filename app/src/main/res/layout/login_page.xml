@@ -71,7 +71,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
-        android:background="@drawable/areainput"
+        android:background="@drawable/gradient_button_background"
         android:paddingHorizontal="33dp"
         android:paddingVertical="10dp"
         android:text="Login"
