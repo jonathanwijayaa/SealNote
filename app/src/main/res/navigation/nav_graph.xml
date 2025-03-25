@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/homepageFragment">
+
+    <fragment
+        android:id="@+id/homepageFragment"
+        android:name="com.example.sealnote.HomepageFragment"
+        android:label="Homepage"
+        tools:layout="@layout/home_page" />
+
+    <fragment
+        android:id="@+id/bookmarksFragment"
+        android:name="com.example.sealnote.BookmarksFragment"
+        android:label="Bookmarks"
+        tools:layout="@layout/bookmarks_page" />
+
+    <fragment
+        android:id="@+id/secretNotesFragment"
+        android:name="com.example.sealnote.SecretNotesFragment"
+        android:label="Secret Notes"
+        tools:layout="@layout/secret_note_page" />
+
+    <fragment
+        android:id="@+id/trashFragment"
+        android:name="com.example.sealnote.TrashFragment"
+        android:label="Trash"
+        tools:layout="@layout/trash_page" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.sealnote.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/profile_page" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.sealnote.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/settings_page" />
+
+    <fragment
+        android:id="@+id/addNotesFragment"
+        android:name="com.example.sealnote.AddNotesFragment"
+        android:label="Add Notes"
+        tools:layout="@layout/add_notes" />
+
+</navigation>
