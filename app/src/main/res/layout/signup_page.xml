@@ -28,54 +28,58 @@
         android:layout_marginTop="16dp"
         android:text="Please fill the input below here"
         android:textColor="#FFF3DB"
-        android:textSize="13sp"
-        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textStyle="normal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.488"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleText" />
 
     <EditText
-        style="@style/InputField"
         android:id="@+id/fullNameInput"
+        style="@style/InputField"
         android:background="@drawable/areainput"
         android:drawablePadding="11dp"
         android:hint="full name"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/subtitleText"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subtitleText" />
 
     <!-- Email Input -->
     <EditText
-        style="@style/InputField"
         android:id="@+id/emailInput"
+        style="@style/InputField"
         android:background="@drawable/areainput"
         android:drawablePadding="11dp"
         android:hint="youremail@gmail.com"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fullNameInput"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fullNameInput" />
 
     <!-- Password Input -->
     <EditText
-        style="@style/InputField"
         android:id="@+id/passwordInput"
+        style="@style/InputField"
         android:background="@drawable/areainput"
         android:drawablePadding="11dp"
         android:hint="password"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/emailInput"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/emailInput" />
 
     <!-- Confirm Password Input -->
     <EditText
-        style="@style/InputField"
         android:id="@+id/confirmPasswordInput"
+        style="@style/InputField"
         android:background="@drawable/areainput"
-        android:hint="confirm Password"
-        app:layout_constraintStart_toStartOf="parent"
+        android:hint="confirm password"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/passwordInput"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/passwordInput" />
 
     <!-- Sign Up Button -->
 
@@ -84,14 +88,15 @@
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/signUpButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_marginTop="48dp"
         android:background="@drawable/gradient_button_background"
         android:paddingHorizontal="45dp"
         android:paddingVertical="3dp"
         android:text="Sign Up"
+        android:textAllCaps="false"
         android:textColor="#FFFFFF"
-        android:textSize="12sp"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.844"

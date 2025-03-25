@@ -8,4 +8,5 @@
     <color name="warnatext">#FFF3DB</color>
     <color name="warnaicon">#FFF3DB</color>
     <color name="warnabox">#3C4177</color>
+    <color name="background_dark">#1E2A3A</color>
 </resources>

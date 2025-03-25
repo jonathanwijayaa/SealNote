@@ -33,12 +33,12 @@
     <TextView
         android:id="@+id/loginInfo"
         android:layout_width="327dp"
-        android:layout_height="14dp"
+        android:layout_height="20dp"
         android:layout_marginHorizontal="38dp"
         android:layout_marginTop="8dp"
         android:text="Enter your login information to continue"
         android:textColor="#FFF3DB"
-        android:textSize="13sp"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.392"
         app:layout_constraintStart_toStartOf="parent"
@@ -46,39 +46,43 @@
 
 
     <EditText
-        style="@style/InputField"
         android:id="@+id/emailInput"
+        style="@style/InputField"
         android:background="@drawable/areainput"
         android:drawableStart="@drawable/ic_email"
         android:drawablePadding="10dp"
         android:hint="youremail@gmail.com"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/loginInfo" />
 
     <EditText
-        style="@style/InputField"
         android:id="@+id/passwordInput"
+        style="@style/InputField"
         android:background="@drawable/areainput"
         android:drawablePadding="11dp"
         android:hint="password"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/emailInput" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/loginButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/gradient_button_background"
-        android:paddingHorizontal="33dp"
-        android:paddingVertical="10dp"
+        android:paddingHorizontal="50dp"
+        android:paddingVertical="5dp"
         android:text="Login"
+        android:textAllCaps="false"
         android:textColor="#FFFFFF"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.867"
+        app:layout_constraintHorizontal_bias="0.847"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/forgotPassword" />
 
@@ -151,7 +155,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="24dp"
-        android:background="@drawable/areainput"
+        android:background="@drawable/gradient_button_background"
         android:gravity="center"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
