@@ -2,32 +2,32 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/nav_all_notes"
+        android:id="@+id/homepageFragment"
         android:title="All notes"
         android:icon="@drawable/ic_notes"/>
 
     <item
-        android:id="@+id/nav_bookmarks"
+        android:id="@+id/bookmarksFragment"
         android:title="Bookmarks"
         android:icon="@drawable/ic_bookmark"/>
 
     <item
-        android:id="@+id/nav_secret_notes"
+        android:id="@+id/secretNotesFragment"
         android:title="Secret Notes"
         android:icon="@drawable/ic_secret"/>
 
     <item
-        android:id="@+id/nav_trash"
+        android:id="@+id/trashFragment"
         android:title="Trash"
         android:icon="@drawable/ic_trash"/>
 
     <group android:checkableBehavior="none">
         <item
-            android:id="@+id/nav_profile"
+            android:id="@+id/profileFragment"
             android:title="Profile"
             android:icon="@drawable/ic_profile"/>
         <item
-            android:id="@+id/nav_settings"
+            android:id="@+id/settingsFragment"
             android:title="Settings"
             android:icon="@drawable/ic_settings"/>
     </group>
