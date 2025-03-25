@@ -81,20 +81,20 @@
 
     <!-- Already have an account? -->
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/signUpButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="152dp"
-        android:background="@drawable/areainput"
-        android:paddingHorizontal="26dp"
-        android:paddingVertical="10dp"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/gradient_button_background"
+        android:paddingHorizontal="45dp"
+        android:paddingVertical="3dp"
         android:text="Sign Up"
         android:textColor="#FFFFFF"
         android:textSize="12sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.867"
+        app:layout_constraintHorizontal_bias="0.844"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/confirmPasswordInput" />
 
@@ -103,13 +103,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="76dp"
-        android:layout_marginBottom="124dp"
+        android:layout_marginBottom="100dp"
         android:text="Already have an account?"
         android:textColor="#F8F8F8"
         android:textSize="13sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/logInText"
-        app:layout_constraintHorizontal_bias="0.678"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
