@@ -37,57 +37,72 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- All Notes Title -->
-    <TextView
-        android:id="@+id/all_notes_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="All notes"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        tools:layout_editor_absoluteX="70dp" />
 
     <!-- Sorted By -->
-    <TextView
-        android:id="@+id/sorted_by"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="Sorted by"
-        android:textColor="#B0BEC5"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toStartOf="@id/sort_icon"
-        app:layout_constraintStart_toEndOf="@id/all_notes_title"
-        app:layout_constraintTop_toBottomOf="@id/search_bar" />
 
     <!-- Sort Icon -->
-    <ImageView
-        android:id="@+id/sort_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_sort"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/sorted_by"
-        app:layout_constraintTop_toBottomOf="@id/search_bar"
-        app:tint="#B0BEC5"
-        tools:ignore="NotSibling" />
 
     <!-- RecyclerView for Notes -->
 
     <!-- Floating Action Button -->
 
+    <TextView
+        android:id="@+id/all_notes_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="92dp"
+        android:layout_marginBottom="19dp"
+        android:text="All notes"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/sort_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="7dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout">
+
+        <TextView
+            android:id="@+id/sorted_by"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sorted by"
+            android:textColor="#B0BEC5"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/sort_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="4dp"
+            android:src="@drawable/ic_sort"
+            app:tint="#B0BEC5" />
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:layout_width="416dp"
-        android:layout_height="620dp"
+        android:layout_width="408dp"
+        android:layout_height="760dp"
         android:padding="16dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:spanCount="2"
-        tools:layout_editor_absoluteX="-1dp"
-        tools:layout_editor_absoluteY="112dp"
         tools:listitem="@layout/item_note" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
