@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1E2A3A">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/background"
+        android:elevation="4dp"
+        app:title="Bookmarks"
+        app:titleTextColor="#FFFFFF"
+        app:navigationIcon="@drawable/ic_menu"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Search Bar -->
     <com.google.android.material.textfield.TextInputLayout
@@ -20,61 +35,47 @@
         app:boxCornerRadiusTopEnd="32dp"
         app:boxCornerRadiusTopStart="32dp"
         app:endIconMode="clear_text"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:startIconDrawable="@drawable/ic_menu">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Search your note..."
             android:padding="16dp"
             android:textColor="#FFFFFF"
             android:textColorHint="#B0BEC5"
-            android:textSize="16sp" />
-
+            android:textSize="16sp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- All Notes Title -->
-
-    <!-- Sorted By -->
-
-    <!-- Sort Icon -->
-
-    <!-- RecyclerView for Notes -->
-
-    <!-- Floating Action Button -->
-
     <TextView
         android:id="@+id/all_notes_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="26dp"
-        android:layout_marginTop="92dp"
-        android:layout_marginBottom="19dp"
+        android:layout_marginTop="12dp"
         android:text="All notes"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout"/>
 
+    <!-- Sort Container -->
     <LinearLayout
         android:id="@+id/sort_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="13dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="7dp"
         android:clickable="true"
         android:focusable="true"
         android:orientation="horizontal"
         android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout">
 
         <TextView
             android:id="@+id/sorted_by"
@@ -82,7 +83,7 @@
             android:layout_height="wrap_content"
             android:text="Sorted by"
             android:textColor="#B0BEC5"
-            android:textSize="14sp" />
+            android:textSize="14sp"/>
 
         <ImageView
             android:id="@+id/sort_icon"
@@ -90,21 +91,24 @@
             android:layout_height="24dp"
             android:layout_marginStart="4dp"
             android:src="@drawable/ic_sort"
-            app:tint="#B0BEC5" />
+            app:tint="#B0BEC5"/>
     </LinearLayout>
 
+    <!-- RecyclerView for Notes -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
-        android:layout_width="408dp"
-        android:layout_height="760dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:padding="16dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/all_notes_title"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/fab"
         app:spanCount="2"
-        tools:listitem="@layout/item_note" />
+        tools:listitem="@layout/item_note"/>
 
+    <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -114,6 +118,6 @@
         android:tint="#FFFFFF"
         app:backgroundTint="#6200EE"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
