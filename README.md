@@ -10,3 +10,8 @@ Anggota Kelompok:
 1. 71220834 Caesar Tresna Andika
 2. 71220867 Amelia Putri Aftiana
 3. 71220880 Jonathan Wijaya
+
+- 👤 [**Caesar Tresna Andika (71220834)**](https://github.com/caesartresnaandika)
+- 👤 [**Amelia Putri Aftiana (71220867)**](https://github.com/caesartresnaandika)
+- 👤 [**Jonathan Wijaya (71220880)**](https://github.com/ameliaaftiana)
+
