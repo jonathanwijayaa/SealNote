@@ -38,7 +38,7 @@
         android:id="@+id/settingsFragment"
         android:name="com.example.sealnote.SettingsFragment"
         android:label="Settings"
-        tools:layout="@layout/settings" />
+        tools:layout="@layout/settings_page" />
 
     <fragment
         android:id="@+id/addNotesFragment"
