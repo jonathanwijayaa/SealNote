@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "303469020439",
+    "project_id": "android-sealnote",
+    "storage_bucket": "android-sealnote.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:303469020439:android:990e5e4e16971d84e12352",
+        "android_client_info": {
+          "package_name": "com.example.sealnote"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdaRh8guVXwD1nwjbCr8IQsITjFCzJp84"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
