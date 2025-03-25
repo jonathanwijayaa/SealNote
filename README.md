@@ -9,5 +9,5 @@ Dengan SealNote, catatan Anda tetap aman dan hanya dapat diakses oleh Anda! 🚀
 Anggota Kelompok:
 
 - 👤 [**Caesar Tresna Andika (71220834)**](https://github.com/caesartresnaandika)
-- 👤 [**Amelia Putri Aftiana (71220867)**](https://github.com/caesartresnaandika)
-- 👤 [**Jonathan Wijaya (71220880)**](https://github.com/ameliaaftiana)
+- 👤 [**Amelia Putri Aftiana (71220867)**](https://github.com/ameliaaftiana)
+- 👤 [**Jonathan Wijaya (71220880)**](https://github.com/jonathanwijayaa)
