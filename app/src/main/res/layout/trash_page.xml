@@ -10,9 +10,6 @@
     tools:context=".MainActivity">
 
     <!-- Toolbar sebagai SearchBar -->
-
-    <!-- RecyclerView untuk daftar catatan dalam grid -->
-
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         style="@style/InputField"
