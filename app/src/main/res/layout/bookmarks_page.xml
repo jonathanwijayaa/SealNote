@@ -42,11 +42,11 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Search your note..."
+            android:hint="Search Your Notes"
             android:padding="16dp"
             android:textColor="#FFFFFF"
-            android:textColorHint="#B0BEC5"
-            android:textSize="16sp"/>
+            android:textColorHint="#FFFFF"
+            android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- All Notes Title -->
@@ -95,20 +95,24 @@
     </LinearLayout>
 
     <!-- RecyclerView for Notes -->
+
+    <!-- Floating Action Button -->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="16dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/all_notes_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/fab"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/all_notes_title"
+        app:layout_constraintVertical_bias="0.0"
         app:spanCount="2"
-        tools:listitem="@layout/item_note"/>
+        tools:listitem="@layout/item_note" />
 
-    <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
