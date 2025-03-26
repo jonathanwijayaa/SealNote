@@ -18,9 +18,9 @@
 
     <fragment
         android:id="@+id/secretNotesFragment"
-        android:name="com.example.sealnote.SecretNotesFragment"
+        android:name="com.example.sealnote.AuthenticationFragment"
         android:label="Secret Notes"
-        tools:layout="@layout/secret_note_page" />
+        tools:layout="@layout/authentication" />
 
     <fragment
         android:id="@+id/trashFragment"
