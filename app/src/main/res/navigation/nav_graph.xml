@@ -6,13 +6,13 @@
 
     <fragment
         android:id="@+id/homepageFragment"
-        android:name="com.example.sealnote.HomepageFragment"
+        android:name="com.example.sealnote.view.HomepageFragment"
         android:label="Homepage"
         tools:layout="@layout/home_page" />
 
     <fragment
         android:id="@+id/bookmarksFragment"
-        android:name="com.example.sealnote.BookmarksFragment"
+        android:name="com.example.sealnote.view.BookmarksFragment"
         android:label="Bookmarks"
         tools:layout="@layout/bookmarks_page" />
 
@@ -24,7 +24,7 @@
 
     <fragment
         android:id="@+id/trashFragment"
-        android:name="com.example.sealnote.TrashFragment"
+        android:name="com.example.sealnote.view.TrashFragment"
         android:label="Trash"
         tools:layout="@layout/trash_page" />
 
