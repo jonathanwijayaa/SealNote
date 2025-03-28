@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -13,19 +14,18 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Menu"
+        android:contentDescription="@string/menu"
         android:src="@drawable/ic_menu"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="#FFFFFF" />
 
     <!-- Title -->
-
-    <!-- Display -->
     <TextView
+        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Basic"
+        android:text="@string/basic"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -36,204 +36,371 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
 
-    <!-- Calculator Buttons -->
-
-    <TextView
-        android:id="@+id/tvDisplay"
-        android:layout_width="397dp"
+    <!-- Display Container with Shadow -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="0dp"
         android:layout_height="196dp"
         android:layout_marginTop="16dp"
-        android:gravity="bottom|end"
-        android:padding="16dp"
-        android:text="5.000"
+        app:cardBackgroundColor="#152332"
+        app:cardElevation="16dp"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnMenu">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- Display Text -->
+            <TextView
+                android:id="@+id/tvDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="bottom|end"
+                android:padding="16dp"
+                android:text="@string/default_display"
+                android:textColor="#FFFFFF"
+                android:textSize="48sp"
+                android:textStyle="bold" />
+
+            <!-- Line Under Number -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#33FFFFFF" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Calculator Buttons -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="button" />
+
+    <!-- Row 1 -->
+    <Button
+        android:id="@+id/btnBackspace"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#4A52AA"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/backspace"
+        android:text="@string/backspace"
         android:textColor="#FFFFFF"
-        android:textSize="48sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnMenu" />
+        app:layout_constraintEnd_toStartOf="@id/button6"
+        app:layout_constraintTop_toBottomOf="@id/cardView"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-    <GridLayout
-        android:layout_width="413dp"
-        android:layout_height="477dp"
-        android:columnCount="4"
-        android:padding="16dp"
-        android:rowCount="5"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <Button
+        android:id="@+id/button6"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#4A52AA"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/square_root"
+        android:text="@string/square_root"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/btnBackspace"
+        app:layout_constraintEnd_toStartOf="@id/button8"
+        app:layout_constraintTop_toBottomOf="@id/cardView"
+        app:layout_constraintHorizontal_chainStyle="spread" />
+
+    <Button
+        android:id="@+id/button8"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#4A52AA"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/percent"
+        android:text="@string/percent"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button6"
+        app:layout_constraintEnd_toStartOf="@id/button10"
+        app:layout_constraintTop_toBottomOf="@id/cardView"
+        app:layout_constraintHorizontal_chainStyle="spread" />
+
+    <Button
+        android:id="@+id/button10"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/gradient_button_background"
+        android:contentDescription="@string/divide"
+        android:text="@string/divide"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button8"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/cardView"
+        app:layout_constraintHorizontal_chainStyle="spread" />
+
+    <!-- Row 2 -->
+    <Button
+        android:id="@+id/button"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/seven"
+        android:text="@string/seven"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvDisplay"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintEnd_toStartOf="@id/button2"
+        app:layout_constraintTop_toBottomOf="@id/btnBackspace"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <!-- Row 1 -->
-        <Button
-            android:id="@+id/btnBackspace"
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#4A52AA"
-            android:text="⌫"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/eight"
+        android:text="@string/eight"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button"
+        app:layout_constraintEnd_toStartOf="@id/button3"
+        app:layout_constraintTop_toBottomOf="@id/button6"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:layout_row="0"
-            android:layout_column="1"
-            android:backgroundTint="#4A52AA"
-            android:text="x²√"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/nine"
+        android:text="@string/nine"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button2"
+        app:layout_constraintEnd_toStartOf="@id/button4"
+        app:layout_constraintTop_toBottomOf="@id/button8"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#4A52AA"
-            android:text="%"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/gradient_button_background"
+        android:contentDescription="@string/multiply"
+        android:text="@string/multiply"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button10"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:background="@drawable/gradient_button_background"
-            android:text="÷"
-            android:textSize="20sp" />
+    <!-- Row 3 -->
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/four"
+        android:text="@string/four"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button7"
+        app:layout_constraintTop_toBottomOf="@id/button"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <!-- Row 2 -->
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="7"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button7"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/five"
+        android:text="@string/five"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button5"
+        app:layout_constraintEnd_toStartOf="@id/button9"
+        app:layout_constraintTop_toBottomOf="@id/button2"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="8"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button9"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/six"
+        android:text="@string/six"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button7"
+        app:layout_constraintEnd_toStartOf="@id/button11"
+        app:layout_constraintTop_toBottomOf="@id/button3"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="9"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button11"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/gradient_button_background"
+        android:contentDescription="@string/subtract"
+        android:text="@string/subtract"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button4"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:background="@drawable/gradient_button_background"
-            android:text="×"
-            android:textSize="20sp" />
+    <!-- Row 4 -->
+    <Button
+        android:id="@+id/button12"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/one"
+        android:text="@string/one"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button13"
+        app:layout_constraintTop_toBottomOf="@id/button5"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <!-- Row 3 -->
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="4"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button13"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/two"
+        android:text="@string/two"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button12"
+        app:layout_constraintEnd_toStartOf="@id/button15"
+        app:layout_constraintTop_toBottomOf="@id/button7"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="5"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button15"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/three"
+        android:text="@string/three"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button13"
+        app:layout_constraintEnd_toStartOf="@id/button14"
+        app:layout_constraintTop_toBottomOf="@id/button9"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="6"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button14"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/gradient_button_background"
+        android:contentDescription="@string/add"
+        android:text="@string/add"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button15"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button11"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:background="@drawable/bg_operator_gradient"
-            android:text="-"
-            android:textSize="20sp" />
+    <!-- Row 5 -->
+    <Button
+        android:id="@+id/button16"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/clear"
+        android:text="@string/clear"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button17"
+        app:layout_constraintTop_toBottomOf="@id/button12"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <!-- Row 4 -->
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="1"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button17"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/decimal"
+        android:text="@string/decimal"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button16"
+        app:layout_constraintEnd_toStartOf="@id/button18"
+        app:layout_constraintTop_toBottomOf="@id/button13"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="2"
-            android:textSize="20sp" />
+    <Button
+        android:id="@+id/button18"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
+        android:contentDescription="@string/zero"
+        android:text="@string/zero"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button17"
+        app:layout_constraintEnd_toStartOf="@id/button19"
+        app:layout_constraintTop_toBottomOf="@id/button15"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="3"
-            android:textSize="20sp" />
-
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:background="@drawable/bg_operator_gradient"
-            android:text="+"
-            android:textSize="20sp" />
-
-        <!-- Row 5 -->
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="C"
-            android:textSize="20sp" />
-
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text="0"
-            android:textSize="20sp" />
-
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:backgroundTint="#313673"
-            android:text=","
-            android:textSize="20sp" />
-
-        <Button
-            style="@style/CalculatorButton"
-            android:layout_width="74dp"
-            android:layout_height="59dp"
-            android:background="@drawable/bg_operator_gradient"
-            android:text="="
-            android:textSize="20sp" />
-
-    </GridLayout>
+    <Button
+        android:id="@+id/button19"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/gradient_button_background"
+        android:contentDescription="@string/equal"
+        android:text="@string/equal"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@id/button18"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button14"
+        app:layout_constraintHorizontal_chainStyle="spread" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
