@@ -1,4 +1,4 @@
-package com.example.sealnote
+package com.example.sealnote.view
 
 import android.os.Bundle
 import android.view.LayoutInflater

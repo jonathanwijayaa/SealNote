@@ -1,10 +1,11 @@
-package com.example.sealnote
+package com.example.sealnote.view
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.sealnote.R
 
 class SecretNotesFragment : Fragment() {
     override fun onCreateView(

@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/secretNotesFragment"
-        android:name="com.example.sealnote.AuthenticationFragment"
+        android:name="com.example.sealnote.view.AuthenticationFragment"
         android:label="Secret Notes"
         tools:layout="@layout/authentication" />
 
@@ -30,19 +30,19 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.example.sealnote.ProfileFragment"
+        android:name="com.example.sealnote.view.ProfileFragment"
         android:label="Profile"
         tools:layout="@layout/profile_page" />
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.example.sealnote.SettingsFragment"
+        android:name="com.example.sealnote.view.SettingsFragment"
         android:label="Settings"
         tools:layout="@layout/settings_page" />
 
     <fragment
         android:id="@+id/addNotesFragment"
-        android:name="com.example.sealnote.AddNotesFragment"
+        android:name="com.example.sealnote.view.AddNotesFragment"
         android:label="Add Notes"
         tools:layout="@layout/add_notes" />
 
