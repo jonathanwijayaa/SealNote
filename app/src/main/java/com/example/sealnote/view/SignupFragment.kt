@@ -27,22 +27,33 @@ class SignupFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Changed from btnSignup to signUpButton
+        binding.signUpButton.setOnClickListener {
+            // Changed from etUsername to fullNameInput
+            val username = binding.fullNameInput.text.toString().trim()
+            // Changed from etPassword to passwordInput
+            val password = binding.passwordInput.text.toString().trim()
+            // Changed from etConfirmPassword to confirmPasswordInput
+            val confirmPassword = binding.confirmPasswordInput.text.toString().trim()
 
-        binding.btnSignup.setOnClickListener {
-            val username = binding.etUsername.text.toString().trim()
-            val password = binding.etPassword.text.toString().trim()
+            // Added password confirmation check
+            if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(requireContext(), "Please fill in all fields!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-            if (username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(requireContext(), "Mohon isi semua data!", Toast.LENGTH_SHORT).show()
+            if (password != confirmPassword) {
+                Toast.makeText(requireContext(), "Passwords do not match!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             viewModel.signup(username, password)
-            Toast.makeText(requireContext(), "Akun berhasil dibuat!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Account created successfully!", Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_signupFragment_to_loginFragment)
         }
 
-        binding.tvLogin.setOnClickListener {
+        // Changed from tvLogin to logInText
+        binding.logInText.setOnClickListener {
             findNavController().navigate(R.id.action_signupFragment_to_loginFragment)
         }
     }

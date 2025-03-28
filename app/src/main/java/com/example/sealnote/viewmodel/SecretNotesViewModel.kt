@@ -15,10 +15,10 @@ class SecretNotesViewModel : ViewModel() {
 
     private fun loadSecretNotes() {
         val dummyNotes = listOf(
-            Notes(1, "Password List", "Saved passwords", false, true),
-            Notes(2, "Private Diary", "Today's secret thoughts", false, true),
-            Notes(3, "Top Secret", "Confidential Information", false, true)
+            Notes(1, "Password List", "Saved passwords"),
+            Notes(2, "Private Diary", "Today's secret thoughts"),
+            Notes(3, "Top Secret", "Confidential Information")
         )
-        _secretNotes.value = dummyNotes.filter { it.isSecret }
+        _secretNotes.value = dummyNotes
     }
 }

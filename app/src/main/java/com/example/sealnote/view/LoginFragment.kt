@@ -28,9 +28,12 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnLogin.setOnClickListener {
-            val username = binding.etUsername.text.toString().trim()
-            val password = binding.etPassword.text.toString().trim()
+        // Try using viewModel instead - remove the User binding for now
+        // We'll fix the layout XML in a moment
+
+        binding.loginButton.setOnClickListener {
+            val username = binding.emailInput.text.toString().trim()
+            val password = binding.passwordInput.text.toString().trim()
 
             if (username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(requireContext(), "Username dan Password harus diisi!", Toast.LENGTH_SHORT).show()
@@ -43,13 +46,13 @@ class LoginFragment : Fragment() {
         viewModel.isLoggedIn.observe(viewLifecycleOwner) { isLoggedIn ->
             if (isLoggedIn) {
                 Toast.makeText(requireContext(), "Login sukses!", Toast.LENGTH_SHORT).show()
-                findNavController().navigate(R.id.action_loginFragment_to_homePage)
+                findNavController().navigate(R.id.action_loginFragment_to_homepageFragment)
             } else {
                 Toast.makeText(requireContext(), "Username atau password salah!", Toast.LENGTH_SHORT).show()
             }
         }
 
-        binding.tvSignup.setOnClickListener {
+        binding.signUpText.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_signupFragment)
         }
     }
