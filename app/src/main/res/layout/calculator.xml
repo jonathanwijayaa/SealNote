@@ -69,9 +69,9 @@
 
             <!-- Line Under Number -->
             <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-                          android:background="#33FFFFFF" />
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#33FFFFFF" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
@@ -90,17 +90,17 @@
         android:layout_width="74dp"
         android:layout_height="74dp"
         android:layout_margin="8dp"
-        android:backgroundTint="#4A52AA"
         android:background="@drawable/rounded_button_background"
+        android:backgroundTint="#4A52AA"
         android:contentDescription="@string/backspace"
         android:text="@string/backspace"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="25sp"
         app:backgroundTint="@null"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/button6"
-        app:layout_constraintTop_toBottomOf="@id/cardView"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardView" />
 
     <Button
         android:id="@+id/button6"
@@ -124,17 +124,17 @@
         android:layout_width="74dp"
         android:layout_height="74dp"
         android:layout_margin="8dp"
-        android:backgroundTint="#4A52AA"
         android:background="@drawable/rounded_button_background"
+        android:backgroundTint="#4A52AA"
         android:contentDescription="@string/percent"
         android:text="@string/percent"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="25sp"
         app:backgroundTint="@null"
-        app:layout_constraintStart_toEndOf="@id/button6"
         app:layout_constraintEnd_toStartOf="@id/button10"
-        app:layout_constraintTop_toBottomOf="@id/cardView"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button6"
+        app:layout_constraintTop_toBottomOf="@id/cardView" />
 
     <Button
         android:id="@+id/button10"
@@ -145,7 +145,7 @@
         android:contentDescription="@string/divide"
         android:text="@string/divide"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="30sp"
         app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_chainStyle="spread"
@@ -213,7 +213,7 @@
         android:contentDescription="@string/multiply"
         android:text="@string/multiply"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="30sp"
         app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_chainStyle="spread"
@@ -260,8 +260,8 @@
         android:layout_width="74dp"
         android:layout_height="74dp"
         android:layout_margin="8dp"
-        android:background="#313673"
-        android:backgroundTint="@null"
+        android:backgroundTint="#313673"
+        android:background="@drawable/rounded_button_background"
         android:contentDescription="@string/six"
         android:text="@string/six"
         android:textColor="#FFFFFF"
@@ -281,7 +281,7 @@
         android:contentDescription="@string/subtract"
         android:text="@string/subtract"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="30sp"
         app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_chainStyle="spread"
@@ -349,7 +349,7 @@
         android:contentDescription="@string/add"
         android:text="@string/add"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="30sp"
         app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_chainStyle="spread"
@@ -362,34 +362,34 @@
         android:layout_width="74dp"
         android:layout_height="74dp"
         android:layout_margin="8dp"
-        android:backgroundTint="#313673"
         android:background="@drawable/rounded_button_background"
+        android:backgroundTint="#313673"
         android:contentDescription="@string/clear"
         android:text="@string/clear"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="25sp"
         app:backgroundTint="@null"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/button17"
-        app:layout_constraintTop_toBottomOf="@id/button12"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button12" />
 
     <Button
         android:id="@+id/button17"
         android:layout_width="74dp"
         android:layout_height="74dp"
         android:layout_margin="8dp"
-        android:backgroundTint="#313673"
         android:background="@drawable/rounded_button_background"
+        android:backgroundTint="#313673"
         android:contentDescription="@string/decimal"
         android:text="@string/decimal"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="30sp"
         app:backgroundTint="@null"
-        app:layout_constraintStart_toEndOf="@id/button16"
         app:layout_constraintEnd_toStartOf="@id/button18"
-        app:layout_constraintTop_toBottomOf="@id/button13"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button16"
+        app:layout_constraintTop_toBottomOf="@id/button13" />
 
     <Button
         android:id="@+id/button18"
@@ -417,11 +417,11 @@
         android:contentDescription="@string/equal"
         android:text="@string/equal"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="30sp"
         app:backgroundTint="@null"
-        app:layout_constraintStart_toEndOf="@id/button18"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button14"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button18"
+        app:layout_constraintTop_toBottomOf="@id/button14" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
