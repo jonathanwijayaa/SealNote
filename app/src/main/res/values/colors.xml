@@ -9,5 +9,7 @@
     <color name="warnaicon">#FFF3DB</color>
     <color name="warnabox">#3C4177</color>
     <color name="background_dark">#1E2A3A</color>
+    <color name="button_blue_purple">#4A52AA</color>
+    <color name="button_dark_blue">#313673</color>
     <item name="colorControlNormal" type="drawable">@drawable/gradient_button_background</item>
 </resources>
