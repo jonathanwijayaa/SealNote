@@ -12,7 +12,7 @@
         android:layout_width="332dp"
         android:layout_height="305dp"
         app:cardCornerRadius="16dp"
-        app:cardBackgroundColor="@color/background"
+        app:cardBackgroundColor="#10182C"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,11 +21,9 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="16dp"
-            tools:layout_editor_absoluteX="9dp"
-            tools:layout_editor_absoluteY="13dp">
+            android:padding="16dp">
 
-            <!-- Custom Tab Layout -->
+            <!-- Custom Tab Layout with gradient background -->
             <LinearLayout
                 android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
@@ -64,7 +62,7 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Judul -->
+            <!-- Title -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -77,17 +75,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tab_layout" />
 
-            <!-- Icon Face/Fingerprint -->
-
-            <!-- Text Keterangan -->
-
-            <!-- Tombol Gunakan PIN -->
+            <!-- Face/Fingerprint Icon with gradient color -->
             <ImageView
                 android:id="@+id/icon_auth"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="68dp"
                 android:src="@drawable/ic_face_id"
+                app:tint="@drawable/gradient_blue_purple"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tab_layout" />
@@ -101,7 +96,6 @@
                 android:textColor="@android:color/white"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.504"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/icon_auth" />
 
@@ -117,7 +111,6 @@
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.502"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/text_auth" />
         </androidx.constraintlayout.widget.ConstraintLayout>

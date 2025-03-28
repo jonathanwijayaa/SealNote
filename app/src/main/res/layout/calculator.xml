@@ -69,9 +69,10 @@
 
             <!-- Line Under Number -->
             <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#33FFFFFF" />
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+                          android:background="#33FFFFFF" />
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -95,6 +96,7 @@
         android:text="@string/backspace"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/button6"
         app:layout_constraintTop_toBottomOf="@id/cardView"
@@ -105,16 +107,17 @@
         android:layout_width="74dp"
         android:layout_height="74dp"
         android:layout_margin="8dp"
-        android:backgroundTint="#4A52AA"
         android:background="@drawable/rounded_button_background"
+        android:backgroundTint="@color/button_blue_purple"
         android:contentDescription="@string/square_root"
         android:text="@string/square_root"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@id/btnBackspace"
+        android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@id/button8"
-        app:layout_constraintTop_toBottomOf="@id/cardView"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:backgroundTint="@null"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/btnBackspace"
+        app:layout_constraintTop_toBottomOf="@id/cardView" />
 
     <Button
         android:id="@+id/button8"
@@ -127,6 +130,7 @@
         android:text="@string/percent"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toEndOf="@id/button6"
         app:layout_constraintEnd_toStartOf="@id/button10"
         app:layout_constraintTop_toBottomOf="@id/cardView"
@@ -142,10 +146,11 @@
         android:text="@string/divide"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@id/button8"
+        app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardView"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button8"
+        app:layout_constraintTop_toBottomOf="@id/cardView" />
 
     <!-- Row 2 -->
     <Button
@@ -159,6 +164,7 @@
         android:text="@string/seven"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/button2"
         app:layout_constraintTop_toBottomOf="@id/btnBackspace"
@@ -174,6 +180,7 @@
         android:contentDescription="@string/eight"
         android:text="@string/eight"
         android:textColor="#FFFFFF"
+        app:backgroundTint="@null"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@id/button"
         app:layout_constraintEnd_toStartOf="@id/button3"
@@ -191,6 +198,7 @@
         android:text="@string/nine"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toEndOf="@id/button2"
         app:layout_constraintEnd_toStartOf="@id/button4"
         app:layout_constraintTop_toBottomOf="@id/button8"
@@ -206,10 +214,11 @@
         android:text="@string/multiply"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@id/button3"
+        app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button10"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button3"
+        app:layout_constraintTop_toBottomOf="@id/button10" />
 
     <!-- Row 3 -->
     <Button
@@ -223,6 +232,7 @@
         android:text="@string/four"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/button7"
         app:layout_constraintTop_toBottomOf="@id/button"
@@ -239,6 +249,7 @@
         android:text="@string/five"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toEndOf="@id/button5"
         app:layout_constraintEnd_toStartOf="@id/button9"
         app:layout_constraintTop_toBottomOf="@id/button2"
@@ -249,16 +260,17 @@
         android:layout_width="74dp"
         android:layout_height="74dp"
         android:layout_margin="8dp"
-        android:backgroundTint="#313673"
-        android:background="@drawable/rounded_button_background"
+        android:background="#313673"
+        android:backgroundTint="@null"
         android:contentDescription="@string/six"
         android:text="@string/six"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@id/button7"
+        app:backgroundTint="@null"
         app:layout_constraintEnd_toStartOf="@id/button11"
-        app:layout_constraintTop_toBottomOf="@id/button3"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button7"
+        app:layout_constraintTop_toBottomOf="@id/button3" />
 
     <Button
         android:id="@+id/button11"
@@ -270,10 +282,11 @@
         android:text="@string/subtract"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@id/button9"
+        app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button4"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button9"
+        app:layout_constraintTop_toBottomOf="@id/button4" />
 
     <!-- Row 4 -->
     <Button
@@ -287,6 +300,7 @@
         android:text="@string/one"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/button13"
         app:layout_constraintTop_toBottomOf="@id/button5"
@@ -303,6 +317,7 @@
         android:text="@string/two"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toEndOf="@id/button12"
         app:layout_constraintEnd_toStartOf="@id/button15"
         app:layout_constraintTop_toBottomOf="@id/button7"
@@ -319,6 +334,7 @@
         android:text="@string/three"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toEndOf="@id/button13"
         app:layout_constraintEnd_toStartOf="@id/button14"
         app:layout_constraintTop_toBottomOf="@id/button9"
@@ -334,10 +350,11 @@
         android:text="@string/add"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@id/button15"
+        app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button11"
-        app:layout_constraintHorizontal_chainStyle="spread" />
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button15"
+        app:layout_constraintTop_toBottomOf="@id/button11" />
 
     <!-- Row 5 -->
     <Button
@@ -351,6 +368,7 @@
         android:text="@string/clear"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/button17"
         app:layout_constraintTop_toBottomOf="@id/button12"
@@ -367,6 +385,7 @@
         android:text="@string/decimal"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toEndOf="@id/button16"
         app:layout_constraintEnd_toStartOf="@id/button18"
         app:layout_constraintTop_toBottomOf="@id/button13"
@@ -383,6 +402,7 @@
         android:text="@string/zero"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toEndOf="@id/button17"
         app:layout_constraintEnd_toStartOf="@id/button19"
         app:layout_constraintTop_toBottomOf="@id/button15"
@@ -398,6 +418,7 @@
         android:text="@string/equal"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toEndOf="@id/button18"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button14"
