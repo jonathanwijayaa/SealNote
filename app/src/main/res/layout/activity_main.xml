@@ -2,46 +2,42 @@
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
-    <!-- Main Content -->
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <!-- Toolbar sebagai ActionBar -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:navigationIcon="@drawable/ic_menu" />
+            android:background="@color/my_toolbar_background"
+            app:titleTextColor="@color/my_toolbar_title_text"
+            app:subtitleTextColor="@color/my_toolbar_subtitle_text"
+            android:elevation="4dp"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <!-- Fragment Container -->
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/nav_host_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             app:defaultNavHost="true"
             app:navGraph="@navigation/nav_graph" />
 
-        <!-- Floating Action Button -->
+    </LinearLayout>
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-    <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:menu="@menu/menu_drawer"
-        app:headerLayout="@layout/nav_header" />
+        app:menu="@menu/notes_menu_drawer"
+        app:headerLayout="@layout/stealth_nav_header"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

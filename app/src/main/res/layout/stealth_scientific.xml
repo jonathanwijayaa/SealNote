@@ -5,56 +5,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#152332">
+    android:background="#152332"
+    tools:context=".MainActivity">
 
     <!-- Top Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#1E3246"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <!-- Menu Button -->
-        <ImageButton
-            android:id="@+id/btnMenu"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="start"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/menu"
-            android:src="@drawable/ic_menu"
-            app:tint="#FFFFFF" />
-
-        <!-- Title -->
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Scientific"
-            android:textColor="#FFFFFF"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            tools:layout_editor_absoluteX="155dp"
-            tools:layout_editor_absoluteY="16dp" />
-
-    </androidx.appcompat.widget.Toolbar>
 
     <!-- Display Container with Shadow and Line -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         app:cardBackgroundColor="#152332"
-        app:cardElevation="8dp"
         app:cardCornerRadius="0dp"
+        app:cardElevation="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        tools:layout_editor_absoluteY="72dp">
 
         <LinearLayout
             android:layout_width="match_parent"

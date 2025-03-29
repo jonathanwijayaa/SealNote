@@ -19,4 +19,14 @@
     <color name="gradient_start">#9747FF</color>
     <color name="gradient_end">#3D9EE3</color>
     <item name="colorControlNormal" type="drawable">@drawable/gradient_button_background</item>
+<!-- In res/values/colors.xml -->
+    <color name="my_toolbar_background">#FF6200EE</color>  <!-- Example: Purple -->
+    <color name="my_toolbar_title_text">@android:color/white</color>
+    <color name="my_toolbar_subtitle_text">#DDFFFFFF</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+
+    <!-- <color name="my_toolbar_background">#3F51B5</color> -->
+  <!-- Example: Indigo -->
+    <!-- <color name="my_toolbar_title_text">@</color> -->
 </resources>
