@@ -39,7 +39,7 @@ class LoginFragment : Fragment() {
             when (result) {
                 is LoginViewModel.LoginResult.Success -> {
                     Toast.makeText(requireContext(), "Login sukses!", Toast.LENGTH_SHORT).show()
-                    findNavController().navigate(R.id.action_sealNoteLogin_to_homepage)
+                    findNavController().navigate(R.id.homepageFragment)
                 }
                 is LoginViewModel.LoginResult.Error -> {
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()

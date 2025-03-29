@@ -35,6 +35,6 @@ class StealthCalculatorFragment : Fragment() {
     }
 
     private fun navigateToLogin() {
-        findNavController().navigate(R.id.action_stealthCalculator_to_sealNoteLogin)
+        findNavController().navigate(R.id.loginFragment)
     }
 }
