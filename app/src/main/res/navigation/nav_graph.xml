@@ -4,33 +4,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     app:startDestination="@id/stealthCalculatorFragment">
 
-    <!-- Stealth Calculator Mode -->
+    <!-- Stealth Mode -->
     <fragment
         android:id="@+id/stealthCalculatorFragment"
         android:name="com.example.sealnote.view.StealthCalculatorFragment"
         android:label="Stealth Calculator"
-        tools:layout="@layout/stealth_calculator">
-    </fragment>
+        tools:layout="@layout/stealth_calculator" />
 
     <fragment
         android:id="@+id/stealthHistoryFragment"
         android:name="com.example.sealnote.view.StealthHistoryFragment"
         android:label="History"
-        tools:layout="@layout/history">
-    </fragment>
+        tools:layout="@layout/history" />
 
     <fragment
         android:id="@+id/stealthScientificFragment"
         android:name="com.example.sealnote.view.StealthScientificFragment"
         android:label="Scientific"
-        tools:layout="@layout/stealth_scientific">
-    </fragment>
+        tools:layout="@layout/stealth_scientific" />
 
+    <!-- SealNote Login -->
     <fragment
         android:id="@+id/sealNoteLoginFragment"
         android:name="com.example.sealnote.view.LoginFragment"
         android:label="SealNote Login"
         tools:layout="@layout/login_page">
+        <action
+            android:id="@+id/action_loginFragment_to_signupFragment"
+            app:destination="@id/signupFragment" />
     </fragment>
 
     <!-- Note Mode -->
@@ -38,8 +39,7 @@
         android:id="@+id/homepageFragment"
         android:name="com.example.sealnote.view.HomepageFragment"
         android:label="Homepage"
-        tools:layout="@layout/home_page">
-    </fragment>
+        tools:layout="@layout/home_page" />
 
     <fragment
         android:id="@+id/profileFragment"
@@ -55,29 +55,25 @@
         android:id="@+id/bookmarksFragment"
         android:name="com.example.sealnote.view.BookmarksFragment"
         android:label="Bookmarks"
-        tools:layout="@layout/bookmarks_page">
-    </fragment>
+        tools:layout="@layout/bookmarks_page" />
 
     <fragment
         android:id="@+id/secretNotesFragment"
         android:name="com.example.sealnote.view.AuthenticationFragment"
         android:label="Secret Notes"
-        tools:layout="@layout/secret_note_page">
-    </fragment>
+        tools:layout="@layout/secret_note_page" />
 
     <fragment
         android:id="@+id/trashFragment"
         android:name="com.example.sealnote.view.TrashFragment"
         android:label="Trash"
-        tools:layout="@layout/trash_page">
-    </fragment>
+        tools:layout="@layout/trash_page" />
 
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.sealnote.view.SettingsFragment"
         android:label="Settings"
-        tools:layout="@layout/settings_page">
-    </fragment>
+        tools:layout="@layout/settings_page" />
 
     <fragment
         android:id="@+id/addNotesFragment"
@@ -107,8 +103,7 @@
         android:label="Signup"
         tools:layout="@layout/signup_page">
         <action
-            android:id="@+id/action_signup_to_login"
+            android:id="@+id/action_signupFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
     </fragment>
-
 </navigation>

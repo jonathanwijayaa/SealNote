@@ -32,37 +32,47 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment // Replace with your NavHostFragment ID
         navController = navHostFragment.navController
-        appBarConfiguration = AppBarConfiguration(setOf(R.id.stealthCalculatorFragment))
+        appBarConfiguration = AppBarConfiguration(getTopLevelDestinations(), drawerLayout)
         setupActionBarWithNavController(navController, appBarConfiguration)
         setupNavigationDrawer()
     }
 
     private fun setupNavigationDrawer() {
-        // Set the appropriate menu based on the mode
         val menuRes = if (isStealthMode) R.menu.stealth_menu_drawer else R.menu.notes_menu_drawer
-        navView.menu.clear() // Clear the existing menu
+        navView.menu.clear()
         navView.inflateMenu(menuRes)
 
-        //  AppBarConfiguration needs to be recreated after menu change
-        appBarConfiguration = AppBarConfiguration(
-            getTopLevelDestinations(), // Use a helper function
-            drawerLayout
-        )
+        // Update daftar fragment yang dianggap sebagai top-level
+        appBarConfiguration = AppBarConfiguration(getTopLevelDestinations(), drawerLayout)
 
+        // Perbarui navigasi drawer
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
         NavigationUI.setupWithNavController(navView, navController)
+
+        navView.setNavigationItemSelectedListener { menuItem ->
+            menuItem.isChecked = true
+            drawerLayout.closeDrawers() // Tutup drawer setelah memilih item
+            navController.navigate(menuItem.itemId)
+            true
+        }
     }
 
     private fun getTopLevelDestinations(): Set<Int> {
-        // Return the IDs of the fragments where the drawer icon should appear.
-        // This depends on your desired navigation flow.  For example, if you
-        // want the drawer on all top-level screens in Note Mode, you'd return
-        // the IDs of Homepage, Bookmarks, Profile, Trash, Settings, and SecretNotes.
-        // In Stealth Mode, it might be just StealthCalculator.
         return if (isStealthMode) {
-            setOf(R.id.stealthCalculatorFragment) // Adjust as needed
+            setOf(
+                R.id.stealthCalculatorFragment,
+                R.id.stealthHistoryFragment,
+                R.id.stealthScientificFragment
+            )
         } else {
-            setOf(R.id.homepageFragment) // Adjust as needed
+            setOf(
+                R.id.homepageFragment,
+                R.id.profileFragment,
+                R.id.bookmarksFragment,
+                R.id.secretNotesFragment,
+                R.id.trashFragment,
+                R.id.settingsFragment
+            )
         }
     }
 
@@ -74,13 +84,16 @@ class MainActivity : AppCompatActivity() {
     //  you'll need a function like this to update the UI:
     fun setStealthMode(enabled: Boolean) {
         isStealthMode = enabled
-        setupNavigationDrawer() // Reconfigure the drawer
-        //  You might also want to navigate to the appropriate start destination
-        //  based on the new mode.  For example:
+        setupNavigationDrawer() // Update menu drawer
+
+        // Buat ulang graf navigasi untuk memastikan navigasi berfungsi
+        val navInflater = navController.navInflater
+        val navGraph = navInflater.inflate(R.navigation.nav_graph)
+
+        // Tetapkan startDestination sesuai mode
         val startDestination = if (isStealthMode) R.id.stealthCalculatorFragment else R.id.homepageFragment
-        navController.graph = navController.graph.apply {
-            setStartDestination(startDestination)
-        }
-        navController.navigate(startDestination)
+        navGraph.setStartDestination(startDestination)
+
+        navController.graph = navGraph // Terapkan graf navigasi yang diperbarui
     }
 }

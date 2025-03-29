@@ -54,7 +54,7 @@ class SignupFragment : Fragment() {
 
         // Changed from tvLogin to logInText
         binding.logInText.setOnClickListener {
-            findNavController().navigate(R.id.action_signup_to_login)
+            findNavController().navigate(R.id.action_signupFragment_to_loginFragment)
         }
     }
 
