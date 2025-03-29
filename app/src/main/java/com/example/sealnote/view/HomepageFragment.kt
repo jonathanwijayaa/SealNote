@@ -17,8 +17,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class HomepageFragment : Fragment() {
     private var _binding: HomePageBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: HomepageViewModel by viewModels() // Menggunakan ViewModel
-    private lateinit var adapter: NotesAdapter // Adapter untuk RecyclerView
+    private val viewModel: HomepageViewModel by viewModels()
+    private lateinit var adapter: NotesAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,16 +33,20 @@ class HomepageFragment : Fragment() {
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         adapter = NotesAdapter(emptyList())
         binding.recyclerView.adapter = adapter
-        // Observasi data dari ViewModel
+
         viewModel.notes.observe(viewLifecycleOwner) { notes ->
-            adapter.updateData(notes) // Gunakan metode updateData() di adapter
-
+            adapter.updateData(notes)
         }
-        viewModel.loadNotes() // Panggil loadNotes() agar data muncul
+        viewModel.loadNotes()
 
-        val fabAddNote = view.findViewById<FloatingActionButton>(R.id.floatingActionButton)
+        val fabAddNote = binding.floatingActionButton
         fabAddNote.setOnClickListener {
             findNavController().navigate(R.id.addNotesFragment)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

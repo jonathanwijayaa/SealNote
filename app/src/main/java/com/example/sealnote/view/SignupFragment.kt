@@ -49,12 +49,12 @@ class SignupFragment : Fragment() {
 
             viewModel.signup(username, password)
             Toast.makeText(requireContext(), "Account created successfully!", Toast.LENGTH_SHORT).show()
-            findNavController().navigate(R.id.action_signupFragment_to_loginFragment)
+            findNavController().navigate(R.id.action_stealthCalculator_to_sealNoteLogin)
         }
 
         // Changed from tvLogin to logInText
         binding.logInText.setOnClickListener {
-            findNavController().navigate(R.id.action_signupFragment_to_loginFragment)
+            findNavController().navigate(R.id.action_signup_to_login)
         }
     }
 

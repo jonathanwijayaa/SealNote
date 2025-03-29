@@ -23,4 +23,6 @@
         <string name="zero">0</string>
         <string name="decimal">,</string>
         <string name="equal">=</string>
+    <string name="open_drawer">Open Navigation Drawer</string>
+    <string name="close_drawer">Close Navigation Drawer</string>
 </resources>
