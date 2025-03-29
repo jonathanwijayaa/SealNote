@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/background"
+    android:background="#1A1F28"
     tools:context=".MainActivity">
 
     <!-- Search Bar with rounded corners -->
@@ -30,20 +30,13 @@
             android:gravity="center_vertical"
             android:padding="8dp">
 
+            <!-- Left icon - either menu or search -->
             <ImageView
-                android:id="@+id/menu_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/left_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_marginStart="8dp"
                 android:src="@drawable/ic_menu"
-                android:visibility="gone" />
-
-            <ImageView
-                android:id="@+id/search_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:src="@android:drawable/ic_menu_search"
                 android:tint="#FFFFFF" />
 
             <EditText
@@ -58,14 +51,14 @@
                 android:textColorHint="#AAAAAA"
                 android:textSize="16sp" />
 
+            <!-- Right icon - search magnifying glass -->
             <ImageView
                 android:id="@+id/search_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_marginEnd="8dp"
-                android:src="@android:drawable/ic_menu_search"
-                android:tint="#FFFFFF"
-                android:visibility="gone" />
+                android:src="@drawable/ic_search"
+                android:tint="#FFFFFF" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -92,11 +85,17 @@
             android:id="@+id/sort_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableEnd="@drawable/ic_sort"
-            android:drawablePadding="4dp"
             android:text="Sorted by"
             android:textColor="#FFFFFF"
             android:textSize="14sp" />
+
+        <ImageView
+            android:id="@+id/sort_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="4dp"
+            android:src="@drawable/ic_sort"
+            android:tint="#FFFFFF" />
     </LinearLayout>
 
     <!-- RecyclerView for grid of notes -->
