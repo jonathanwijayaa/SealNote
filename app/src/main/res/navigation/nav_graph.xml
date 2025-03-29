@@ -15,7 +15,7 @@
         android:id="@+id/stealthHistoryFragment"
         android:name="com.example.sealnote.view.StealthHistoryFragment"
         android:label="History"
-        tools:layout="@layout/history" />
+        tools:layout="@layout/stealth_history" />
 
     <fragment
         android:id="@+id/stealthScientificFragment"
