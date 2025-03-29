@@ -15,8 +15,10 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            android:background="@color/my_toolbar_background"
+            app:titleTextColor="@color/my_toolbar_title_text"
+            app:subtitleTextColor="@color/my_toolbar_subtitle_text"
+            android:elevation="4dp"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         <androidx.fragment.app.FragmentContainerView
