@@ -12,6 +12,7 @@ import com.example.sealnote.adapter.NotesAdapter
 import com.example.sealnote.R
 import com.example.sealnote.viewmodel.HomepageViewModel
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
@@ -82,7 +83,7 @@ class HomepageFragment : Fragment() {
                 return when (menuItem.itemId) {
                     android.R.id.home -> {
                         // Membuka drawer saat tombol menu ditekan
-                        drawerLayout.openDrawer(Gravity.START)
+                        drawerLayout.openDrawer(GravityCompat.START)
                         Log.d("Menu", "Drawer opened")
                         true
                     }

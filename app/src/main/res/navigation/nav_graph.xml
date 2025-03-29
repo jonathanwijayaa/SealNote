@@ -59,7 +59,7 @@
 
     <fragment
         android:id="@+id/secretNotesFragment"
-        android:name="com.example.sealnote.view.AuthenticationFragment"
+        android:name="com.example.sealnote.view.SecretNotesFragment"
         android:label="Secret Notes"
         tools:layout="@layout/secret_note_page" />
 
