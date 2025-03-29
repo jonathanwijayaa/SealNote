@@ -7,82 +7,90 @@
     android:layout_height="match_parent"
     android:background="#1E2A3A">
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/background"
-        android:elevation="4dp"
-        app:title="Bookmarks"
-        app:titleTextColor="#FFFFFF"
-        app:navigationIcon="@drawable/ic_menu"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Search Bar -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+    <!-- Search Bar with Menu Icon -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/search_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:background="@drawable/search_bar_background"
-        app:boxBackgroundColor="#33000000"
-        app:boxCornerRadiusBottomEnd="32dp"
-        app:boxCornerRadiusBottomStart="32dp"
-        app:boxCornerRadiusTopEnd="32dp"
-        app:boxCornerRadiusTopStart="32dp"
-        app:endIconMode="clear_text"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="#4A4B7F"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Search Your Notes"
-            android:padding="16dp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#FFFFFF"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/menu_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_menu"
+                android:tint="#FFFFFF" />
+
+            <EditText
+                android:id="@+id/search_bar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="Search your note..."
+                android:padding="8dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#AAAAAA"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/search_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_search"
+                android:tint="#FFFFFF" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <!-- All Notes Title -->
     <TextView
         android:id="@+id/all_notes_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="26dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:text="All notes"
         android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold"
+        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout"/>
+        app:layout_constraintTop_toBottomOf="@id/search_card"/>
 
     <!-- Sort Container -->
     <LinearLayout
         android:id="@+id/sort_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:clickable="true"
         android:focusable="true"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:gravity="center_vertical"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout">
+        app:layout_constraintTop_toBottomOf="@id/search_card">
 
         <TextView
             android:id="@+id/sorted_by"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sorted by"
-            android:textColor="#B0BEC5"
+            android:textColor="#FFFFFF"
             android:textSize="14sp"/>
 
         <ImageView
@@ -91,37 +99,36 @@
             android:layout_height="24dp"
             android:layout_marginStart="4dp"
             android:src="@drawable/ic_sort"
-            app:tint="#B0BEC5"/>
+            app:tint="#FFFFFF"/>
     </LinearLayout>
 
     <!-- RecyclerView for Notes -->
-
-    <!-- Floating Action Button -->
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="16dp"
+        android:clipToPadding="false"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="80dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:layout_constraintBottom_toTopOf="@id/fab"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/all_notes_title"
-        app:layout_constraintVertical_bias="0.0"
         app:spanCount="2"
         tools:listitem="@layout/item_note" />
 
+    <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:src="@drawable/ic_add"
-        android:tint="#FFFFFF"
-        app:backgroundTint="#6200EE"
+        app:backgroundTint="#7377E8"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="#FFFFFF" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
