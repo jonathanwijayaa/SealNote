@@ -11,5 +11,12 @@
     <color name="background_dark">#1E2A3A</color>
     <color name="button_blue_purple">#4A52AA</color>
     <color name="button_dark_blue">#313673</color>
+    <color name="dark_blue_background">#17223B</color>
+    <color name="input_field_background">#2A3A59</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#9FADBF</color>
+    <color name="accent_blue">#3D9EE3</color>
+    <color name="gradient_start">#9747FF</color>
+    <color name="gradient_end">#3D9EE3</color>
     <item name="colorControlNormal" type="drawable">@drawable/gradient_button_background</item>
 </resources>
