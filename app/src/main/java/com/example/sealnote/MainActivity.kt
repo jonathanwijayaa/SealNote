@@ -1,9 +1,10 @@
 package com.example.sealnote
 
 import android.os.Bundle
-import android.view.Menu
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -30,11 +31,25 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment // Replace with your NavHostFragment ID
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
-        appBarConfiguration = AppBarConfiguration(getTopLevelDestinations(), drawerLayout)
-        setupActionBarWithNavController(navController, appBarConfiguration)
+
+        // Konfigurasi ActionBar & Drawer
+        setupDrawer(toolbar)
         setupNavigationDrawer()
+    }
+
+    private fun setupDrawer(toolbar: Toolbar) {
+        setSupportActionBar(toolbar)
+
+        val toggle = ActionBarDrawerToggle(
+            this, drawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
     }
 
     private fun setupNavigationDrawer() {
@@ -44,16 +59,26 @@ class MainActivity : AppCompatActivity() {
 
         // Update daftar fragment yang dianggap sebagai top-level
         appBarConfiguration = AppBarConfiguration(getTopLevelDestinations(), drawerLayout)
-
-        // Perbarui navigasi drawer
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
-        NavigationUI.setupWithNavController(navView, navController)
+        setupActionBarWithNavController(navController, appBarConfiguration)
 
         navView.setNavigationItemSelectedListener { menuItem ->
             menuItem.isChecked = true
             drawerLayout.closeDrawers() // Tutup drawer setelah memilih item
             navController.navigate(menuItem.itemId)
             true
+        }
+
+        // Kunci atau buka drawer berdasarkan mode
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            updateDrawerState(destination.id in getTopLevelDestinations())
+        }
+    }
+
+    private fun updateDrawerState(isNotesMode: Boolean) {
+        if (isNotesMode) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+        } else {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         }
     }
 
@@ -67,11 +92,9 @@ class MainActivity : AppCompatActivity() {
         } else {
             setOf(
                 R.id.homepageFragment,
-                R.id.profileFragment,
                 R.id.bookmarksFragment,
                 R.id.secretNotesFragment,
-                R.id.trashFragment,
-                R.id.settingsFragment
+                R.id.trashFragment
             )
         }
     }
@@ -80,13 +103,10 @@ class MainActivity : AppCompatActivity() {
         return NavigationUI.navigateUp(navController, appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-    //  If you have a way to change modes at runtime (e.g., from a settings screen),
-    //  you'll need a function like this to update the UI:
     fun setStealthMode(enabled: Boolean) {
         isStealthMode = enabled
         setupNavigationDrawer() // Update menu drawer
 
-        // Buat ulang graf navigasi untuk memastikan navigasi berfungsi
         val navInflater = navController.navInflater
         val navGraph = navInflater.inflate(R.navigation.nav_graph)
 
@@ -94,6 +114,6 @@ class MainActivity : AppCompatActivity() {
         val startDestination = if (isStealthMode) R.id.stealthCalculatorFragment else R.id.homepageFragment
         navGraph.setStartDestination(startDestination)
 
-        navController.graph = navGraph // Terapkan graf navigasi yang diperbarui
+        navController.graph = navGraph
     }
 }

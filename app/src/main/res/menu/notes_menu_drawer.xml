@@ -2,28 +2,29 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_homepage"
+            android:id="@+id/homepageFragment"
             android:icon="@drawable/ic_notes"
         android:title="Homepage" />
         <item
-            android:id="@+id/nav_bookmarks"
+            android:id="@+id/bookmarksFragment"
             android:icon="@drawable/ic_bookmark"
         android:title="Bookmarks" />
         <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_profile"
-        android:title="Profile" />
+            android:id="@+id/secretNotesFragment"
+            android:icon="@drawable/ic_secret"
+            android:title="Secret Notes" />
         <item
-            android:id="@+id/nav_trash"
+            android:id="@+id/trashFragment"
             android:icon="@drawable/ic_trash"
         android:title="Trash" />
         <item
-            android:id="@+id/nav_settings"
+            android:id="@+id/profileFragment"
+            android:icon="@drawable/ic_profile"
+            android:title="Profile" />
+        <item
+            android:id="@+id/settingsFragment"
             android:icon="@drawable/ic_settings"
         android:title="Settings" />
-        <item
-            android:id="@+id/nav_secretNotes"
-            android:icon="@drawable/ic_secret"
-        android:title="Secret Notes" />
+
     </group>
 </menu>

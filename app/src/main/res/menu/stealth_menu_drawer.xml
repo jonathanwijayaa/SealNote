@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_stealthCalculator"
+            android:id="@+id/stealthCalculatorFragment"
             android:icon="@drawable/ic_lock"
         android:title="Stealth Calculator" />
         <item
-            android:id="@+id/nav_stealthScientific"
+            android:id="@+id/stealthScientificFragment"
             android:icon="@drawable/ic_lock"
         android:title="Stealth Scientific" />
         <item
-            android:id="@+id/nav_stealthHistory"
+            android:id="@+id/stealthHistoryFragment"
             android:icon="@drawable/ic_lock"
         android:title="Stealth History" />
     </group>
