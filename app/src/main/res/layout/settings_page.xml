@@ -16,12 +16,12 @@
         android:elevation="4dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        app:title="Settings"
-        app:titleTextColor="#FFF3DB"
-        app:navigationIcon="@drawable/ic_back"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_back"
+        app:title="Settings"
+        app:titleTextColor="#FDFDFD" />
 
     <!-- Konten lainnya -->
     <TextView
@@ -31,7 +31,7 @@
         android:layout_marginStart="30dp"
         android:layout_marginTop="5dp"
         android:text="Theme"
-        android:textColor="#FFF3DB"
+        android:textColor="#FFFFFE"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
