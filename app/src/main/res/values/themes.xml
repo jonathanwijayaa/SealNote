@@ -1,31 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.SealNote" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-    </style>
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/gradientStart</item>
+        <item name="colorPrimaryVariant">@color/background</item>
+        <item name="colorOnPrimary">@color/white</item> <!-- Warna teks & ikon di Toolbar -->
 
-    <style name="Theme.SealNote" parent="Base.Theme.SealNote" />
-
-    <style name="Theme.MyApp" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Other theme attributes -->
-        <item name="toolbarStyle">@style/MyToolbarStyle</item>
-    </style>
-
-    <style name="MyToolbarStyle" parent="Widget.AppCompat.Toolbar">
-        <item name="android:background">@color/my_toolbar_background</item>
-        <item name="titleTextColor">@color/my_toolbar_title_text</item>
-        <item name="subtitleTextColor">@color/my_toolbar_subtitle_text</item>
-        <item name="android:elevation">4dp</item>  <!--  Optional: Add elevation -->
-        <!-- Add other attributes as needed -->
-    </style>
-    <!--  If using themes.xml, you might have a base theme like this:  -->
-    <style name="Base.Theme.MyApp" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- ... other theme attributes ... -->
+        <!-- Warna ikon di AppBar -->
+        <item name="colorControlNormal">@color/white</item>
     </style>
 
         </resources>
