@@ -7,5 +7,12 @@
         <!-- Warna ikon di AppBar -->
         <item name="colorControlNormal">@color/white</item>
     </style>
+    <style name="RoundedToolbarShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">40dp</item>
+        <item name="cornerSizeTopRight">40dp</item>
+        <item name="cornerSizeBottomLeft">16dp</item>
+        <item name="cornerSizeBottomRight">16dp</item>
+    </style>
 
         </resources>

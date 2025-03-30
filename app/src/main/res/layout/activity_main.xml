@@ -19,7 +19,8 @@
             app:titleTextColor="@color/my_toolbar_title_text"
             app:subtitleTextColor="@color/my_toolbar_subtitle_text"
             android:elevation="4dp"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            />
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/nav_host_fragment"
