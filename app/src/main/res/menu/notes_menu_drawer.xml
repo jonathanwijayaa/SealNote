@@ -10,7 +10,7 @@
             android:icon="@drawable/ic_bookmark"
             android:title="Bookmarks" />
         <item
-            android:id="@+id/secretNotesFragment"
+            android:id="@+id/secretNotesLockedFragment"
             android:icon="@drawable/ic_secret"
             android:title="Secret Notes" />
         <item

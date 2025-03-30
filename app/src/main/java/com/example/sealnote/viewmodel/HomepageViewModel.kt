@@ -8,7 +8,9 @@ import com.example.sealnote.model.Notes
 class HomepageViewModel : ViewModel() {
     private val _notes = MutableLiveData<List<Notes>>() // LiveData untuk daftar catatan
     val notes: LiveData<List<Notes>> get() = _notes
-
+    init {
+        loadNotes()
+    }
     fun loadNotes() {
         // Simulasi data sementara, bisa diganti dengan data dari database
         _notes.value = listOf(
