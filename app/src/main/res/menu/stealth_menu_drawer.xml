@@ -3,15 +3,15 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/stealthCalculatorFragment"
-            android:icon="@drawable/ic_lock"
-        android:title="Stealth Calculator" />
+            android:icon="@drawable/ic_notes"
+        android:title="Basic Calculator" />
         <item
             android:id="@+id/stealthScientificFragment"
-            android:icon="@drawable/ic_lock"
-        android:title="Stealth Scientific" />
+            android:icon="@drawable/ic_calculator_2"
+        android:title="Scientific Calculator" />
         <item
             android:id="@+id/stealthHistoryFragment"
-            android:icon="@drawable/ic_lock"
-        android:title="Stealth History" />
+            android:icon="@drawable/ic_history_2"
+        android:title="History" />
     </group>
 </menu>
