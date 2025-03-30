@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.sealnote.R
 
 class AuthenticationFragment : Fragment() {
@@ -31,6 +32,9 @@ class AuthenticationFragment : Fragment() {
 
         tabFace.setOnClickListener {
             setFaceMode(tabFingerprint, tabFace, iconAuth, textAuth)
+        }
+        iconAuth.setOnClickListener{
+            findNavController().navigate(R.id.secretNotesFragment)
         }
 
         return view

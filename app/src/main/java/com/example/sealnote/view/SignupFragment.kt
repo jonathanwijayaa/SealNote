@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -27,6 +28,7 @@ class SignupFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val logIn = view.findViewById<TextView>(R.id.logInText)
         // Changed from btnSignup to signUpButton
         binding.signUpButton.setOnClickListener {
             // Changed from etUsername to fullNameInput
@@ -35,6 +37,7 @@ class SignupFragment : Fragment() {
             val password = binding.passwordInput.text.toString().trim()
             // Changed from etConfirmPassword to confirmPasswordInput
             val confirmPassword = binding.confirmPasswordInput.text.toString().trim()
+
 
             // Added password confirmation check
             if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
@@ -50,12 +53,14 @@ class SignupFragment : Fragment() {
             viewModel.signup(username, password)
             Toast.makeText(requireContext(), "Account created successfully!", Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.loginFragment)
-        }
 
-        // Changed from tvLogin to logInText
-        binding.logInText.setOnClickListener {
+
+        }
+        logIn.setOnClickListener{
             findNavController().navigate(R.id.action_signupFragment_to_loginFragment)
         }
+        
+
     }
 
     override fun onDestroyView() {

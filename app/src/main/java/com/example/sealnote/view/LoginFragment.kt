@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -30,6 +32,7 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val toolbar = requireActivity().findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+        val signUp = view.findViewById<TextView>(R.id.signUpText)
 
         if (toolbar != null) {
             (requireActivity() as AppCompatActivity).setSupportActionBar(toolbar)
@@ -58,6 +61,9 @@ class LoginFragment : Fragment() {
                     Toast.makeText(requireContext(), result.message, Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+        signUp.setOnClickListener{
+            findNavController().navigate(R.id.action_loginFragment_to_signupFragment)
         }
     }
 

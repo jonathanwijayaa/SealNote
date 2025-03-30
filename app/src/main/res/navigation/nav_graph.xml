@@ -49,6 +49,10 @@
         <action
             android:id="@+id/action_profile_to_homepage"
             app:destination="@id/homepageFragment" />
+        <action
+            android:id="@+id/action_profile_to_signout"
+            app:destination="@+id/loginFragment"
+            />
     </fragment>
 
     <fragment
@@ -61,7 +65,29 @@
         android:id="@+id/secretNotesFragment"
         android:name="com.example.sealnote.view.SecretNotesFragment"
         android:label="Secret Notes"
-        tools:layout="@layout/secret_note_page" />
+        tools:layout="@layout/secret_note_page">
+    </fragment>
+
+    <fragment
+        android:id="@+id/secretNotesLockedFragment"
+        android:name="com.example.sealnote.view.SecretNotesLockedFragment"
+        android:label="Secret Notes"
+        tools:layout="@layout/secret_note_locked_page">
+        <action
+            android:id="@+id/action_secretNoteLocked_to_auth"
+            app:destination="@+id/authenticationFragment"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/authenticationFragment"
+        android:name="com.example.sealnote.view.AuthenticationFragment"
+        android:label="Authentication"
+        tools:layout="@layout/authentication">
+        <action
+            android:id="@+id/action_secretNoteLocked_to_auth"
+            app:destination="@+id/authenticationFragment"
+            />
+    </fragment>
 
     <fragment
         android:id="@+id/trashFragment"
