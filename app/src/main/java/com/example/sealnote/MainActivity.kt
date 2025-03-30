@@ -70,8 +70,10 @@ class MainActivity : AppCompatActivity() {
 
         // Kunci atau buka drawer berdasarkan mode
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            updateDrawerState(destination.id in getTopLevelDestinations())
+            navView.menu.findItem(destination.id)?.isChecked = true
         }
+            updateDrawerState(navController.currentDestination?.id in getTopLevelDestinations())
+
     }
 
     private fun updateDrawerState(isNotesMode: Boolean) {

@@ -7,85 +7,36 @@
     android:background="@color/background">
 
     <!-- Search Bar with Menu Icon -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/search_card"
+
+    <!-- All Notes Title -->
+
+    <!-- Sort Container -->
+
+    <!-- RecyclerView for Notes -->
+    <LinearLayout
+        android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        app:cardBackgroundColor="#4A4B7F"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="0dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/all_notes_text"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <ImageView
-                android:id="@+id/menu_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:src="@drawable/ic_menu"
-                android:tint="#FFFFFF" />
-
-            <EditText
-                android:id="@+id/search_bar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Search your note..."
-                android:padding="8dp"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#AAAAAA"
-                android:textSize="16sp" />
-
-            <ImageView
-                android:id="@+id/search_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:src="@drawable/ic_search"
-                android:tint="#FFFFFF" />
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-    <!-- All Notes Title -->
-    <TextView
-        android:id="@+id/all_notes_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="All notes"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_card" />
-
-    <!-- Sort Container -->
-    <LinearLayout
-        android:id="@+id/sort_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_card">
+            android:layout_weight="1"
+            android:text="All notes"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/sorted_by"
+            android:id="@+id/sort_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sorted by"
@@ -98,10 +49,9 @@
             android:layout_height="24dp"
             android:layout_marginStart="4dp"
             android:src="@drawable/ic_sort"
-            app:tint="#FFFFFF" />
+            android:tint="#FFFFFF" />
     </LinearLayout>
 
-    <!-- RecyclerView for Notes -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
@@ -114,7 +64,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/all_notes_title"
+        app:layout_constraintTop_toBottomOf="@+id/header_layout"
         app:spanCount="2"
         tools:listitem="@layout/item_note" />
 

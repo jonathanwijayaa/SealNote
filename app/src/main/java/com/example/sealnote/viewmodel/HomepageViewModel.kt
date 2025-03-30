@@ -17,4 +17,5 @@ class HomepageViewModel : ViewModel() {
             Notes(3, "Meeting Notes", "Discuss project details", false, true)
         )
     }
+
 }
