@@ -85,6 +85,16 @@
             app:destination="@id/homepageFragment"
             app:popUpTo="@id/homepageFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_addNotes_to_bookmark"
+            app:destination="@id/bookmarksFragment"
+            app:popUpTo="@id/bookmarksFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_addNotes_to_secret"
+            app:destination="@id/secretNotesFragment"
+            app:popUpTo="@id/secretNotesFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

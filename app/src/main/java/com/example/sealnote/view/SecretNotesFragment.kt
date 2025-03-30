@@ -12,6 +12,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.sealnote.R
 import com.example.sealnote.adapter.NotesAdapter
@@ -46,6 +47,7 @@ class SecretNotesFragment : Fragment() {
 
         setupMenu(toolbar)
         setupRecyclerView()
+        setupFloatingButton()
         setupNavigationDrawer()
 
         // Tetap mengamati data dari ViewModel tanpa filtering
@@ -93,6 +95,11 @@ class SecretNotesFragment : Fragment() {
 
         navView.menu.clear()
         navView.inflateMenu(R.menu.notes_menu_drawer)
+    }
+    private fun setupFloatingButton() {
+        binding.fab.setOnClickListener {
+            findNavController().navigate(R.id.addNotesFragment)
+        }
     }
     override fun onDestroyView() {
         super.onDestroyView()
