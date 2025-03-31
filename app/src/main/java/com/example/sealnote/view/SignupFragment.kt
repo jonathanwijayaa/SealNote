@@ -59,7 +59,7 @@ class SignupFragment : Fragment() {
         logIn.setOnClickListener{
             findNavController().navigate(R.id.action_signupFragment_to_loginFragment)
         }
-        
+
 
     }
 
