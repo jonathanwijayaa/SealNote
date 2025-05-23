@@ -1,108 +1,207 @@
-package com.example.sealnote.view
+package com.example.sealnote.view // Pastikan package ini sesuai dengan lokasi file Anda
 
-import android.os.Bundle
-import android.util.Log
-import android.view.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.navigation.fragment.findNavController
-import com.example.sealnote.R
-import com.example.sealnote.adapter.NotesAdapter
-import com.example.sealnote.databinding.HomePageBinding
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
-import com.example.sealnote.viewmodel.HomepageViewModel
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add // Untuk FAB
+import androidx.compose.material.icons.filled.Menu // Untuk ikon sort (hamburger)
+import androidx.compose.material.icons.outlined.LocalOffer // Untuk ikon tag
+import androidx.compose.material3.*
+import androidx.compose.runtime.* // Tidak perlu import Composable lagi jika sudah ada di sini
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-class HomepageFragment : Fragment() {
-    private var _binding: HomePageBinding? = null
-    private val binding get() = _binding!!
-    private val viewModel: HomepageViewModel by viewModels()
-    private lateinit var adapter: NotesAdapter
+// Definisikan Warna sesuai gambar
+val ScreenBackground = Color(0xFF1A1C2E) // Dark blue/gray
+val CardBackgroundColor = Color(0xFF2C2F48) // Slightly lighter purplish dark blue
+val FabColor = Color(0xFF7B5DFF) // Purple/Blue untuk FAB (sesuai perkiraan dari gambar)
+val PrimaryTextColor = Color.White
+val SecondaryTextColor = Color(0xFFD1D1D1) // LightGray yang sedikit lebih spesifik
+val TertiaryTextColor = Color(0xFF9E9E9E) // Gray untuk tanggal dan tag
+val IconColor = Color.White
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = HomePageBinding.inflate(inflater, container, false)
-        return binding.root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+// Data class Anda (tetap sama)
+data class Note(
+    val id: Int, // Tambahkan ID untuk key di LazyVerticalGrid jika diperlukan
+    val title: String,
+    val content: String,
+    val date: String,
+    val tag: String
+)
 
-        val activity = requireActivity() as AppCompatActivity
-        val toolbar = activity.findViewById<Toolbar>(R.id.toolbar)
-        activity.setSupportActionBar(toolbar)
-
-        activity.supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setHomeAsUpIndicator(R.drawable.ic_menu)
-        }
-
-        setupMenu(toolbar)
-        setupRecyclerView()
-        setupFloatingButton()
-        setupNavigationDrawer()
-
-        // Tetap mengamati data dari ViewModel tanpa filtering
-        viewModel.notes.observe(viewLifecycleOwner) { notes ->
-            adapter.updateData(notes)
+@Composable
+fun HomeScreen(modifier: Modifier = Modifier) {
+    // Data contoh, sesuaikan jumlah dan isinya
+    val notes = remember {
+        List(8) { index ->
+            Note(
+                id = index,
+                title = "Title",
+                content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id.",
+                date = "Mar 22, 2025",
+                tag = "Example" // Tag akan ditampilkan dengan ikon
+            )
         }
     }
 
-    private fun setupMenu(toolbar: Toolbar) {
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.menu_search, menu)
-
-                val searchItem = menu.findItem(R.id.action_search)
-                val searchView = searchItem.actionView as SearchView
-                searchView.queryHint = "Search your notes..."
+    Scaffold(
+        containerColor = ScreenBackground,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { /* TODO: Aksi untuk menambah catatan baru */ },
+                containerColor = FabColor,
+                contentColor = IconColor,
+                shape = RoundedCornerShape(16.dp) // Sedikit rounded square seperti di beberapa desain modern FAB
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add new note"
+                )
             }
-
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    android.R.id.home -> {
-                        val drawerLayout = requireActivity().findViewById<DrawerLayout>(R.id.drawer_layout)
-                        drawerLayout.openDrawer(GravityCompat.START)
-                        true
-                    }
-                    else -> false
+        },
+        modifier = modifier // Modifier dari parameter bisa diterapkan ke Scaffold
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding) // Padding dari Scaffold (untuk status bar, nav bar, FAB)
+                .padding(horizontal = 16.dp) // Padding horizontal keseluruhan untuk konten
+        ) {
+            // Header: "All notes" dan "Sorted by"
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp), // Padding vertikal untuk header
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "All notes",
+                    color = PrimaryTextColor,
+                    fontSize = 22.sp, // Ukuran font lebih besar untuk "All notes"
+                    fontWeight = FontWeight.Bold
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Sorted by",
+                        color = PrimaryTextColor,
+                        fontSize = 14.sp
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.Default.Menu, // Ikon hamburger menu
+                        contentDescription = "Sort notes",
+                        tint = PrimaryTextColor,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
-    }
 
-    private fun setupRecyclerView() {
-        binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
-        adapter = NotesAdapter(emptyList())
-        binding.recyclerView.adapter = adapter
-    }
-
-    private fun setupFloatingButton() {
-        binding.floatingActionButton.setOnClickListener {
-            findNavController().navigate(R.id.addNotesFragment)
+            // Grid untuk daftar catatan
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(bottom = 16.dp), // Padding bawah untuk grid jika ada item yang dekat FAB
+                verticalArrangement = Arrangement.spacedBy(16.dp), // Jarak vertikal antar kartu
+                horizontalArrangement = Arrangement.spacedBy(16.dp) // Jarak horizontal antar kartu
+            ) {
+                items(notes, key = { it.id }) { note -> // Gunakan ID sebagai key
+                    NoteCard(note)
+                }
+            }
         }
     }
+}
 
-    private fun setupNavigationDrawer() {
-        val drawerLayout = requireActivity().findViewById<DrawerLayout>(R.id.drawer_layout)
-        val navView = requireActivity().findViewById<com.google.android.material.navigation.NavigationView>(R.id.nav_view)
 
-        navView.menu.clear()
-        navView.inflateMenu(R.menu.notes_menu_drawer)
+@Composable
+fun NoteCard(note: Note) {
+    Card(
+        shape = RoundedCornerShape(12.dp), // Sudut kartu yang lebih rounded
+        colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
+        modifier = Modifier
+            .fillMaxWidth()
+        // .height(180.dp) // Anda bisa mengatur tinggi tetap atau membiarkannya dinamis (wrap content)
+        // Jika konten bisa bervariasi, lebih baik tidak set tinggi tetap atau gunakan intrinsic height.
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp) // Padding internal kartu
+        ) {
+            Text(
+                text = note.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp, // Ukuran font judul
+                color = PrimaryTextColor
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = note.content,
+                fontSize = 13.sp, // Ukuran font konten
+                color = SecondaryTextColor,
+                lineHeight = 18.sp, // Jarak antar baris agar lebih mudah dibaca
+                maxLines = 4 // Batasi jumlah baris konten agar kartu tidak terlalu panjang
+            )
+            Spacer(modifier = Modifier.height(16.dp)) // Beri jarak sebelum baris bawah
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = note.date,
+                    fontSize = 11.sp, // Ukuran font tanggal
+                    color = TertiaryTextColor
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.LocalOffer, // Ikon tag
+                        contentDescription = "Tag",
+                        tint = TertiaryTextColor,
+                        modifier = Modifier.size(14.dp) // Ukuran ikon tag
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = note.tag,
+                        fontSize = 11.sp, // Ukuran font tag
+                        color = TertiaryTextColor
+                    )
+                }
+            }
+        }
     }
+}
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+// Pratinjau untuk HomeScreen
+@Preview(showBackground = true, name = "Home Screen Preview Dark")
+@Composable
+fun HomeScreenPreview() {
+    MaterialTheme { // Idealnya, Anda memiliki tema aplikasi sendiri yang mengatur warna gelap/terang
+        HomeScreen()
+    }
+}
+
+// Pratinjau untuk NoteCard individual
+@Preview(showBackground = true, name = "Note Card Preview Dark", backgroundColor = 0xFF1A1C2E)
+@Composable
+fun NoteCardPreview() {
+    MaterialTheme {
+        Box(modifier = Modifier.padding(16.dp)) {
+            NoteCard(
+                Note(
+                    id = 0,
+                    title = "Title",
+                    content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id.",
+                    date = "Mar 22, 2025",
+                    tag = "Example"
+                )
+            )
+        }
     }
 }
