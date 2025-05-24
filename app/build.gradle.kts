@@ -38,6 +38,11 @@ android {
     buildFeatures {
         dataBinding = true
         viewBinding = true
+        compose = true
+    }
+    composeOptions {
+        // Ganti versi ini
+        kotlinCompilerExtensionVersion = "1.5.14" // <- UBAH KE VERSI INI
     }
 }
 
@@ -56,8 +61,15 @@ dependencies {
     implementation(libs.material.v190)
     implementation(libs.androidx.drawerlayout)
     implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.foundation.android)
+    implementation(libs.androidx.ui.tooling.preview.android)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.navigation.compose.jvmstubs)
+    implementation(libs.androidx.material3.android)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    debugImplementation(libs.androidx.ui.tooling)
 }
