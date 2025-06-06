@@ -40,6 +40,13 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        dataBinding = true
+        viewBinding = true
+        compose = true
+    }
+    composeOptions {
+        // Ganti versi ini
+        kotlinCompilerExtensionVersion = "1.5.14" // <- UBAH KE VERSI INI
         dataBinding = true // Apakah Anda benar-benar menggunakan Data Binding XML? Jika tidak, bisa di-disable.
         viewBinding = true // Apakah Anda benar-benar menggunakan View Binding XML? Jika tidak, bisa di-disable.
         compose = true
@@ -70,6 +77,19 @@ dependencies {
     implementation(libs.material.v190) // Duplikat dari libs.material?
     implementation(libs.androidx.drawerlayout)
     implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.foundation.android)
+    implementation(libs.androidx.ui.tooling.preview.android)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.navigation.compose.jvmstubs)
+    implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.ui.text.google.fonts)
+    implementation ("com.google.android.gms:play-services-oss-licenses:17.1.0");
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    debugImplementation(libs.androidx.ui.tooling)
 
     // Dependensi Compose
     implementation(platform(libs.androidx.compose.bom))
