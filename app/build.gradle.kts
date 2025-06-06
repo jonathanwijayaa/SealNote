@@ -47,9 +47,6 @@ android {
     composeOptions {
         // Ganti versi ini
         kotlinCompilerExtensionVersion = "1.5.14" // <- UBAH KE VERSI INI
-        dataBinding = true // Apakah Anda benar-benar menggunakan Data Binding XML? Jika tidak, bisa di-disable.
-        viewBinding = true // Apakah Anda benar-benar menggunakan View Binding XML? Jika tidak, bisa di-disable.
-        compose = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get() // Ini akan mengambil versi 1.5.14 yang baru
