@@ -31,7 +31,6 @@ fun AddNotesScreenContent(
     onNotesChange: (String) -> Unit,
     onBack: () -> Unit
 ) {
-
     val containerColor = MaterialTheme.colorScheme.surface
     val onContainerColor = MaterialTheme.colorScheme.onSurface
     val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
