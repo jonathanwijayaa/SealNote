@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color // TETAPKAN INI jika Anda masih menggunakan Color.White atau Color(0xFF...) untuk debugging
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavController
-import com.example.sealnote.R // Pastikan R diimpor dengan benar
+import com.example.sealnote.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,34 +31,36 @@ fun AddNotesScreenContent(
     onNotesChange: (String) -> Unit,
     onBack: () -> Unit
 ) {
-    val darkBlue = Color(0xFF1E2A3A)
-    val lightGray = Color(0x80FFFFFF)
-    val white = Color.White
+
+    val containerColor = MaterialTheme.colorScheme.surface
+    val onContainerColor = MaterialTheme.colorScheme.onSurface
+    val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val TextFieldBackground = MaterialTheme.colorScheme.surfaceVariant
 
     Scaffold(
-        containerColor = darkBlue,
+        containerColor = containerColor, // Menggunakan warna tema
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Add Note", color = white) },
+            TopAppBar(
+                title = { Text("Add Note", color = onContainerColor) }, // Menggunakan warna tema
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = white
+                            tint = onContainerColor // Menggunakan warna tema
                         )
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = darkBlue
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = containerColor // Menggunakan warna tema
                 ),
                 modifier = Modifier.shadow(4.dp)
             )
         },
         bottomBar = {
             BottomAppBar(
-                containerColor = darkBlue,
-                contentColor = white,
+                containerColor = containerColor, // Menggunakan warna tema
+                contentColor = onContainerColor, // Menggunakan warna tema
                 modifier = Modifier.height(56.dp)
             ) {
                 Row(
@@ -72,7 +74,7 @@ fun AddNotesScreenContent(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_image),
                             contentDescription = "Add Image",
-                            tint = white
+                            tint = onContainerColor // Menggunakan warna tema
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -80,13 +82,13 @@ fun AddNotesScreenContent(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_camera),
                             contentDescription = "Take Photo",
-                            tint = white
+                            tint = onContainerColor // Menggunakan warna tema
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = createdDate,
-                        color = lightGray,
+                        color = secondaryTextColor, // Menggunakan warna tema
                         fontSize = 14.sp
                     )
                 }
@@ -122,7 +124,7 @@ fun AddNotesScreenContent(
 
             Text(
                 text = lastChangedDate,
-                color = lightGray,
+                color = secondaryTextColor, // Menggunakan warna tema
                 fontSize = 14.sp,
                 modifier = Modifier.align(Alignment.End)
             )
@@ -138,20 +140,21 @@ fun CustomTextField(
     modifier: Modifier = Modifier,
     minLines: Int = 1
 ) {
-    val textFieldBackground = Color(0xFF2A3B4F) // Slightly lighter than dark blue
-    val white = Color.White
-    val lightGray = Color(0x80FFFFFF)
+    // --- Ganti hardcoded colors dengan MaterialTheme.colorScheme ---
+    val textFieldBackgroundColor = MaterialTheme.colorScheme.surfaceVariant // Menggunakan warna tema
+    val textColor = MaterialTheme.colorScheme.onSurface // Menggunakan warna tema
+    val placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant // Menggunakan warna tema
 
     TextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(hint, color = lightGray) },
-        textStyle = TextStyle(color = white, fontSize = 16.sp),
+        placeholder = { Text(hint, color = placeholderColor) }, // Menggunakan warna tema
+        textStyle = TextStyle(color = textColor, fontSize = 16.sp), // Menggunakan warna tema
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = textFieldBackground,
-            unfocusedContainerColor = textFieldBackground,
-            disabledContainerColor = textFieldBackground,
-            cursorColor = white,
+            focusedContainerColor = textFieldBackgroundColor, // Menggunakan warna tema
+            unfocusedContainerColor = textFieldBackgroundColor, // Menggunakan warna tema
+            disabledContainerColor = textFieldBackgroundColor, // Menggunakan warna tema
+            cursorColor = textColor, // Menggunakan warna tema
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent
@@ -162,17 +165,19 @@ fun CustomTextField(
     )
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun AddNotesScreenPreview() {
-    AddNotesScreenContent(
-        title = "Meeting Notes",
-        notes = "Discuss Q2 goals, client feedback, and action items.",
-        createdDate = "Created: May 24, 2025",
-        lastChangedDate = "Last Edited: May 24, 2025",
-        onTitleChange = {},
-        onNotesChange = {},
-        onBack = {}
-    )
+    // Wrap preview dengan AppTheme agar warna tema diterapkan
+    com.example.sealnote.ui.theme.AppTheme(darkTheme = true) { // Paksa tema gelap untuk pratinjau
+        AddNotesScreenContent(
+            title = "Meeting Notes",
+            notes = "Discuss Q2 goals, client feedback, and action items.",
+            createdDate = "Created: May 24, 2025",
+            lastChangedDate = "Last Edited: May 24, 2025",
+            onTitleChange = {},
+            onNotesChange = {},
+            onBack = {}
+        )
+    }
 }

@@ -68,7 +68,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose.jvmstubs)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.runtime.livedata)
-
+    implementation(libs.androidx.ui.text.google.fonts)
+    implementation ("com.google.android.gms:play-services-oss-licenses:17.1.0");
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

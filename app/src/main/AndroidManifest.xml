@@ -12,6 +12,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
+        <provider
+            android:name="com.google.android.gms.fonts.providers.GoogleFontsFileProvider"
+            android:authorities="com.google.android.gms.fonts"
+            android:exported="true"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/font_provider_paths" />
+        </provider>
         <activity
             android:name=".MainActivity"
             android:exported="true">
