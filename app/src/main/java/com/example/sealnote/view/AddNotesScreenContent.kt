@@ -168,7 +168,7 @@ fun CustomTextField(
 @Composable
 fun AddNotesScreenPreview() {
     // Wrap preview dengan AppTheme agar warna tema diterapkan
-    com.example.sealnote.ui.theme.AppTheme(darkTheme = true) { // Paksa tema gelap untuk pratinjau
+    com.example.sealnote.ui.theme.SealnoteTheme(darkTheme = true) { // Paksa tema gelap untuk pratinjau
         AddNotesScreenContent(
             title = "Meeting Notes",
             notes = "Discuss Q2 goals, client feedback, and action items.",
