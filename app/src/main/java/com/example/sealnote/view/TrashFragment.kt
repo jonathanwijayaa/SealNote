@@ -1,5 +1,6 @@
 package com.example.sealnote.view
 
+import androidx.compose.foundation.background // <-- ADD THIS IMPORT for Modifier.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -12,7 +13,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Restore
-import androidx.compose.material3.*
+import androidx.compose.material3.* // Make sure this is Material3
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,11 +90,12 @@ fun TrashScreen(
                             }
                             DropdownMenu(
                                 expanded = isSortMenuExpanded,
-                                onDismissRequest = { isSortMenuExpanded = false }
+                                onDismissRequest = { isSortMenuExpanded = false },
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme color or custom DropdownMenuBackground
                             ) {
                                 sortOptions.forEach { option ->
                                     DropdownMenuItem(
-                                        text = { Text(option) },
+                                        text = { Text(option, color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme color or custom DropdownMenuItemTextColor
                                         onClick = {
                                             selectedSortOption = option
                                             isSortMenuExpanded = false
@@ -119,35 +121,51 @@ fun TrashScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                if (isSearchActive) {
-                    // --- INI ADALAH KODE SEARCH BAR YANG SUDAH DIPERBAIKI ---
-                    DockedSearchBar(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                        expanded = isSearchActive,
-                        onExpandedChange = { isSearchActive = it },
-                        inputField = {
-                            SearchBarDefaults.InputField(
-                                query = searchQuery,
-                                onQueryChange = { searchQuery = it },
-                                onSearch = { isSearchActive = false },
-                                expanded = isSearchActive,
-                                onExpandedChange = { isSearchActive = it },
-                                placeholder = { Text("Search in trash...") },
-                                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                                trailingIcon = {
-                                    if (searchQuery.isNotEmpty()) {
-                                        IconButton(onClick = { searchQuery = "" }) {
-                                            Icon(Icons.Default.Close, contentDescription = "Clear search")
-                                        }
-                                    }
-                                }
-                            )
+                // FIX: Corrected DockedSearchBar usage
+                DockedSearchBar(
+                    query = searchQuery,
+                    onQueryChange = { newQuery -> searchQuery = newQuery },
+                    onSearch = { newQuery ->
+                        println("Search submitted: $newQuery")
+                        isSearchActive = false // Close the search bar after search
+                    },
+                    active = isSearchActive,
+                    onActiveChange = { newActiveState -> isSearchActive = newActiveState },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp), // Adjust padding as needed
+                    placeholder = { Text("Search in trash...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarHintColor
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarIconColor
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear search", tint = MaterialTheme.colorScheme.onSurfaceVariant) // Use MaterialTheme color or SearchBarIconColor
+                            }
                         }
-                    ) {
-                        // Konten untuk menampilkan hasil/saran pencarian
+                    },
+                    colors = SearchBarDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant, // Use MaterialTheme color or SearchBarBackgroundColor
+                        inputFieldColors = TextFieldDefaults.colors(
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
+                            cursorColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary, // Use MaterialTheme color or SearchBarBorderColor
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.outline, // Use MaterialTheme color or SearchBarBorderColor
+                        )
+                    )
+                ) {
+                    // Konten untuk menampilkan hasil/saran pencarian
+                    // This is the content that appears *inside* the expanded DockedSearchBar
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            "Hasil untuk '$searchQuery' akan ditampilkan di sini.",
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
-                } else {
-                    // --- Konten Utama (Teks Notifikasi dan Grid) ---
+                }
+
+                // Conditionally display the main content (Text and Grid) based on search active state
+                if (!isSearchActive) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         Text(
                             text = "Items in trash are automatically deleted after 30 days.",
@@ -155,7 +173,8 @@ fun TrashScreen(
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
+                                .padding(16.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant // Add color for consistency
                         )
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
@@ -209,28 +228,29 @@ fun TrashNoteCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant // Add color for consistency
                 )
                 Box {
                     IconButton(
                         onClick = { isMenuExpanded = true },
                         modifier = Modifier.size(24.dp)
                     ) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "More Options")
+                        Icon(Icons.Default.MoreVert, contentDescription = "More Options", tint = MaterialTheme.colorScheme.onSurfaceVariant) // Add color for consistency
                     }
                     DropdownMenu(
                         expanded = isMenuExpanded,
-                        onDismissRequest = { isMenuExpanded = false }
+                        onDismissRequest = { isMenuExpanded = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme color or custom background
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Restore") },
+                            text = { Text("Restore", color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme color or custom text color
                             onClick = { onRestore(); isMenuExpanded = false },
-                            leadingIcon = { Icon(Icons.Outlined.Restore, contentDescription = "Restore") }
+                            leadingIcon = { Icon(Icons.Outlined.Restore, contentDescription = "Restore", tint = MaterialTheme.colorScheme.onSurface) } // Use MaterialTheme color or custom tint
                         )
                         DropdownMenuItem(
-                            text = { Text("Delete forever") },
+                            text = { Text("Delete forever", color = MaterialTheme.colorScheme.error) }, // Use MaterialTheme color (error for delete)
                             onClick = { onPermanentlyDelete(); isMenuExpanded = false },
-                            leadingIcon = { Icon(Icons.Outlined.DeleteForever, contentDescription = "Delete Forever") }
+                            leadingIcon = { Icon(Icons.Outlined.DeleteForever, contentDescription = "Delete Forever", tint = MaterialTheme.colorScheme.error) } // Use MaterialTheme color (error for delete)
                         )
                     }
                 }

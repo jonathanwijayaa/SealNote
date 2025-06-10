@@ -2,7 +2,7 @@ package com.example.sealnote.view // Atau package UI Anda
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+// REMOVED: import androidx.compose.foundation.clickable // No longer directly used for link
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,28 +25,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.sp // <-- REMOVED THE TRAILING '>' CHARACTER HERE
+
+// --- CORRECTED IMPORTS FOR POINTER INPUT / GESTURES ---
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures // Correct import for detectTapGestures
+// REMOVED: import androidx.compose.ui.gesture.tap // This was the problematic old import
+// REMOVED: import androidx.compose.ui.input.pointer.PointerEventPass // Not directly used by detectTapGestures
+// REMOVED: import androidx.compose.ui.input.pointer.PointerInputChange // Not directly used by detectTapGestures
+// REMOVED: import androidx.compose.ui.input.pointer.changedToUp // Not directly used by detectTapGestures
+// --- END CORRECTED IMPORTS ---
+
 import com.example.sealnote.R // Pastikan path ini benar
 
-// Definisikan Warna (sesuaikan dengan @color/background dan nilai hex dari XML)
-val SignUpScreenBackground = Color(0xFF152332)
-val SignUpTitleTextColor = Color.White
-val SignUpSubtitleTextColor = Color(0xFFFBFBFB)
-val SignUpInputFieldBackground = Color(0xFF2A2E45)
-val SignUpInputTextHintColor = Color(0xFFBBBBBB)
-val SignUpInputTextColor = Color.White
-val SignUpButtonGradientStart = Color(0xFF8000FF)
-val SignUpButtonGradientEnd = Color(0xFF00D1FF)
-val SignUpButtonTextColor = Color.White
-val SignUpGoogleButtonBackground = Color(0xFF3E5166)
-val SignUpGoogleButtonTextColor = Color.White
-val AlreadyAccountTextColor = Color(0xFFF8F8F8)
-val LoginLinkColor = Color(0xFFF8F8F8) // Warna untuk link "Log In", bold
+// --- START: Impor warna kustom dari Color.kt ---
+import com.example.sealnote.ui.theme.SignUpScreenBackground
+import com.example.sealnote.ui.theme.SignUpTitleTextColor
+import com.example.sealnote.ui.theme.SignUpSubtitleTextColor
+import com.example.sealnote.ui.theme.SignUpInputFieldBackground
+import com.example.sealnote.ui.theme.SignUpInputTextHintColor
+import com.example.sealnote.ui.theme.SignUpInputTextColor
+import com.example.sealnote.ui.theme.SignUpButtonGradientStart
+import com.example.sealnote.ui.theme.SignUpButtonGradientEnd
+import com.example.sealnote.ui.theme.SignUpButtonTextColor
+import com.example.sealnote.ui.theme.SignUpGoogleButtonBackground
+import com.example.sealnote.ui.theme.SignUpGoogleButtonTextColor
+import com.example.sealnote.ui.theme.AlreadyAccountTextColor
+import com.example.sealnote.ui.theme.LoginLinkColor
+// --- END: Impor warna kustom ---
 
 @Composable
 fun SignUpScreenComposable(
@@ -62,7 +74,7 @@ fun SignUpScreenComposable(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = SignUpScreenBackground
+        color = SignUpScreenBackground // Menggunakan warna dari Color.kt
     ) {
         Column(
             modifier = Modifier
@@ -75,7 +87,7 @@ fun SignUpScreenComposable(
 
             Text(
                 text = "Create Account",
-                color = SignUpTitleTextColor,
+                color = SignUpTitleTextColor, // Menggunakan warna dari Color.kt
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.Start)
@@ -85,7 +97,7 @@ fun SignUpScreenComposable(
 
             Text(
                 text = "Please fill the input below here",
-                color = SignUpSubtitleTextColor,
+                color = SignUpSubtitleTextColor, // Menggunakan warna dari Color.kt
                 fontSize = 16.sp,
                 modifier = Modifier.align(Alignment.Start)
             )
@@ -179,14 +191,14 @@ fun SignUpScreenComposable(
                         .fillMaxSize()
                         .background(
                             brush = Brush.horizontalGradient(
-                                colors = listOf(SignUpButtonGradientStart, SignUpButtonGradientEnd)
+                                colors = listOf(SignUpButtonGradientStart, SignUpButtonGradientEnd) // Menggunakan warna dari Color.kt
                             )
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Sign Up",
-                        color = SignUpButtonTextColor,
+                        color = SignUpButtonTextColor, // Menggunakan warna dari Color.kt
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -200,8 +212,8 @@ fun SignUpScreenComposable(
                 onClick = onGoogleSignInClick,
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SignUpGoogleButtonBackground,
-                    contentColor = SignUpGoogleButtonTextColor
+                    containerColor = SignUpGoogleButtonBackground, // Menggunakan warna dari Color.kt
+                    contentColor = SignUpGoogleButtonTextColor // Menggunakan warna dari Color.kt
                 ),
                 modifier = Modifier
                     .fillMaxWidth(0.8f) // XML 243dp, ini membuatnya responsif
@@ -217,7 +229,7 @@ fun SignUpScreenComposable(
                     Text(
                         text = "Continue with Google",
                         fontSize = 16.sp,
-                        color = SignUpGoogleButtonTextColor
+                        color = SignUpGoogleButtonTextColor // Menggunakan warna dari Color.kt
                     )
                 }
             }
@@ -246,39 +258,41 @@ private fun CustomOutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
-        label = { Text(label, color = SignUpInputTextHintColor) },
-        placeholder = { Text(hint, color = SignUpInputTextHintColor) },
+        label = { Text(label, color = SignUpInputTextHintColor) }, // Menggunakan warna dari Color.kt
+        placeholder = { Text(hint, color = SignUpInputTextHintColor) }, // Menggunakan warna dari Color.kt
         leadingIcon = {
             Icon(
                 painter = painterResource(id = leadingIconRes),
                 contentDescription = "$label Icon",
-                tint = SignUpInputTextHintColor
+                tint = SignUpInputTextHintColor // Menggunakan warna dari Color.kt
             )
         },
         singleLine = true,
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None, // Pastikan VisualTransformation diimpor
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
-        textStyle = TextStyle(color = SignUpInputTextColor, fontSize = 14.sp),
+        textStyle = TextStyle(color = SignUpInputTextColor, fontSize = 14.sp), // Menggunakan warna dari Color.kt
         shape = RoundedCornerShape(8.dp), // Bentuk dari areainput
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = SignUpInputFieldBackground,
-            unfocusedContainerColor = SignUpInputFieldBackground,
-            disabledContainerColor = SignUpInputFieldBackground,
-            cursorColor = SignUpInputTextColor,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
+            focusedContainerColor = SignUpInputFieldBackground, // Menggunakan warna dari Color.kt
+            unfocusedContainerColor = SignUpInputFieldBackground, // Menggunakan warna dari Color.kt
+            disabledContainerColor = SignUpInputFieldBackground, // Menggunakan warna dari Color.kt
+            cursorColor = SignUpInputTextColor, // Menggunakan warna dari Color.kt
+            focusedIndicatorColor = Color.Transparent, // Sembunyikan garis bawah
+            unfocusedIndicatorColor = Color.Transparent, // Sembunyikan garis bawah
         )
     )
 }
 
 @Composable
 private fun ClickableLoginText(onLoginClick: () -> Unit) {
+    val ANNOTATION_TAG = "login_link_tag"
+
     val annotatedText = buildAnnotatedString {
         withStyle(style = SpanStyle(color = AlreadyAccountTextColor, fontSize = 13.sp)) {
             append("Already have an account? ")
         }
-        pushStringAnnotation(tag = "LOGIN", annotation = "login")
+        pushStringAnnotation(tag = ANNOTATION_TAG, annotation = "login_action")
         withStyle(
             style = SpanStyle(
                 color = LoginLinkColor,
@@ -289,21 +303,37 @@ private fun ClickableLoginText(onLoginClick: () -> Unit) {
         ) {
             append("Log In")
         }
-        pop()
+        pop() // Pop the annotation
     }
 
-    Row( // Untuk memastikan chainStyle="packed" efeknya tercapai (centered row)
+    var textLayoutResult by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
+
+    Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
-        androidx.compose.foundation.text.ClickableText(
+        // Use Text composable with pointerInput for click detection
+        Text(
             text = annotatedText,
-            onClick = { offset ->
-                annotatedText.getStringAnnotations(tag = "LOGIN", start = offset, end = offset)
-                    .firstOrNull()?.let {
-                        onLoginClick()
+            modifier = Modifier.pointerInput(Unit) { // Use Unit as key if lambda doesn't depend on external state
+                detectTapGestures(
+                    onTap = { offset ->
+                        textLayoutResult?.let { layoutResult ->
+                            val annotation = annotatedText.getStringAnnotations(
+                                tag = ANNOTATION_TAG,
+                                start = layoutResult.getOffsetForPosition(offset),
+                                end = layoutResult.getOffsetForPosition(offset)
+                            ).firstOrNull()
+
+                            if (annotation?.tag == ANNOTATION_TAG) {
+                                onLoginClick()
+                            }
+                        }
                     }
-            }
+                )
+            },
+            onTextLayout = { layoutResult -> textLayoutResult = layoutResult }, // Simpan TextLayoutResult
+            style = LocalTextStyle.current.copy(textAlign = TextAlign.Center) // Gaya teks
         )
     }
 }

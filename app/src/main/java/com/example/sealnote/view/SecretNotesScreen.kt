@@ -1,5 +1,6 @@
 package com.example.sealnote.view // Sesuaikan dengan package Anda
 
+import androidx.compose.foundation.background // <-- ADD THIS IMPORT for Modifier.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -10,7 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
+import androidx.compose.material3.* // Make sure this is Material3
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +22,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.ui.theme.SealnoteTheme // Pastikan tema Anda diimpor
 import kotlinx.coroutines.launch
+
+// Import your custom colors if you want to use them instead of MaterialTheme.colorScheme
+// import com.example.sealnote.ui.theme.DarkGreyBackground
+// import com.example.sealnote.ui.theme.NoteCardBackgroundColor
+// import com.example.sealnote.ui.theme.TopAppBarBackgroundColor
+// import com.example.sealnote.ui.theme.TopAppBarIconColor
+// import com.example.sealnote.ui.theme.TopAppBarTitleColor
+// import com.example.sealnote.ui.theme.SearchBarBackgroundColor
+// import com.example.sealnote.ui.theme.SearchBarBorderColor
+// import com.example.sealnote.ui.theme.SearchBarIconColor
+// import com.example.sealnote.ui.theme.SearchBarHintColor
+// import com.example.sealnote.ui.theme.SearchBarTextColor
+// import com.example.sealnote.ui.theme.DropdownMenuBackground
+// import com.example.sealnote.ui.theme.DropdownMenuItemTextColor
+
 
 // Data class yang lebih sesuai untuk konteks ini
 data class SecretNote(
@@ -92,11 +108,12 @@ fun SecretNotesScreen(
                             }
                             DropdownMenu(
                                 expanded = isSortMenuExpanded,
-                                onDismissRequest = { isSortMenuExpanded = false }
+                                onDismissRequest = { isSortMenuExpanded = false },
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme color or your custom DropdownMenuBackground
                             ) {
                                 sortOptions.forEach { option ->
                                     DropdownMenuItem(
-                                        text = { Text(option) },
+                                        text = { Text(option, color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme color or your custom DropdownMenuItemTextColor
                                         onClick = {
                                             selectedSortOption = option
                                             isSortMenuExpanded = false
@@ -132,46 +149,47 @@ fun SecretNotesScreen(
                     .padding(innerPadding) // Terapkan padding dari Scaffold di sini
                     .fillMaxSize()
             ) {
-                // REVISI 3: M3 Search Bar
-                if (isSearchActive) {
-                    DockedSearchBar(
-                        // Parameter untuk WADAH
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        expanded = isSearchActive,
-                        onExpandedChange = { isSearchActive = it },
-
-                        // Parameter untuk KOLOM INPUT di dalam 'inputField'
-                        inputField = {
-                            SearchBarDefaults.InputField(
-                                query = searchQuery,
-                                onQueryChange = { searchQuery = it },
-                                onSearch = {
-                                    isSearchActive = false
-                                    // TODO: Handle search action
-                                },
-                                expanded = isSearchActive,
-                                onExpandedChange = { isSearchActive = it },
-                                placeholder = { Text("Search secret notes...") },
-                                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                                trailingIcon = {
-                                    if (searchQuery.isNotEmpty()) {
-                                        IconButton(onClick = { searchQuery = "" }) {
-                                            Icon(Icons.Default.Close, contentDescription = "Clear search")
-                                        }
-                                    }
-                                }
-                            )
+                // FIX: Corrected DockedSearchBar usage
+                DockedSearchBar(
+                    query = searchQuery,
+                    onQueryChange = { newQuery -> searchQuery = newQuery },
+                    onSearch = { newQuery ->
+                        println("Search submitted: $newQuery")
+                        isSearchActive = false
+                    },
+                    active = isSearchActive,
+                    onActiveChange = { newActiveState -> isSearchActive = newActiveState },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    placeholder = { Text("Search secret notes...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarHintColor
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarIconColor
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear search", tint = MaterialTheme.colorScheme.onSurfaceVariant) // Use MaterialTheme color or SearchBarIconColor
+                            }
                         }
-                    ) {
-                        // Konten yang ditampilkan saat search bar aktif (daftar saran, dll.)
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Hasil untuk '$searchQuery' akan ditampilkan di sini.")
-                        }
+                    },
+                    colors = SearchBarDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant, // Use MaterialTheme color or SearchBarBackgroundColor
+                        inputFieldColors = TextFieldDefaults.colors(
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
+                            cursorColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
+                            focusedIndicatorColor = MaterialTheme.colorScheme.primary, // Use MaterialTheme color or SearchBarBorderColor
+                            unfocusedIndicatorColor = MaterialTheme.colorScheme.outline, // Use MaterialTheme color or SearchBarBorderColor
+                        )
+                    )
+                ) {
+                    // Konten yang ditampilkan saat search bar aktif (daftar saran, dll.)
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Hasil untuk '$searchQuery' akan ditampilkan di sini.", color = MaterialTheme.colorScheme.onSurface)
                     }
-                } else {
-                    // LazyVerticalGrid untuk menampilkan catatan (kode ini sudah benar)
+                }
+
+                // Conditionally display the grid based on search active state
+                if (!isSearchActive) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
                         modifier = Modifier
@@ -241,15 +259,16 @@ fun SecretNoteCard(
                     }
                     DropdownMenu(
                         expanded = isMenuExpanded,
-                        onDismissRequest = { isMenuExpanded = false }
+                        onDismissRequest = { isMenuExpanded = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme color or custom background
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Delete") },
+                            text = { Text("Delete", color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme color or custom text color
                             onClick = {
                                 onDeleteClick()
                                 isMenuExpanded = false
                             },
-                            leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = "Delete") }
+                            leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurface) } // Use MaterialTheme color or custom tint
                         )
                     }
                 }

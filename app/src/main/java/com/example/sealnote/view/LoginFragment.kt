@@ -38,22 +38,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.R // Pastikan path ini benar
-
-// Definisikan Warna (sesuaikan dengan @color/background dan nilai hex dari XML)
-val LoginScreenBackground = Color(0xFF152332) // Asumsi dari @color/background atau tema sebelumnya
-val LoginWelcomeTextColor = Color(0xFFFDFDFD)
-val LoginInfoTextColor = Color(0xFFEDEDED)
-val LoginInputFieldBackground = Color(0xFF2A2E45) // Mirip dengan ProfileInputBackgroundColor
-val LoginInputTextHintColor = Color(0xFFBBBBBB) // Warna hint yang lebih lembut
-val LoginInputTextColor = Color.White
-val LoginButtonGradientStart = Color(0xFF8000FF) // Gradien dari Profile Page
-val LoginButtonGradientEnd = Color(0xFF00D1FF)
-val LoginButtonTextColor = Color.White
-val ForgotPasswordTextColor = Color(0xFF2493D7)
-val NoAccountTextColor = Color(0xFFF8F8F8)
-val SignUpLinkColor = Color(0xFFEDEDED) // Warna untuk link "Sign Up"
-val GoogleButtonBackground = Color(0xFF3E5166)
-val GoogleButtonTextColor = Color.White
+import com.example.sealnote.ui.theme.LoginButtonGradientEnd
+import com.example.sealnote.ui.theme.LoginButtonGradientStart
+import com.example.sealnote.ui.theme.LoginButtonTextColor
+import com.example.sealnote.ui.theme.LoginInfoTextColor
+import com.example.sealnote.ui.theme.LoginInputFieldBackground
+import com.example.sealnote.ui.theme.LoginInputTextHintColor
+import com.example.sealnote.ui.theme.LoginInputTextColor
+import com.example.sealnote.ui.theme.LoginScreenBackground
+import com.example.sealnote.ui.theme.LoginWelcomeTextColor
+import com.example.sealnote.ui.theme.ForgotPasswordTextColor
+import com.example.sealnote.ui.theme.NoAccountTextColor
+import com.example.sealnote.ui.theme.SignUpLinkColor
+import com.example.sealnote.ui.theme.GoogleButtonBackground
+import com.example.sealnote.ui.theme.GoogleButtonTextColor
 
 @Composable
 fun LoginScreenComposable(
