@@ -45,11 +45,7 @@ android {
         compose = true
     }
     composeOptions {
-        // Ganti versi ini
-        kotlinCompilerExtensionVersion = "1.5.14" // <- UBAH KE VERSI INI
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get() // Ini akan mengambil versi 1.5.14 yang baru
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
     packaging {
         resources {
@@ -59,59 +55,70 @@ android {
 }
 
 dependencies {
-    // Dependensi yang sudah ada (View System) - pastikan Anda memang memerlukannya
+    // Android KTX and AppCompat
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material) // Material Components untuk View System
+
+    // Material Components Library (for your themes.xml and XML views like NavigationView, Toolbar)
+    implementation(libs.material)
+
+    // Activity (for both View System and Compose)
     implementation(libs.androidx.activity)
-    implementation(libs.androidx.gridlayout)
+
+    // ConstraintLayout (if you still use XML layouts with ConstraintLayout)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.material.v1100) // Duplikat dari libs.material?
+
+    // Lifecycle components (for both View System and Compose)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx) // For ViewModel in View System
+    implementation(libs.lifecycle.livedata.ktx) // For LiveData in View System
+    implementation(libs.androidx.lifecycle.viewmodel.compose) // For ViewModel in Compose
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.runtime.livedata)
+
+
+    // DrawerLayout (Used in activity_main.xml)
+    implementation(libs.androidx.drawerlayout)
+
+    // Traditional Android Navigation Component (for NavHostFragment in activity_main.xml)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.material.v190) // Duplikat dari libs.material?
-    implementation(libs.androidx.drawerlayout)
-    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.runtime.ktx) // Also good to have with fragment/ui ktx
+
+    // FOUNDATION (from Compose, explicit might not be strictly needed as Compose BOM covers it)
     implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.ui.tooling.preview.android)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.navigation.compose.jvmstubs)
-    implementation(libs.androidx.material3.android)
-    implementation(libs.androidx.runtime.livedata)
-    implementation(libs.androidx.ui.text.google.fonts)
-    implementation ("com.google.android.gms:play-services-oss-licenses:17.1.0");
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    debugImplementation(libs.androidx.ui.tooling)
 
-    // Dependensi Compose
+
+    // Compose BOM (Bill of Materials) - Ensures compatible Compose versions
     implementation(platform(libs.androidx.compose.bom))
+
+    // Core Compose UI
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.runtime.livedata)
 
-    // Ikon Compose
+    // Compose Material Design 3 (for your Compose UI)
+    implementation(libs.androidx.material3)
+
+    // Compose Navigation (for your Compose UI)
+    implementation(libs.androidx.navigation.compose)
+
+    // Compose Material Icons
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
-    // HAPUS BARIS DUPLIKAT DARI SINI (sudah ada di atas)
-    // implementation(libs.androidx.material.icons.extended)
-    // implementation(libs.androidx.material.icons.core)
+
+    // Google Services (if used)
+    implementation ("com.google.android.gms:play-services-oss-licenses:17.1.0")
+    implementation(libs.androidx.ui.text.google.fonts)
 
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
     // Testing Compose
-    androidTestImplementation(platform(libs.androidx.compose.bom)) // BOM juga untuk test
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

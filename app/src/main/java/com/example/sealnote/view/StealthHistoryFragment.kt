@@ -4,10 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.HorizontalDivider // Menggunakan HorizontalDivider untuk mengganti Divider yang deprecated
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,16 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// import com.example.sealnote.R // Jika menggunakan resource @color/background
 
-// Definisi Warna dari XML
-val HistoryScreenBackground = Color(0xFF152332)
-val HistoryItemExpressionColor = Color(0xFF8090A6)
-val HistoryItemResultColor = Color.White
-val HistoryItemDividerColor = Color(0xFF2A2F3A)
+// --- START: Impor warna kustom dari Color.kt ---
+import com.example.sealnote.ui.theme.HistoryScreenBackground
+import com.example.sealnote.ui.theme.HistoryItemExpressionColor
+import com.example.sealnote.ui.theme.HistoryItemResultColor
+import com.example.sealnote.ui.theme.HistoryItemDividerColor
+// --- END: Impor warna kustom ---
 
 // Data class untuk setiap entri riwayat
 data class CalculationHistoryEntry(
@@ -39,28 +38,22 @@ fun CalculationHistoryScreen(
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = HistoryScreenBackground // Background utama dari root ConstraintLayout
+        color = HistoryScreenBackground // Menggunakan warna dari Color.kt
     ) {
-        // Box ini bertindak sebagai parent ConstraintLayout untuk memposisikan ScrollView
         Box(modifier = Modifier.fillMaxSize()) {
             Column( // Ini adalah Composable yang meniru ScrollView
                 modifier = Modifier
-                    .align(Alignment.TopCenter) // Memusatkan ScrollView secara horizontal, dan menempel ke atas sebelum offset
-                    .offset(y = 159.dp)         // Menerapkan layout_marginTop="159dp"
-                    .width(416.dp)              // Menerapkan layout_width="416dp"
-                    .height(732.dp)             // Menerapkan layout_height="732dp"
-                    .background(HistoryScreenBackground) // Background ScrollView dari XML
-                    .verticalScroll(rememberScrollState()) // Membuat Column ini bisa di-scroll
+                    .align(Alignment.TopCenter)
+                    .offset(y = 159.dp)
+                    .width(416.dp)
+                    .height(732.dp)
+                    .background(HistoryScreenBackground) // Menggunakan warna dari Color.kt
+                    .verticalScroll(rememberScrollState())
             ) {
-                // Column ini adalah LinearLayout vertikal di dalam ScrollView
-                // fillMaxHeight() untuk meniru android:fillViewport="true"
                 Column(modifier = Modifier.fillMaxHeight()) {
                     historyEntries.forEach { entry ->
                         HistoryItemView(entry = entry)
                     }
-                    // Jika tidak ada item, fillMaxHeight akan membuat Column ini setinggi viewport
-                    // Jika ada item dan lebih pendek, juga akan setinggi viewport
-                    // Jika item lebih panjang, akan bisa di-scroll.
                 }
             }
         }
@@ -72,8 +65,8 @@ private fun HistoryItemView(entry: CalculationHistoryEntry) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(HistoryScreenBackground) // background="#152332" pada RelativeLayout
-            .padding(vertical = 15.dp)    // paddingVertical="15dp" pada RelativeLayout
+            .background(HistoryScreenBackground) // Menggunakan warna dari Color.kt
+            .padding(vertical = 15.dp)
     ) {
         Box(
             modifier = Modifier
@@ -82,39 +75,36 @@ private fun HistoryItemView(entry: CalculationHistoryEntry) {
         ) {
             Column(
                 modifier = Modifier
-                    .align(Alignment.TopEnd) // Menempatkan teks di kanan atas dalam Box 60dp ini
-                    .padding(end = 20.dp),    // layout_marginEnd="20dp" untuk kedua TextView
-                horizontalAlignment = Alignment.End // Teks di dalam Column ini rata kanan
+                    .align(Alignment.TopEnd)
+                    .padding(end = 20.dp),
+                horizontalAlignment = Alignment.End
             ) {
                 Text(
                     text = entry.expression,
-                    color = HistoryItemExpressionColor,
+                    color = HistoryItemExpressionColor, // Menggunakan warna dari Color.kt
                     fontSize = 14.sp,
                     textAlign = TextAlign.End
                 )
-                // Menggunakan padding atas dengan nilai dp tetap
                 Text(
                     text = entry.result,
-                    color = HistoryItemResultColor,
+                    color = HistoryItemResultColor, // Menggunakan warna dari Color.kt
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End,
-                    // Ganti dengan nilai dp yang sesuai secara visual, misal 4.dp atau 8.dp
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
 
-        Divider(
-            color = HistoryItemDividerColor,
+        HorizontalDivider( // Menggunakan HorizontalDivider
+            color = HistoryItemDividerColor, // Menggunakan warna dari Color.kt
             thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth() // android:layout_width="match_parent"
+            modifier = Modifier.fillMaxWidth()
         )
     }
-
 }
 
-@Preview(showBackground = true, widthDp = 416, heightDp = 891) // Mensimulasikan ukuran layar jika diperlukan
+@Preview(showBackground = true, widthDp = 416, heightDp = 891)
 @Composable
 fun CalculationHistoryScreenPreview() {
     val sampleHistory = listOf(
@@ -125,7 +115,7 @@ fun CalculationHistoryScreenPreview() {
         CalculationHistoryEntry("id5", "150.000 - 45.000", "45.000"),
         CalculationHistoryEntry("id6", "30.000 - 7.500", "7.500"),
     )
-    MaterialTheme { // Atau tema kustom aplikasi Anda
+    MaterialTheme {
         CalculationHistoryScreen(historyEntries = sampleHistory)
     }
 }

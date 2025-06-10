@@ -1,5 +1,6 @@
 package com.example.sealnote.view // Sesuaikan dengan package Anda
 
+import androidx.compose.foundation.background // <-- ADD THIS IMPORT
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -8,7 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort // REVISI: Menggunakan ikon AutoMirrored
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Close // <-- ADD THIS IMPORT for Icons.Default.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
@@ -26,6 +27,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.ui.theme.SealnoteTheme // Pastikan import ini sesuai dengan nama tema Anda
 import kotlinx.coroutines.launch
+
+// Import your custom colors if you plan to use them instead of MaterialTheme.colorScheme
+// import com.example.sealnote.ui.theme.DarkGreyBackground
+// import com.example.sealnote.ui.theme.NoteCardBackgroundColor
+// import com.example.sealnote.ui.theme.TopAppBarBackgroundColor
+// import com.example.sealnote.ui.theme.TopAppBarIconColor
+// import com.example.sealnote.ui.theme.TopAppBarTitleColor
+// import com.example.sealnote.ui.theme.SearchBarBackgroundColor
+// import com.example.sealnote.ui.theme.SearchBarBorderColor
+// import com.example.sealnote.ui.theme.SearchBarIconColor
+// import com.example.sealnote.ui.theme.SearchBarHintColor
+// import com.example.sealnote.ui.theme.SearchBarTextColor
+// import com.example.sealnote.ui.theme.DropdownMenuBackground
+// import com.example.sealnote.ui.theme.DropdownMenuItemTextColor
+
 
 // Data class Note (tidak berubah)
 data class Note(
@@ -107,11 +123,13 @@ fun HomeScreen(
                             }
                             DropdownMenu(
                                 expanded = isSortMenuExpanded,
-                                onDismissRequest = { isSortMenuExpanded = false }
+                                onDismissRequest = { isSortMenuExpanded = false },
+                                // Using Modifier.background for the dropdown menu background
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme colors or your custom DropdownMenuBackground
                             ) {
                                 sortOptions.forEach { option ->
                                     DropdownMenuItem(
-                                        text = { Text(option) },
+                                        text = { Text(option, color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme colors or your custom DropdownMenuItemTextColor
                                         onClick = {
                                             selectedSortOption = option
                                             isSortMenuExpanded = false
@@ -148,41 +166,49 @@ fun HomeScreen(
                     .fillMaxSize()
             ) {
                 // Logika if/else untuk menampilkan SearchBar atau Grid Catatan
+                // FIX: Updated DockedSearchBar usage
                 if (isSearchActive) {
                     DockedSearchBar(
+                        query = searchQuery,
+                        onQueryChange = { newQuery -> searchQuery = newQuery },
+                        onSearch = { newQuery ->
+                            isSearchActive = false
+                            // TODO: Handle search action
+                        },
+                        active = isSearchActive,
+                        onActiveChange = { newActiveState -> isSearchActive = newActiveState },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        expanded = isSearchActive,
-                        onExpandedChange = { isSearchActive = it },
-                        inputField = {
-                            SearchBarDefaults.InputField(
-                                query = searchQuery,
-                                onQueryChange = { searchQuery = it },
-                                onSearch = {
-                                    isSearchActive = false
-                                    // TODO: Handle search action
-                                },
-                                expanded = isSearchActive,
-                                onExpandedChange = { isSearchActive = it },
-                                placeholder = { Text("Search your notes...") },
-                                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
-                                trailingIcon = {
-                                    if (searchQuery.isNotEmpty()) {
-                                        IconButton(onClick = { searchQuery = "" }) {
-                                            Icon(Icons.Default.Close, contentDescription = "Clear search query")
-                                        }
-                                    }
+                        placeholder = { Text("Search your notes...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarHintColor
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarIconColor
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { searchQuery = "" }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Clear search query", tint = MaterialTheme.colorScheme.onSurfaceVariant) // Use MaterialTheme color or SearchBarIconColor
                                 }
+                            }
+                        },
+                        colors = SearchBarDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant, // Use MaterialTheme color or SearchBarBackgroundColor
+                            inputFieldColors = TextFieldDefaults.colors(
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
+                                cursorColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
+                                focusedIndicatorColor = MaterialTheme.colorScheme.primary, // Use MaterialTheme color or SearchBarBorderColor
+                                unfocusedIndicatorColor = MaterialTheme.colorScheme.outline, // Use MaterialTheme color or SearchBarBorderColor
                             )
-                        }
+                        )
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
                         ) {
-                            Text("Hasil pencarian untuk '$searchQuery' akan muncul di sini.")
+                            Text(
+                                "Hasil pencarian untuk '$searchQuery' akan muncul di sini.",
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
                 } else {
@@ -258,16 +284,17 @@ fun NoteCard(
                     }
                     DropdownMenu(
                         expanded = isCardMenuExpanded,
-                        onDismissRequest = { isCardMenuExpanded = false }
+                        onDismissRequest = { isCardMenuExpanded = false },
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme color or DropdownMenuBackground
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Delete") },
+                            text = { Text("Delete", color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme color or DropdownMenuItemTextColor
                             onClick = {
                                 onDeleteClick()
                                 isCardMenuExpanded = false
                             },
                             leadingIcon = {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurface) // Use MaterialTheme color or DropdownMenuItemTextColor
                             }
                         )
                     }

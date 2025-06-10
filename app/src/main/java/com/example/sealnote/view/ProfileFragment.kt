@@ -1,4 +1,4 @@
-package com.example.sealnote.view // Atau package UI Anda, pastikan R.drawable dapat diakses
+package com.example.sealnote.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,16 +27,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.R // Pastikan ini adalah path yang benar ke R class Anda
 
-// Warna berdasarkan UI yang diberikan
-val ProfilePageBackgroundColor = Color(0xFF152332)
-val ProfileNameTextColor = Color.White
-val ProfileUsernameTextColor = Color(0xFFDBDBDB)
-val ProfileLabelTextColor = Color.White
-val ProfileInputBackgroundColor = Color(0xFF2A2E45) // Perkiraan dari gambar field input
-val ProfileInputTextColor = Color(0xFFFFF3DB)
-val ProfileButtonTextColor = Color.White
-val ProfileButtonGradientStart = Color(0xFF8000FF) // Ungu pekat untuk gradien tombol
-val ProfileButtonGradientEnd = Color(0xFF00D1FF)   // Cyan/Biru untuk gradien tombol
+// --- START: Impor warna kustom dari Color.kt ---
+import com.example.sealnote.ui.theme.ProfilePageBackgroundColor
+import com.example.sealnote.ui.theme.ProfileNameTextColor
+import com.example.sealnote.ui.theme.ProfileUsernameTextColor
+import com.example.sealnote.ui.theme.ProfileLabelTextColor
+import com.example.sealnote.ui.theme.ProfileInputBackgroundColor
+import com.example.sealnote.ui.theme.ProfileInputTextColor
+import com.example.sealnote.ui.theme.ProfileButtonTextColor
+import com.example.sealnote.ui.theme.ProfileButtonGradientStart
+import com.example.sealnote.ui.theme.ProfileButtonGradientEnd
+// --- END: Impor warna kustom ---
 
 @Composable
 fun ProfileScreenComposable(
@@ -50,7 +51,7 @@ fun ProfileScreenComposable(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = ProfilePageBackgroundColor
+        color = ProfilePageBackgroundColor // Menggunakan warna dari Color.kt
     ) {
         Column(
             modifier = Modifier
@@ -74,7 +75,7 @@ fun ProfileScreenComposable(
 
             Text(
                 text = "Kim Mingyu",
-                color = ProfileNameTextColor,
+                color = ProfileNameTextColor, // Menggunakan warna dari Color.kt
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -83,7 +84,7 @@ fun ProfileScreenComposable(
 
             Text(
                 text = "@mingyusyng",
-                color = ProfileUsernameTextColor,
+                color = ProfileUsernameTextColor, // Menggunakan warna dari Color.kt
                 fontSize = 14.sp
             )
 
@@ -134,14 +135,14 @@ fun ProfileScreenComposable(
                         .fillMaxSize()
                         .background(
                             brush = Brush.horizontalGradient(
-                                colors = listOf(ProfileButtonGradientStart, ProfileButtonGradientEnd)
+                                colors = listOf(ProfileButtonGradientStart, ProfileButtonGradientEnd) // Menggunakan warna dari Color.kt
                             )
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Sign Out",
-                        color = ProfileButtonTextColor,
+                        color = ProfileButtonTextColor, // Menggunakan warna dari Color.kt
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -167,7 +168,7 @@ private fun ProfileTextFieldItem(
     ) {
         Text(
             text = label,
-            color = ProfileLabelTextColor,
+            color = ProfileLabelTextColor, // Menggunakan warna dari Color.kt
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.Start)
@@ -179,28 +180,24 @@ private fun ProfileTextFieldItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp), // Tinggi TextField
-            textStyle = TextStyle(color = ProfileInputTextColor, fontSize = 14.sp),
+            textStyle = TextStyle(color = ProfileInputTextColor, fontSize = 14.sp), // Menggunakan warna dari Color.kt
             shape = RoundedCornerShape(8.dp), // Bentuk field input
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = ProfileInputBackgroundColor,
-                unfocusedContainerColor = ProfileInputBackgroundColor,
-                disabledContainerColor = ProfileInputBackgroundColor, // Warna jika disabled
-                cursorColor = ProfileInputTextColor,
+                focusedContainerColor = ProfileInputBackgroundColor, // Menggunakan warna dari Color.kt
+                unfocusedContainerColor = ProfileInputBackgroundColor, // Menggunakan warna dari Color.kt
+                disabledContainerColor = ProfileInputBackgroundColor, // Menggunakan warna dari Color.kt
+                cursorColor = ProfileInputTextColor, // Menggunakan warna dari Color.kt
                 focusedIndicatorColor = Color.Transparent, // Sembunyikan garis bawah
                 unfocusedIndicatorColor = Color.Transparent, // Sembunyikan garis bawah
                 disabledIndicatorColor = Color.Transparent,  // Sembunyikan garis bawah jika disabled
-                focusedTextColor = ProfileInputTextColor,
-                unfocusedTextColor = ProfileInputTextColor,
-                disabledTextColor = ProfileInputTextColor // Warna teks jika disabled
+                focusedTextColor = ProfileInputTextColor, // Menggunakan warna dari Color.kt
+                unfocusedTextColor = ProfileInputTextColor, // Menggunakan warna dari Color.kt
+                disabledTextColor = ProfileInputTextColor // Menggunakan warna dari Color.kt
             ),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
             readOnly = readOnly // Set TextField menjadi read-only jika true
-            // Padding internal untuk teks di dalam TextField (paddingHorizontal="16dp" di XML)
-            // biasanya sudah diatur oleh default Material 3 TextField.
-            // Jika teks terlalu mepet, bisa gunakan parameter `contentPadding` pada `decorationBox`
-            // atau `BasicTextField` untuk kontrol penuh.
         )
     }
 }
