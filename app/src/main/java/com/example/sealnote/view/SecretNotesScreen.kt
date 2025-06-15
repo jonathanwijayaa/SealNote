@@ -1,215 +1,102 @@
-package com.example.sealnote.view // Sesuaikan dengan package Anda
-
-import androidx.compose.foundation.background // <-- ADD THIS IMPORT for Modifier.background
+package com.example.sealnote.view // Tambahkan di setiap file
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.items // Pastikan import ini ada
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.* // Make sure this is Material3
-import androidx.compose.runtime.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sealnote.ui.theme.SealnoteTheme // Pastikan tema Anda diimpor
-import kotlinx.coroutines.launch
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FloatingActionButtonDefaults
+import com.example.sealnote.R // Pastikan ini adalah path yang benar ke R class Anda
 
-// Import your custom colors if you want to use them instead of MaterialTheme.colorScheme
-// import com.example.sealnote.ui.theme.DarkGreyBackground
-// import com.example.sealnote.ui.theme.NoteCardBackgroundColor
-// import com.example.sealnote.ui.theme.TopAppBarBackgroundColor
-// import com.example.sealnote.ui.theme.TopAppBarIconColor
-// import com.example.sealnote.ui.theme.TopAppBarTitleColor
-// import com.example.sealnote.ui.theme.SearchBarBackgroundColor
-// import com.example.sealnote.ui.theme.SearchBarBorderColor
-// import com.example.sealnote.ui.theme.SearchBarIconColor
-// import com.example.sealnote.ui.theme.SearchBarHintColor
-// import com.example.sealnote.ui.theme.SearchBarTextColor
-// import com.example.sealnote.ui.theme.DropdownMenuBackground
-// import com.example.sealnote.ui.theme.DropdownMenuItemTextColor
+// Asumsi warna dari resources Anda
+val ScreenNotesBackground = Color(0xFF1A1C2E) // Contoh, sesuaikan dengan @color/background
+val ScreenNotesFabColor = Color(0xFF7377E8)
+val ScreenNotesTextColor = Color.White
+val ScreenNotesIconColor = Color.White
+val NoteCardDefaultBackgroundColor = Color(0xFF2C2F48) // Contoh warna kartu catatan
 
-
-// Data class yang lebih sesuai untuk konteks ini
-data class SecretNote(
+// Data class placeholder untuk item catatan utama
+data class MainNote(
     val id: String,
     val title: String,
     val contentPreview: String,
-    val date: String
+    val date: String,
+    val colorTag: Color? = null // Opsional: warna untuk kartu catatan
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecretNotesScreen(
-    // Parameter untuk data dan aksi/event
-    secretNotes: List<SecretNote> = emptyList(),
-    onNoteClick: (SecretNote) -> Unit = {},
-    onDeleteNote: (SecretNote) -> Unit = {},
-    onNavigateTo: (String) -> Unit = {},
+    notes: List<MainNote> = emptyList(),
+    onNoteClick: (MainNote) -> Unit = {},
+    onSortClick: () -> Unit = {},
     onFabClick: () -> Unit = {}
 ) {
-    // --- State Management ---
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-    var searchQuery by remember { mutableStateOf("") }
-    var isSearchActive by remember { mutableStateOf(false) }
-    var isSortMenuExpanded by remember { mutableStateOf(false) }
-    val sortOptions = listOf("Sort by Date", "Sort by Title")
-    var selectedSortOption by remember { mutableStateOf(sortOptions[0]) }
-
-    // REVISI 4: Navigation Drawer
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                Spacer(Modifier.height(12.dp))
-                // Contoh item di drawer, tandai "Secret Notes" sebagai yang aktif
-                NavigationDrawerItem(
-                    label = { Text("All Notes") },
-                    selected = false,
-                    onClick = { onNavigateTo("all_notes"); scope.launch { drawerState.close() } },
-                    icon = { Icon(Icons.Outlined.Home, contentDescription = "All Notes") }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = ScreenNotesBackground,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onFabClick,
+                containerColor = ScreenNotesFabColor,
+                contentColor = ScreenNotesIconColor, // Untuk tint ikon di dalam FAB
+                shape = FloatingActionButtonDefaults.shape // Bentuk default (biasanya lingkaran)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_add), // Pastikan drawable ini ada
+                    contentDescription = "Add New Note"
                 )
-                NavigationDrawerItem(
-                    label = { Text("Secret Notes") },
-                    selected = true,
-                    onClick = { scope.launch { drawerState.close() } },
-                    icon = { Icon(Icons.Outlined.Lock, contentDescription = "Secret Notes") }
-                )
-                // ... tambahkan item lain seperti Bookmarks, Trash, Settings ...
             }
         }
-    ) {
-        Scaffold(
-            // REVISI 2 & 3: TopAppBar dengan Search dan Sorting
-            topBar = {
-                TopAppBar(
-                    title = { Text("Secret Notes") },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { isSearchActive = true }) {
-                            Icon(Icons.Default.Search, contentDescription = "Search Secret Notes")
-                        }
-                        Box {
-                            IconButton(onClick = { isSortMenuExpanded = true }) {
-                                Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort Notes")
-                            }
-                            DropdownMenu(
-                                expanded = isSortMenuExpanded,
-                                onDismissRequest = { isSortMenuExpanded = false },
-                                modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme color or your custom DropdownMenuBackground
-                            ) {
-                                sortOptions.forEach { option ->
-                                    DropdownMenuItem(
-                                        text = { Text(option, color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme color or your custom DropdownMenuItemTextColor
-                                        onClick = {
-                                            selectedSortOption = option
-                                            isSortMenuExpanded = false
-                                            // TODO: Terapkan logika sorting
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                )
-            },
-            floatingActionButton = {
-                FloatingActionButton(onClick = onFabClick) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Secret Note")
-                }
-            }
-        ) { innerPadding ->
-            // Filter catatan berdasarkan query pencarian
-            val filteredNotes = remember(searchQuery, secretNotes) {
-                if (searchQuery.isBlank()) {
-                    secretNotes
-                } else {
-                    secretNotes.filter {
-                        it.title.contains(searchQuery, ignoreCase = true) ||
-                                it.contentPreview.contains(searchQuery, ignoreCase = true)
-                    }
-                }
-            }
-
-            Column(
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding) // Padding dari Scaffold (untuk status bar, FAB, dll.)
+                .fillMaxSize()
+        ) {
+            // Header Layout
+            NotesHeader(
+                onSortClick = onSortClick,
                 modifier = Modifier
-                    .padding(innerPadding) // Terapkan padding dari Scaffold di sini
-                    .fillMaxSize()
-            ) {
-                // FIX: Corrected DockedSearchBar usage
-                DockedSearchBar(
-                    query = searchQuery,
-                    onQueryChange = { newQuery -> searchQuery = newQuery },
-                    onSearch = { newQuery ->
-                        println("Search submitted: $newQuery")
-                        isSearchActive = false
-                    },
-                    active = isSearchActive,
-                    onActiveChange = { newActiveState -> isSearchActive = newActiveState },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    placeholder = { Text("Search secret notes...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarHintColor
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarIconColor
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Close, contentDescription = "Clear search", tint = MaterialTheme.colorScheme.onSurfaceVariant) // Use MaterialTheme color or SearchBarIconColor
-                            }
-                        }
-                    },
-                    colors = SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant, // Use MaterialTheme color or SearchBarBackgroundColor
-                        inputFieldColors = TextFieldDefaults.colors(
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
-                            cursorColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
-                            focusedIndicatorColor = MaterialTheme.colorScheme.primary, // Use MaterialTheme color or SearchBarBorderColor
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.outline, // Use MaterialTheme color or SearchBarBorderColor
-                        )
-                    )
-                ) {
-                    // Konten yang ditampilkan saat search bar aktif (daftar saran, dll.)
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Hasil untuk '$searchQuery' akan ditampilkan di sini.", color = MaterialTheme.colorScheme.onSurface)
-                    }
-                }
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp) // Margin dari XML
+            )
 
-                // Conditionally display the grid based on search active state
-                if (!isSearchActive) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
-                        contentPadding = PaddingValues(
-                            top = 8.dp,
-                            bottom = 8.dp + 80.dp // Padding bawah agar tidak tertutup FAB
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(filteredNotes, key = { it.id }) { note ->
-                            SecretNoteCard(
-                                note = note,
-                                onClick = { onNoteClick(note) },
-                                onDeleteClick = { onDeleteNote(note) }
-                            )
-                        }
-                    }
+            // Grid untuk Catatan
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2), // app:spanCount="2"
+                modifier = Modifier
+                    .fillMaxSize()
+                    // layout_marginStart/End="8dp" untuk RecyclerView diterapkan sebagai padding horizontal pada LazyVerticalGrid
+                    .padding(horizontal = 8.dp),
+                // paddingHorizontal="8dp" dan paddingBottom="16dp" dari RecyclerView menjadi contentPadding
+                contentPadding = PaddingValues(
+                    start = 8.dp, // dari paddingHorizontal
+                    end = 8.dp,   // dari paddingHorizontal
+                    top = 8.dp,   // Beri jarak dari header
+                    bottom = 16.dp + 56.dp + 16.dp // paddingBottom + FAB height + FAB margin (agar item terakhir tidak tertutup FAB)
+                ),
+                verticalArrangement = Arrangement.spacedBy(8.dp),   // Jarak antar item
+                horizontalArrangement = Arrangement.spacedBy(8.dp) // Jarak antar item
+            ) {
+                items(notes, key = { it.id }) { note ->
+                    NoteCardItem(
+                        note = note,
+                        onClick = { onNoteClick(note) }
+                    )
                 }
             }
         }
@@ -217,77 +104,89 @@ fun SecretNotesScreen(
 }
 
 @Composable
-fun SecretNoteCard(
-    note: SecretNote,
-    onClick: () -> Unit,
-    onDeleteClick: () -> Unit
+private fun NotesHeader(
+    onSortClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var isMenuExpanded by remember { mutableStateOf(false) }
-
-    // REVISI 1: Menggunakan ElevatedCard
-    ElevatedCard(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant // Menggunakan warna dari tema
-        )
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = note.title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                // REVISI 5: Aksi pada Card (Delete)
-                Box {
-                    IconButton(
-                        onClick = { isMenuExpanded = true },
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Note Options")
-                    }
-                    DropdownMenu(
-                        expanded = isMenuExpanded,
-                        onDismissRequest = { isMenuExpanded = false },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme color or custom background
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Delete", color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme color or custom text color
-                            onClick = {
-                                onDeleteClick()
-                                isMenuExpanded = false
-                            },
-                            leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurface) } // Use MaterialTheme color or custom tint
-                        )
-                    }
-                }
-            }
-            Spacer(Modifier.height(8.dp))
+        Text(
+            text = "All Secret Notes",
+            color = ScreenNotesTextColor,
+            fontSize = 16.sp,
+            modifier = Modifier.weight(1f) // Mengisi ruang yang tersedia
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clickable(onClick = onSortClick) // Membuat grup "Sorted by" bisa diklik
+                .padding(vertical = 4.dp) // Padding agar area klik lebih nyaman
+        ) {
+            Text(
+                text = "Sorted by",
+                color = ScreenNotesTextColor,
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.width(4.dp)) // layout_marginStart="4dp" untuk ikon
+            Icon(
+                painter = painterResource(id = R.drawable.ic_sort), // Pastikan drawable ini ada
+                contentDescription = "Sort Notes",
+                tint = ScreenNotesIconColor, // android:tint="#FFFFFF"
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun NoteCardItem( // Berbeda dari TrashNoteItem
+    note: MainNote,
+    onClick: () -> Unit
+) {
+    // IMPLEMENTASI INI ADALAH PLACEHOLDER.
+    // Anda HARUS menyesuaikan Composable ini agar sesuai dengan desain
+    // file item_note.xml Anda untuk daftar catatan utama.
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp), // Contoh, bisa disesuaikan
+        colors = CardDefaults.cardColors(
+            containerColor = note.colorTag ?: NoteCardDefaultBackgroundColor
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp) // Contoh elevasi
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .defaultMinSize(minHeight = 120.dp) // Agar kartu tidak terlalu pendek
+        ) {
+            Text(
+                text = note.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp, // Sedikit lebih besar untuk judul catatan utama
+                color = ScreenNotesTextColor,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = note.contentPreview,
                 fontSize = 14.sp,
-                lineHeight = 20.sp,
-                maxLines = 4,
+                color = ScreenNotesTextColor.copy(alpha = 0.8f),
+                maxLines = 4, // Mungkin lebih banyak baris untuk preview konten
                 overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                lineHeight = 20.sp
             )
-            Spacer(Modifier.weight(1f)) // Mendorong tanggal ke bawah
+            Spacer(modifier = Modifier.weight(1f)) // Mendorong tanggal ke bawah
             Text(
                 text = note.date,
                 fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.align(Alignment.End)
+                color = ScreenNotesTextColor.copy(alpha = 0.6f),
+                modifier = Modifier.align(Alignment.End),
+                textAlign = TextAlign.End
             )
         }
     }
@@ -295,16 +194,17 @@ fun SecretNoteCard(
 
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun SecretNotesScreenPreview() {
-    val sampleNotes = List(5) { index ->
-        SecretNote(
-            id = "secret_$index",
-            title = "Catatan Rahasia #$index",
-            contentPreview = "Ini adalah isi dari catatan rahasia yang sangat penting...",
-            date = "Jun ${15 + index}, 2025"
+fun MainNotesScreenPreview() {
+    val sampleNotes = List(7) { index ->
+        MainNote(
+            id = "note_$index",
+            title = "Judul Catatan Penting $index",
+            contentPreview = "Ini adalah isi dari catatan rahasia nomor $index yang sangat penting dan perlu diingat baik-baik. Konten bisa beberapa baris.",
+            date = "Mei ${20 + index}, 2025",
+            colorTag = if (index % 3 == 0) Color(0xFF4A4E69) else if (index % 3 == 1) Color(0xFF2C3E50) else null
         )
     }
-    SealnoteTheme(darkTheme = true) {
-        SecretNotesScreen(secretNotes = sampleNotes)
+    MaterialTheme { // Atau tema kustom aplikasi Anda
+        SecretNotesScreen(notes = sampleNotes)
     }
 }

@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,49 +27,65 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sealnote.R // Pastikan ini adalah path yang benar ke R class Anda
+import com.example.sealnote.R
+import com.example.sealnote.ui.theme.AppTheme
 
-// --- START: Impor warna kustom dari Color.kt ---
-import com.example.sealnote.ui.theme.ProfilePageBackgroundColor
-import com.example.sealnote.ui.theme.ProfileNameTextColor
-import com.example.sealnote.ui.theme.ProfileUsernameTextColor
-import com.example.sealnote.ui.theme.ProfileLabelTextColor
-import com.example.sealnote.ui.theme.ProfileInputBackgroundColor
-import com.example.sealnote.ui.theme.ProfileInputTextColor
-import com.example.sealnote.ui.theme.ProfileButtonTextColor
-import com.example.sealnote.ui.theme.ProfileButtonGradientStart
-import com.example.sealnote.ui.theme.ProfileButtonGradientEnd
-// --- END: Impor warna kustom ---
+// Warna berdasarkan UI yang diberikan
+val ProfilePageBackgroundColor = Color(0xFF152332)
+val ProfileNameTextColor = Color.White
+val ProfileUsernameTextColor = Color(0xFFDBDBDB)
+val ProfileLabelTextColor = Color.White
+val ProfileInputBackgroundColor = Color(0xFF2A2E45)
+val ProfileInputTextColor = Color(0xFFFFF3DB)
+val ProfileButtonTextColor = Color.White
+val ProfileButtonGradientStart = Color(0xFF8000FF)
+val ProfileButtonGradientEnd = Color(0xFF00D1FF)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreenComposable(
-    onSignOutClick: () -> Unit
+fun ProfileScreen( // Nama Composable: ProfileScreen
+    onSignOutClick: () -> Unit,
+    onBack: () -> Unit // Callback untuk tombol kembali
 ) {
     // State untuk TextField, bisa di-hoist jika diperlukan
-    // Nilai awal diambil dari XML/gambar
     var email by remember { mutableStateOf("mingyusayang@gmail.com") }
     var password by remember { mutableStateOf("**********") }
     var nomor by remember { mutableStateOf("081234567890") }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = ProfilePageBackgroundColor // Menggunakan warna dari Color.kt
-    ) {
+    Scaffold(
+        containerColor = ProfilePageBackgroundColor,
+        topBar = {
+            TopAppBar(
+                title = { Text("Profile", color = ProfileNameTextColor) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = ProfileNameTextColor)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = ProfilePageBackgroundColor,
+                    titleContentColor = ProfileNameTextColor,
+                    navigationIconContentColor = ProfileNameTextColor
+                )
+            )
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
+                .padding(paddingValues)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()) // Agar konten bisa di-scroll
-                .padding(bottom = 32.dp), // Padding bawah agar tidak terlalu mepet
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Image(
-                painter = painterResource(id = R.drawable.logo_sealnote), // Ganti dengan drawable Anda
+                painter = painterResource(id = R.drawable.logo_sealnote),
                 contentDescription = "Profile Image",
                 modifier = Modifier
                     .size(100.dp)
-                    .clip(CircleShape), // Bentuk lingkaran untuk gambar profil
+                    .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
 
@@ -75,7 +93,7 @@ fun ProfileScreenComposable(
 
             Text(
                 text = "Kim Mingyu",
-                color = ProfileNameTextColor, // Menggunakan warna dari Color.kt
+                color = ProfileNameTextColor,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -84,7 +102,7 @@ fun ProfileScreenComposable(
 
             Text(
                 text = "@mingyusyng",
-                color = ProfileUsernameTextColor, // Menggunakan warna dari Color.kt
+                color = ProfileUsernameTextColor,
                 fontSize = 14.sp
             )
 
@@ -95,7 +113,7 @@ fun ProfileScreenComposable(
                 value = email,
                 onValueChange = { email = it },
                 keyboardType = KeyboardType.Email,
-                readOnly = true // Berdasarkan gambar, field ini hanya untuk display
+                readOnly = true
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -106,7 +124,7 @@ fun ProfileScreenComposable(
                 onValueChange = { password = it },
                 keyboardType = KeyboardType.Password,
                 isPassword = true,
-                readOnly = true // Berdasarkan gambar, field ini hanya untuk display
+                readOnly = true
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -116,33 +134,33 @@ fun ProfileScreenComposable(
                 value = nomor,
                 onValueChange = { nomor = it },
                 keyboardType = KeyboardType.Phone,
-                readOnly = true // Berdasarkan gambar, field ini hanya untuk display
+                readOnly = true
             )
 
             Spacer(modifier = Modifier.height(70.dp))
 
             Button(
                 onClick = onSignOutClick,
-                shape = RoundedCornerShape(12.dp), // Sudut tombol
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .width(154.dp)
                     .height(49.dp),
-                contentPadding = PaddingValues(), // Hapus padding default agar gradien memenuhi tombol
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent) // Kontainer transparan untuk gradien
+                contentPadding = PaddingValues(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             brush = Brush.horizontalGradient(
-                                colors = listOf(ProfileButtonGradientStart, ProfileButtonGradientEnd) // Menggunakan warna dari Color.kt
+                                colors = listOf(ProfileButtonGradientStart, ProfileButtonGradientEnd)
                             )
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Sign Out",
-                        color = ProfileButtonTextColor, // Menggunakan warna dari Color.kt
+                        color = ProfileButtonTextColor,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -159,16 +177,16 @@ private fun ProfileTextFieldItem(
     onValueChange: (String) -> Unit,
     keyboardType: KeyboardType,
     isPassword: Boolean = false,
-    readOnly: Boolean = false // Tambahkan parameter readOnly
+    readOnly: Boolean = false
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp) // Margin horizontal untuk section ini
+            .padding(horizontal = 24.dp)
     ) {
         Text(
             text = label,
-            color = ProfileLabelTextColor, // Menggunakan warna dari Color.kt
+            color = ProfileLabelTextColor,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.Start)
@@ -179,25 +197,25 @@ private fun ProfileTextFieldItem(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp), // Tinggi TextField
-            textStyle = TextStyle(color = ProfileInputTextColor, fontSize = 14.sp), // Menggunakan warna dari Color.kt
-            shape = RoundedCornerShape(8.dp), // Bentuk field input
+                .height(50.dp),
+            textStyle = TextStyle(color = ProfileInputTextColor, fontSize = 14.sp),
+            shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = ProfileInputBackgroundColor, // Menggunakan warna dari Color.kt
-                unfocusedContainerColor = ProfileInputBackgroundColor, // Menggunakan warna dari Color.kt
-                disabledContainerColor = ProfileInputBackgroundColor, // Menggunakan warna dari Color.kt
-                cursorColor = ProfileInputTextColor, // Menggunakan warna dari Color.kt
-                focusedIndicatorColor = Color.Transparent, // Sembunyikan garis bawah
-                unfocusedIndicatorColor = Color.Transparent, // Sembunyikan garis bawah
-                disabledIndicatorColor = Color.Transparent,  // Sembunyikan garis bawah jika disabled
-                focusedTextColor = ProfileInputTextColor, // Menggunakan warna dari Color.kt
-                unfocusedTextColor = ProfileInputTextColor, // Menggunakan warna dari Color.kt
-                disabledTextColor = ProfileInputTextColor // Menggunakan warna dari Color.kt
+                focusedContainerColor = ProfileInputBackgroundColor,
+                unfocusedContainerColor = ProfileInputBackgroundColor,
+                disabledContainerColor = ProfileInputBackgroundColor,
+                cursorColor = ProfileInputTextColor,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                focusedTextColor = ProfileInputTextColor,
+                unfocusedTextColor = ProfileInputTextColor,
+                disabledTextColor = ProfileInputTextColor
             ),
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-            readOnly = readOnly // Set TextField menjadi read-only jika true
+            readOnly = readOnly
         )
     }
 }
@@ -205,7 +223,7 @@ private fun ProfileTextFieldItem(
 @Preview(showBackground = true, backgroundColor = 0xFF152332)
 @Composable
 fun ProfileScreenPreview() {
-    MaterialTheme { // Gunakan MaterialTheme untuk preview yang akurat
-        ProfileScreenComposable(onSignOutClick = {})
+    AppTheme {
+        ProfileScreen(onSignOutClick = {}, onBack = {}) // Memberikan lambda kosong untuk preview
     }
 }

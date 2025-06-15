@@ -6,9 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-// Tidak perlu import Face dan Fingerprint jika menggunakan drawable khusus
-// import androidx.compose.material.icons.filled.Face
-// import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,98 +22,101 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sealnote.R // Pastikan ini adalah path yang benar ke R class Anda
+import com.example.sealnote.R
+import com.example.sealnote.ui.theme.AppTheme // Asumsi AppTheme Anda
 
-// --- START: Impor warna kustom dari Color.kt ---
-import com.example.sealnote.ui.theme.AuthScreenBackground
-import com.example.sealnote.ui.theme.AuthCardBackgroundColor
-import com.example.sealnote.ui.theme.AuthTextColor
-import com.example.sealnote.ui.theme.AuthTabLayoutBackgroundColor
-import com.example.sealnote.ui.theme.AuthSelectedTabBrushStart
-import com.example.sealnote.ui.theme.AuthSelectedTabBrushEnd
-import com.example.sealnote.ui.theme.AuthUnselectedTabColor
-// --- END: Impor warna kustom ---
+// Definisi Warna dari XML
+val AuthScreenBackground = Color(0xFF0A0F1E)
+val AuthCardBackgroundColor = Color(0xFF10182C)
+val AuthTextColor = Color.White
+
+// Warna untuk Tab (berdasarkan asumsi dari @drawable/tab_selector, @drawable/tab_selected)
+val AuthTabLayoutBackgroundColor = Color(0xFF0D1326)
+val AuthSelectedTabBrush = Brush.horizontalGradient(listOf(Color(0xFF7B5DFF), Color(0xFF5D7FFF)))
+val AuthUnselectedTabColor = Color.Transparent
+
 
 @Composable
 fun AuthenticationScreen(
-    onUsePinClick: () -> Unit = {}
+    onUsePinClick: () -> Unit,
+    onAuthSuccess: () -> Unit // Callback untuk berhasil autentikasi
 ) {
     // State untuk tab yang terpilih (0: Fingerprint, 1: Face)
-    var selectedTabIndex by remember { mutableStateOf(1) }
+    var selectedTabIndex by remember { mutableStateOf(1) } // Default ke Face
 
     val currentAuthMethod = if (selectedTabIndex == 0) AuthMethod.Fingerprint else AuthMethod.Face
 
-    // Buat Brush di sini menggunakan warna dari Color.kt
-    val AuthSelectedTabBrush = Brush.horizontalGradient(
-        listOf(AuthSelectedTabBrushStart, AuthSelectedTabBrushEnd)
-    )
-
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = AuthScreenBackground // Menggunakan warna dari Color.kt
+        color = AuthScreenBackground
     ) {
         Box(
-            contentAlignment = Alignment.Center, // Memusatkan CardView
+            contentAlignment = Alignment.Center,
             modifier = Modifier.fillMaxSize()
         ) {
             Card(
                 modifier = Modifier
                     .width(332.dp)
-                    .height(305.dp), // Tinggi tetap seperti di XML
+                    .height(305.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = AuthCardBackgroundColor) // Menggunakan warna dari Color.kt
+                colors = CardDefaults.cardColors(containerColor = AuthCardBackgroundColor)
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize() // Mengisi Card
+                        .fillMaxSize()
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Custom Tab Layout
                     AuthCustomTabLayout(
                         selectedTabIndex = selectedTabIndex,
-                        onTabSelected = { index -> selectedTabIndex = index },
-                        authSelectedTabBrush = AuthSelectedTabBrush // Meneruskan Brush yang dibuat
+                        onTabSelected = { index -> selectedTabIndex = index }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
                         text = "Unlock to open secret notes",
-                        color = AuthTextColor, // Menggunakan warna dari Color.kt
+                        color = AuthTextColor,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(32.dp)) // Jarak yang dihitung sebelumnya
+                    Spacer(modifier = Modifier.height(32.dp))
+
 
                     Image(
                         painter = painterResource(id = currentAuthMethod.iconRes),
                         contentDescription = currentAuthMethod.contentDescription,
-                        modifier = Modifier.size(50.dp)
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clickable {
+                                // Contoh: Trigger autentikasi saat ikon diklik (untuk demo)
+                                onAuthSuccess()
+                            }
                     )
 
-                    Spacer(modifier = Modifier.height(32.dp)) // Sesuai marginTop text_auth dari icon_auth
+                    Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
                         text = currentAuthMethod.authText,
-                        color = AuthTextColor, // Menggunakan warna dari Color.kt
+                        color = AuthTextColor,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(36.dp)) // Sesuai marginTop "Use PIN" dari text_auth
+                    Spacer(modifier = Modifier.height(36.dp))
 
                     Text(
                         text = "Use PIN",
-                        color = AuthTextColor, // Menggunakan warna dari Color.kt
+                        color = AuthTextColor,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp)) // Memberikan bentuk pada area klik
+                            .clip(RoundedCornerShape(4.dp))
                             .clickable { onUsePinClick() }
-                            .padding(8.dp) // Padding seperti di XML
+                            .padding(8.dp)
                     )
                 }
             }
@@ -125,8 +127,7 @@ fun AuthenticationScreen(
 @Composable
 private fun AuthCustomTabLayout(
     selectedTabIndex: Int,
-    onTabSelected: (Int) -> Unit,
-    authSelectedTabBrush: Brush // Menerima Brush sebagai parameter
+    onTabSelected: (Int) -> Unit
 ) {
     val tabs = listOf("Fingerprint", "Face")
 
@@ -134,15 +135,15 @@ private fun AuthCustomTabLayout(
         modifier = Modifier
             .fillMaxWidth()
             .height(40.dp)
-            .background(AuthTabLayoutBackgroundColor, shape = RoundedCornerShape(8.dp)) // Menggunakan warna dari Color.kt
-            .padding(4.dp) // Padding internal dari LinearLayout
+            .background(AuthTabLayoutBackgroundColor, shape = RoundedCornerShape(8.dp))
+            .padding(4.dp)
     ) {
         tabs.forEachIndexed { index, title ->
             val isSelected = selectedTabIndex == index
             val tabBackgroundModifier = if (isSelected) {
-                Modifier.background(authSelectedTabBrush, shape = RoundedCornerShape(6.dp)) // Menggunakan Brush yang diterima
+                Modifier.background(AuthSelectedTabBrush, shape = RoundedCornerShape(6.dp))
             } else {
-                Modifier.background(AuthUnselectedTabColor, shape = RoundedCornerShape(6.dp)) // Menggunakan warna dari Color.kt
+                Modifier.background(AuthUnselectedTabColor, shape = RoundedCornerShape(6.dp))
             }
 
             Box(
@@ -150,13 +151,13 @@ private fun AuthCustomTabLayout(
                     .weight(1f)
                     .fillMaxHeight()
                     .then(tabBackgroundModifier)
-                    .clip(RoundedCornerShape(6.dp)) // Untuk efek klik pada area yang benar
+                    .clip(RoundedCornerShape(6.dp))
                     .clickable { onTabSelected(index) },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = title,
-                    color = AuthTextColor, // Menggunakan warna dari Color.kt
+                    color = AuthTextColor,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -165,36 +166,35 @@ private fun AuthCustomTabLayout(
     }
 }
 
-// Enum untuk merepresentasikan metode autentikasi dan data terkaitnya
 private enum class AuthMethod(
     val iconRes: Int,
     val authText: String,
     val contentDescription: String
 ) {
     Fingerprint(
-        iconRes = R.drawable.ic_finger, // Anda perlu drawable ini
+        iconRes = R.drawable.ic_finger,
         authText = "Place your finger on the sensor.",
         contentDescription = "Fingerprint Icon"
     ),
     Face(
-        iconRes = R.drawable.ic_face_id, // Pastikan drawable ini ada
+        iconRes = R.drawable.ic_face_id,
         authText = "We need to detect your face.",
         contentDescription = "Face Icon"
     )
 }
 
 // Placeholder untuk R.drawable.ic_fingerprint_placeholder jika belum ada
-// Anda harus membuat drawable ini atau menggantinya dengan yang valid.
-// Contoh menggunakan Material Icon sebagai fallback, tapi idealnya gunakan drawable dari proyek Anda.
-// private val R.drawable.ic_fingerprint_placeholder: Int // Baris ini tidak perlu jika ic_finger sudah didefinisikan
-//    get() = android.R.drawable.ic_partial_secure // Ini hanya contoh, ganti dengan ikon fingerprint Anda
+// Ini hanya contoh, ganti dengan ikon fingerprint Anda
+private val R.drawable.ic_fingerprint_placeholder: Int
+    get() = android.R.drawable.ic_partial_secure
 
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0F1E)
 @Composable
 fun AuthenticationScreenPreview() {
-    MaterialTheme { // Menggunakan MaterialTheme agar preview bekerja dengan baik
-        AuthenticationScreen()
+    AppTheme {
+        // Berikan lambda kosong untuk callbacks di preview
+        AuthenticationScreen(onUsePinClick = {}, onAuthSuccess = {})
     }
 }
 
@@ -202,9 +202,5 @@ fun AuthenticationScreenPreview() {
 @Composable
 fun AuthCustomTabLayoutPreview() {
     var selected by remember { mutableStateOf(0) }
-    // Membuat Brush untuk preview, sama dengan di AuthenticationScreen
-    val previewAuthSelectedTabBrush = Brush.horizontalGradient(
-        listOf(AuthSelectedTabBrushStart, AuthSelectedTabBrushEnd)
-    )
-    AuthCustomTabLayout(selectedTabIndex = selected, onTabSelected = { selected = it }, authSelectedTabBrush = previewAuthSelectedTabBrush)
+    AuthCustomTabLayout(selectedTabIndex = selected, onTabSelected = { selected = it })
 }

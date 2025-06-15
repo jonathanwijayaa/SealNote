@@ -60,7 +60,7 @@ private enum class SciButtonType {
 
 // --- Composable Utama ---
 @Composable
-fun ScientificCalculatorScreen() {
+fun StealthScientificScreen() {
     var displayMode by remember { mutableStateOf("Rad") }
     var mainDisplay by remember { mutableStateOf("78.000") }
 
@@ -336,6 +336,6 @@ private fun SciCalcActualButton(
 @Composable
 fun ScientificCalculatorScreenPreview() {
     MaterialTheme { // Atau tema kustom aplikasi Anda
-        ScientificCalculatorScreen()
+        StealthScientificScreen()
     }
 }
