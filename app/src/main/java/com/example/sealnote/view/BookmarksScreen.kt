@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.sealnote.viewmodel.BookmarksViewModel
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.sealnote.model.Notes
 import kotlinx.coroutines.launch
@@ -23,12 +22,13 @@ import com.example.sealnote.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookmarksScreenLayout(
+fun BookmarksScreen(
     bookmarkedNotes: List<Notes>,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onNavigateToAddNote: () -> Unit,
-    onNavigateTo: (String) -> Unit
+    onNavigateTo: (String) -> Unit,
+    bookmarksViewModel: BookmarksViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -205,12 +205,13 @@ fun BookmarksScreenPreview() {
 
     // Wrap preview dengan AppTheme agar warna tema diterapkan
     AppTheme(darkTheme = true) { // Anda bisa mengatur darkTheme = true atau false untuk melihat perbedaannya
-        BookmarksScreenLayout(
+        BookmarksScreen(
             bookmarkedNotes = dummyNotes,
             searchQuery = "",
             onSearchQueryChange = {},
             onNavigateToAddNote = {},
-            onNavigateTo = {}
+            onNavigateTo = {},
+            bookmarksViewModel = TODO()
         )
     }
 }

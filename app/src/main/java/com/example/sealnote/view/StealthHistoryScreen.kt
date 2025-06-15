@@ -15,9 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.offset
 // import com.example.sealnote.R // Jika menggunakan resource @color/background
 
 // Definisi Warna dari XML
@@ -34,7 +34,7 @@ data class CalculationHistoryEntry(
 )
 
 @Composable
-fun CalculationHistoryScreen(
+fun StealthHistoryScreen(
     historyEntries: List<CalculationHistoryEntry> = emptyList()
 ) {
     Surface(
@@ -126,6 +126,6 @@ fun CalculationHistoryScreenPreview() {
         CalculationHistoryEntry("id6", "30.000 - 7.500", "7.500"),
     )
     MaterialTheme { // Atau tema kustom aplikasi Anda
-        CalculationHistoryScreen(historyEntries = sampleHistory)
+        StealthHistoryScreen(historyEntries = sampleHistory)
     }
 }

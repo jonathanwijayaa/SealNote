@@ -1,4 +1,4 @@
-package com.example.sealnote.view // Atau package UI Anda
+package com.example.sealnote.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,10 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email // Contoh, jika ic_email adalah ikon standar
-import androidx.compose.material.icons.filled.Lock   // Contoh, jika ic_lock adalah ikon standar
-// Jika ic_email, ic_lock, ic_google adalah custom drawables, gunakan painterResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,28 +33,29 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sealnote.R // Pastikan path ini benar
+import com.example.sealnote.R
+import com.example.sealnote.ui.theme.AppTheme
 
-// Definisikan Warna (sesuaikan dengan @color/background dan nilai hex dari XML)
-val LoginScreenBackground = Color(0xFF152332) // Asumsi dari @color/background atau tema sebelumnya
+// Definisi Warna (sesuaikan dengan @color/background dan nilai hex dari XML)
+val LoginScreenBackground = Color(0xFF152332)
 val LoginWelcomeTextColor = Color(0xFFFDFDFD)
 val LoginInfoTextColor = Color(0xFFEDEDED)
-val LoginInputFieldBackground = Color(0xFF2A2E45) // Mirip dengan ProfileInputBackgroundColor
-val LoginInputTextHintColor = Color(0xFFBBBBBB) // Warna hint yang lebih lembut
+val LoginInputFieldBackground = Color(0xFF2A2E45)
+val LoginInputTextHintColor = Color(0xFFBBBBBB)
 val LoginInputTextColor = Color.White
-val LoginButtonGradientStart = Color(0xFF8000FF) // Gradien dari Profile Page
+val LoginButtonGradientStart = Color(0xFF8000FF)
 val LoginButtonGradientEnd = Color(0xFF00D1FF)
 val LoginButtonTextColor = Color.White
 val ForgotPasswordTextColor = Color(0xFF2493D7)
 val NoAccountTextColor = Color(0xFFF8F8F8)
-val SignUpLinkColor = Color(0xFFEDEDED) // Warna untuk link "Sign Up"
+val SignUpLinkColor = Color(0xFFEDEDED)
 val GoogleButtonBackground = Color(0xFF3E5166)
 val GoogleButtonTextColor = Color.White
 
 @Composable
-fun LoginScreenComposable(
+fun LoginScreen(
     onLoginClick: (email: String, password: String) -> Unit,
-    onGoogleSignInClick: () -> Unit,
+    onGoogleSignInClick: () -> Unit, // PASTIKAN PARAMETER INI ADA!
     onForgotPasswordClick: () -> Unit,
     onSignUpClick: () -> Unit
 ) {
@@ -74,7 +71,7 @@ fun LoginScreenComposable(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 32.dp), // Padding horizontal umum
+                .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -83,7 +80,7 @@ fun LoginScreenComposable(
                 painter = painterResource(id = R.drawable.logo_sealnote),
                 contentDescription = "App Logo",
                 modifier = Modifier.size(173.dp),
-                contentScale = ContentScale.Fit // XML menggunakan fitXY, Fit lebih umum untuk logo
+                contentScale = ContentScale.Fit
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -93,7 +90,7 @@ fun LoginScreenComposable(
                 color = LoginWelcomeTextColor,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Start) // Sesuai bias kiri di XML
+                modifier = Modifier.align(Alignment.Start)
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -102,7 +99,7 @@ fun LoginScreenComposable(
                 text = "Enter your login information to continue",
                 color = LoginInfoTextColor,
                 fontSize = 16.sp,
-                modifier = Modifier.align(Alignment.Start) // Sesuai bias kiri di XML
+                modifier = Modifier.align(Alignment.Start)
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -116,9 +113,9 @@ fun LoginScreenComposable(
                 placeholder = { Text("youremail@gmail.com", color = LoginInputTextHintColor) },
                 leadingIcon = {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_email), // Ganti dengan resource Anda
+                        painter = painterResource(id = R.drawable.ic_email),
                         contentDescription = "Email Icon",
-                        tint = LoginInputTextHintColor // Sesuaikan tint ikon
+                        tint = LoginInputTextHintColor
                     )
                 },
                 singleLine = true,
@@ -138,7 +135,7 @@ fun LoginScreenComposable(
                 )
             )
 
-            Spacer(modifier = Modifier.height(16.dp)) // Jarak antar input field
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Password Input
             OutlinedTextField(
@@ -149,9 +146,9 @@ fun LoginScreenComposable(
                 placeholder = { Text("password", color = LoginInputTextHintColor) },
                 leadingIcon = {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_lock), // Ganti dengan resource Anda
+                        painter = painterResource(id = R.drawable.ic_lock),
                         contentDescription = "Password Icon",
-                        tint = LoginInputTextHintColor // Sesuaikan tint ikon
+                        tint = LoginInputTextHintColor
                     )
                 },
                 singleLine = true,
@@ -185,7 +182,7 @@ fun LoginScreenComposable(
                 color = ForgotPasswordTextColor,
                 fontSize = 13.sp,
                 modifier = Modifier
-                    .align(Alignment.End) // Sesuai bias kanan di XML
+                    .align(Alignment.End)
                     .clickable { onForgotPasswordClick() }
                     .padding(vertical = 4.dp)
             )
@@ -199,10 +196,10 @@ fun LoginScreenComposable(
                 },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
-                    .width(143.dp) // Sesuai XML
-                    .height(39.dp)  // Sesuai XML
-                    .align(Alignment.End), // Sesuai bias kanan di XML
-                contentPadding = PaddingValues(), // Hapus padding default
+                    .width(143.dp)
+                    .height(39.dp)
+                    .align(Alignment.End),
+                contentPadding = PaddingValues(),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
             ) {
                 Box(
@@ -229,18 +226,18 @@ fun LoginScreenComposable(
             // Google Sign-In Button
             Button(
                 onClick = onGoogleSignInClick,
-                shape = RoundedCornerShape(8.dp), // Sesuai rounded_button_background
+                shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GoogleButtonBackground,
                     contentColor = GoogleButtonTextColor
                 ),
                 modifier = Modifier
-                    .fillMaxWidth(0.8f) // XML 243dp, ini membuatnya responsif
+                    .fillMaxWidth(0.8f)
                     .height(50.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_google), // Ganti dengan resource Anda
+                        painter = painterResource(id = R.drawable.ic_google),
                         contentDescription = "Google Icon",
                         modifier = Modifier.size(24.dp)
                     )
@@ -253,11 +250,11 @@ fun LoginScreenComposable(
                 }
             }
 
-            Spacer(modifier = Modifier.height(50.dp)) // Jarak sebelum sign up text, bisa disesuaikan (XML 80dp)
+            Spacer(modifier = Modifier.height(50.dp))
 
             ClickableSignUpText(onSignUpClick)
 
-            Spacer(modifier = Modifier.height(32.dp)) // Padding bawah
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -271,10 +268,10 @@ private fun ClickableSignUpText(onSignUpClick: () -> Unit) {
         pushStringAnnotation(tag = "SIGNUP", annotation = "signup")
         withStyle(
             style = SpanStyle(
-                color = SignUpLinkColor, // Dari XML textColor="#EDEDED"
+                color = SignUpLinkColor,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                textDecoration = TextDecoration.Underline // Opsional: untuk menandakan link
+                textDecoration = TextDecoration.Underline
             )
         ) {
             append("Sign Up")
@@ -290,7 +287,7 @@ private fun ClickableSignUpText(onSignUpClick: () -> Unit) {
                     onSignUpClick()
                 }
         },
-        modifier = Modifier.padding(top = 16.dp) // Sesuaikan dengan margin XML
+        modifier = Modifier.padding(top = 16.dp)
     )
 }
 
@@ -298,14 +295,12 @@ private fun ClickableSignUpText(onSignUpClick: () -> Unit) {
 @Preview(showBackground = true, backgroundColor = 0xFF152332)
 @Composable
 fun LoginScreenPreview() {
-    MaterialTheme {
-        LoginScreenComposable(
+    AppTheme {
+        LoginScreen(
             onLoginClick = { email, password ->
-                // Tidak perlu melakukan apa-apa di preview,
-                // atau Anda bisa menambahkan log jika mau.
-                // Contoh: println("Preview Login Clicked: $email, $password")
+                println("Preview Login Clicked: $email, $password")
             },
-            onGoogleSignInClick = {},
+            onGoogleSignInClick = {}, // Pastikan ini ada
             onForgotPasswordClick = {},
             onSignUpClick = {}
         )

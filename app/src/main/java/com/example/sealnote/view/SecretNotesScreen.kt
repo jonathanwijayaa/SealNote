@@ -1,3 +1,4 @@
+package com.example.sealnote.view // Tambahkan di setiap file
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -16,6 +17,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FloatingActionButtonDefaults
 import com.example.sealnote.R // Pastikan ini adalah path yang benar ke R class Anda
 
 // Asumsi warna dari resources Anda
@@ -36,7 +39,7 @@ data class MainNote(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainNotesScreen(
+fun SecretNotesScreen(
     notes: List<MainNote> = emptyList(),
     onNoteClick: (MainNote) -> Unit = {},
     onSortClick: () -> Unit = {},
@@ -202,6 +205,6 @@ fun MainNotesScreenPreview() {
         )
     }
     MaterialTheme { // Atau tema kustom aplikasi Anda
-        MainNotesScreen(notes = sampleNotes)
+        SecretNotesScreen(notes = sampleNotes)
     }
 }

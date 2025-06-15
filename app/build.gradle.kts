@@ -44,12 +44,9 @@ android {
         viewBinding = true
         compose = true
     }
+    // Consolidated and corrected composeOptions block
     composeOptions {
-        // Ganti versi ini
-        kotlinCompilerExtensionVersion = "1.5.14" // <- UBAH KE VERSI INI
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get() // Ini akan mengambil versi 1.5.14 yang baru
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
     packaging {
         resources {
@@ -59,59 +56,52 @@ android {
 }
 
 dependencies {
-    // Dependensi yang sudah ada (View System) - pastikan Anda memang memerlukannya
+    // --- View System Dependencies (Retained based on your original file) ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material) // Material Components untuk View System
+    // Using libs.material for Material Components for View System.
+    // Removed libs.material.v1100 and libs.material.v190 to avoid duplicates.
+    implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.gridlayout)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.material.v1100) // Duplikat dari libs.material?
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.material.v190) // Duplikat dari libs.material?
     implementation(libs.androidx.drawerlayout)
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.ui.tooling.preview.android)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.navigation.compose.jvmstubs)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.ui.text.google.fonts)
-    implementation ("com.google.android.gms:play-services-oss-licenses:17.1.0");
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    debugImplementation(libs.androidx.ui.tooling)
+    implementation (libs.play.services.oss.licenses)
 
-    // Dependensi Compose
+    // --- Compose Dependencies ---
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.runtime.livedata)
+    // The following two are already listed above, but keeping them here for clarity if you intend them primarily for Compose
+     implementation(libs.androidx.lifecycle.viewmodel.compose)
+     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.navigation.compose) // This is the correct primary dependency
 
-    // Ikon Compose
+    // Compose Icons
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
-    // HAPUS BARIS DUPLIKAT DARI SINI (sudah ada di atas)
-    // implementation(libs.androidx.material.icons.extended)
-    // implementation(libs.androidx.material.icons.core)
 
-    // Testing
+    // --- Testing Dependencies ---
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     // Testing Compose
-    androidTestImplementation(platform(libs.androidx.compose.bom)) // BOM juga untuk test
+    androidTestImplementation(platform(libs.androidx.compose.bom)) // BOM also for test
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

@@ -55,7 +55,7 @@ private enum class ButtonType {
 }
 
 @Composable
-fun CalculatorScreenModified() {
+fun StealthCalculatorScreen() {
     var displayText by remember { mutableStateOf("5.000") } // Contoh dari gambar
 
     Surface(
@@ -247,6 +247,6 @@ private fun CalculatorButtonModified(
 @Composable
 fun CalculatorScreenModifiedPreview() {
     MaterialTheme {
-        CalculatorScreenModified()
+        StealthCalculatorScreen()
     }
 }

@@ -97,7 +97,7 @@
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.example.sealnote.view.SettingsFragment"
+        android:name="com.example.sealnote.view.SettingsScreen"
         android:label="Settings"
         tools:layout="@layout/settings_page" />
 
