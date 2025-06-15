@@ -5,7 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Backspace // Contoh ikon, jika ingin digunakan
+// REVISI: Menggunakan Icons.AutoMirrored.Filled.Backspace yang direkomendasikan
+import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,26 +24,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// import com.example.sealnote.R // Jika menggunakan resource warna
 
-// --- Definisi Warna dari XML dan Gambar ---
-val SciCalcScreenBackground = Color(0xFF152332)
-val SciCalcDisplayCardBackground = Color(0xFF152332) // Sama dengan screen, elevasi memberi efek
-val SciCalcDisplayModeColor = Color(0xFF6B7C89)
-val SciCalcDisplayResultColor = Color.White
-val SciCalcDividerColor = Color(0x33FFFFFF) // Alpha 20%
-
-// Warna Tombol Saintifik (dari XML backgroundTint="#959EFF", gambar menunjukkan warna solid)
-val SciCalcScientificButtonBg = Color(0xFF7C80D3) // Warna dari gambar (biru keunguan muda)
-val SciCalcScientificButtonTextColor = Color.White
-
-// Warna Tombol Kalkulator Dasar (konsisten dengan kalkulator sebelumnya & gambar)
-val SciCalcBasicNumberButtonBg = Color(0xFF2A2D57)      // Untuk angka, C, koma
-val SciCalcBasicFunctionButtonBg = Color(0xFF4A52AA)   // Untuk backspace, √, % (sesuai XML basicGrid)
-val SciCalcBasicOperatorGradient = Brush.horizontalGradient( // Untuk operator dasar
-    listOf(Color(0xFF5C33A1), Color(0xFF3E71D6)) // Contoh gradien dari gambar kalkulator
-)
-val SciCalcBasicButtonTextColor = Color.White
+// --- START: Impor warna kustom dari Color.kt ---
+import com.example.sealnote.ui.theme.SciCalcScreenBackground
+import com.example.sealnote.ui.theme.SciCalcDisplayCardBackground
+import com.example.sealnote.ui.theme.SciCalcDisplayModeColor
+import com.example.sealnote.ui.theme.SciCalcDisplayResultColor
+import com.example.sealnote.ui.theme.SciCalcDividerColor
+import com.example.sealnote.ui.theme.SciCalcScientificButtonBg
+import com.example.sealnote.ui.theme.SciCalcScientificButtonTextColor
+import com.example.sealnote.ui.theme.SciCalcBasicNumberButtonBg
+import com.example.sealnote.ui.theme.SciCalcBasicFunctionButtonBg
+import com.example.sealnote.ui.theme.SciCalcBasicOperatorGradientStart
+import com.example.sealnote.ui.theme.SciCalcBasicOperatorGradientEnd
+import com.example.sealnote.ui.theme.SciCalcBasicButtonTextColor
+// --- END: Impor warna kustom ---
 
 // --- Data Class dan Enum untuk Tombol ---
 private data class SciCalcButtonUIData(
@@ -70,7 +66,7 @@ fun StealthScientificScreen() {
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = SciCalcScreenBackground
+        color = SciCalcScreenBackground // Menggunakan warna dari Color.kt
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             ScientificCalculatorDisplay(
@@ -81,7 +77,6 @@ fun StealthScientificScreen() {
                     .padding(horizontal = 8.dp, vertical = 8.dp) // marginStart/End dari CardView XML
             )
 
-            // Tombol akan memiliki margin 2dp, jadi padding di grid bisa dikurangi atau diatur per baris/kolom
             ScientificFunctionsGrid(
                 onButtonClick = { symbol -> /* TODO: Handle scientific button click */ },
                 modifier = Modifier
@@ -109,7 +104,7 @@ private fun ScientificCalculatorDisplay(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(0.dp), // app:cardCornerRadius="0dp"
-        colors = CardDefaults.cardColors(containerColor = SciCalcDisplayCardBackground),
+        colors = CardDefaults.cardColors(containerColor = SciCalcDisplayCardBackground), // Menggunakan warna dari Color.kt
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp) // app:cardElevation="8dp"
     ) {
         Column(modifier = Modifier.padding(bottom = 8.dp)) { // paddingBottom="8dp" dari LinearLayout dalam
@@ -121,14 +116,14 @@ private fun ScientificCalculatorDisplay(
             ) {
                 Text(
                     text = mode,
-                    color = SciCalcDisplayModeColor,
+                    color = SciCalcDisplayModeColor, // Menggunakan warna dari Color.kt
                     fontSize = 18.sp,
                     modifier = Modifier.padding(start = 16.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f)) // Mendorong hasil ke kanan
                 Text(
                     text = result,
-                    color = SciCalcDisplayResultColor,
+                    color = SciCalcDisplayResultColor, // Menggunakan warna dari Color.kt
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End,
@@ -137,8 +132,9 @@ private fun ScientificCalculatorDisplay(
                     overflow = TextOverflow.Ellipsis // Atau auto-size text
                 )
             }
-            Divider(
-                color = SciCalcDividerColor,
+            // REVISI: Menggunakan HorizontalDivider yang direkomendasikan
+            HorizontalDivider(
+                color = SciCalcDividerColor, // Menggunakan warna dari Color.kt
                 thickness = 1.dp,
                 modifier = Modifier.padding(top = 4.dp) // marginTop="4dp"
             )
@@ -152,10 +148,6 @@ private fun ScientificFunctionsGrid(
     onButtonClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Berdasarkan XML, ada 24 tombol -> 4 baris x 6 kolom
-    // Gambar menunjukkan lebih banyak baris, tapi XML mendefinisikan 24 tombol.
-    // Saya akan mengikuti struktur 4x6 dari daftar tombol di XML.
-    // Teks tombol disesuaikan dengan gambar jika memungkinkan untuk baris awal.
     val scientificButtonsConfig = listOf(
         // Row 1 (Dari gambar & XML)
         SciCalcButtonUIData("/", "Divide (fraction part)", 14.sp, SciButtonType.SCIENTIFIC),
@@ -163,28 +155,28 @@ private fun ScientificFunctionsGrid(
         SciCalcButtonUIData("∛", "Cube Root", 14.sp, SciButtonType.SCIENTIFIC),
         SciCalcButtonUIData("∜", "Fourth Root", 14.sp, SciButtonType.SCIENTIFIC),
         SciCalcButtonUIData("ln", "Natural Log", 14.sp, SciButtonType.SCIENTIFIC),
-        SciCalcButtonUIData("log", "Logarithm base 10", 14.sp, SciButtonType.SCIENTIFIC), // XML: "lo"
+        SciCalcButtonUIData("log", "Logarithm base 10", 14.sp, SciButtonType.SCIENTIFIC),
         // Row 2 (Dari gambar & XML)
         SciCalcButtonUIData("x!", "Factorial", 14.sp, SciButtonType.SCIENTIFIC),
-        SciCalcButtonUIData("sin", "Sine", 14.sp, SciButtonType.SCIENTIFIC), // XML: "si"
-        SciCalcButtonUIData("cos", "Cosine", 14.sp, SciButtonType.SCIENTIFIC), // XML: "co"
-        SciCalcButtonUIData("tan", "Tangent", 14.sp, SciButtonType.SCIENTIFIC), // XML: "ta"
+        SciCalcButtonUIData("sin", "Sine", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("cos", "Cosine", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("tan", "Tangent", 14.sp, SciButtonType.SCIENTIFIC),
         SciCalcButtonUIData("e", "Euler's Number", 14.sp, SciButtonType.SCIENTIFIC),
-        SciCalcButtonUIData("EE", "Exponent", 14.sp, SciButtonType.SCIENTIFIC), // XML: "E"
+        SciCalcButtonUIData("EE", "Exponent", 14.sp, SciButtonType.SCIENTIFIC),
         // Row 3 (Dari XML, disesuaikan dengan format gambar jika bisa)
-        SciCalcButtonUIData("Rad", "Radians Mode", 14.sp, SciButtonType.SCIENTIFIC), // XML: "R"
-        SciCalcButtonUIData("sinh", "Hyperbolic Sine", 14.sp, SciButtonType.SCIENTIFIC), // XML: "si"
-        SciCalcButtonUIData("cosh", "Hyperbolic Cosine", 14.sp, SciButtonType.SCIENTIFIC),// XML: "co"
-        SciCalcButtonUIData("tanh", "Hyperbolic Tangent", 14.sp, SciButtonType.SCIENTIFIC),// XML: "ta"
-        SciCalcButtonUIData("sin⁻¹", "Arc Sine", 14.sp, SciButtonType.SCIENTIFIC), // XML: "si"
-        SciCalcButtonUIData("cos⁻¹", "Arc Cosine", 14.sp, SciButtonType.SCIENTIFIC), // XML: "si"
+        SciCalcButtonUIData("Rad", "Radians Mode", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("sinh", "Hyperbolic Sine", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("cosh", "Hyperbolic Cosine", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("tanh", "Hyperbolic Tangent", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("sin⁻¹", "Arc Sine", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("cos⁻¹", "Arc Cosine", 14.sp, SciButtonType.SCIENTIFIC),
         // Row 4 (Dari sisa XML, ini adalah tombol ke 19-24)
-        SciCalcButtonUIData("tan⁻¹", "Arc Tangent", 14.sp, SciButtonType.SCIENTIFIC), // XML: "si" (btnSp)
-        SciCalcButtonUIData("1/x", "Reciprocal", 14.sp, SciButtonType.SCIENTIFIC), // XML: "si" (btnSinol)
-        SciCalcButtonUIData("x²", "Square", 14.sp, SciButtonType.SCIENTIFIC), // XML: "si" (btnSinl)
-        SciCalcButtonUIData("x³", "Cube", 14.sp, SciButtonType.SCIENTIFIC), // XML: "si" (btnSpnh)
+        SciCalcButtonUIData("tan⁻¹", "Arc Tangent", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("1/x", "Reciprocal", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("x²", "Square", 14.sp, SciButtonType.SCIENTIFIC),
+        SciCalcButtonUIData("x³", "Cube", 14.sp, SciButtonType.SCIENTIFIC),
         SciCalcButtonUIData("π", "Pi", 14.sp, SciButtonType.SCIENTIFIC),
-        SciCalcButtonUIData("Deg", "Degrees Mode", 14.sp, SciButtonType.SCIENTIFIC) // XML: "D"
+        SciCalcButtonUIData("Deg", "Degrees Mode", 14.sp, SciButtonType.SCIENTIFIC)
     )
 
     Column(modifier = modifier) {
@@ -217,7 +209,7 @@ private fun BasicCalculatorPad(
     // Konfigurasi tombol dasar dari XML (ID dan teks)
     val basicButtonsConfig = listOf(
         // Row 1
-        SciCalcButtonUIData("⌫", "Backspace", 18.sp, SciButtonType.BASIC_FUNCTION, Icons.Outlined.Backspace), // XML text "⌫"
+        SciCalcButtonUIData("⌫", "Backspace", 18.sp, SciButtonType.BASIC_FUNCTION, Icons.AutoMirrored.Filled.Backspace), // REVISI: Menggunakan AutoMirrored.Filled.Backspace
         SciCalcButtonUIData("√", "Square Root", 18.sp, SciButtonType.BASIC_FUNCTION),
         SciCalcButtonUIData("%", "Percent", 18.sp, SciButtonType.BASIC_FUNCTION),
         SciCalcButtonUIData("÷", "Divide", 20.sp, SciButtonType.BASIC_OPERATOR),
@@ -239,7 +231,7 @@ private fun BasicCalculatorPad(
         // Row 5
         SciCalcButtonUIData("C", "Clear", 18.sp, SciButtonType.BASIC_CLEAR),
         SciCalcButtonUIData("0", "Zero", 18.sp, SciButtonType.BASIC_NUMBER),
-        SciCalcButtonUIData(",", "Decimal", 18.sp, SciButtonType.BASIC_DECIMAL), // XML text ","
+        SciCalcButtonUIData(",", "Decimal", 18.sp, SciButtonType.BASIC_DECIMAL),
         SciCalcButtonUIData("=", "Equals", 20.sp, SciButtonType.BASIC_OPERATOR)
     )
 
@@ -278,6 +270,11 @@ private fun SciCalcActualButton(
     val backgroundBrush: Brush?
     val textColor: Color
 
+    // Membuat Brush di sini menggunakan warna dari Color.kt
+    val basicOperatorGradient = Brush.horizontalGradient(
+        listOf(SciCalcBasicOperatorGradientStart, SciCalcBasicOperatorGradientEnd)
+    )
+
     when (info.type) {
         SciButtonType.SCIENTIFIC -> {
             backgroundColor = SciCalcScientificButtonBg
@@ -296,7 +293,7 @@ private fun SciCalcActualButton(
         }
         SciButtonType.BASIC_OPERATOR -> {
             backgroundColor = null // Gunakan gradien
-            backgroundBrush = SciCalcBasicOperatorGradient
+            backgroundBrush = basicOperatorGradient // Menggunakan gradien yang dibuat di sini
             textColor = SciCalcBasicButtonTextColor
         }
     }

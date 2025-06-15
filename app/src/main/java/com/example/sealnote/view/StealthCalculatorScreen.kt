@@ -3,9 +3,10 @@ package com.example.sealnote.view
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape // Diubah dari CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Backspace // Ikon untuk backspace
+// REVISI: Menggunakan Icons.AutoMirrored.Filled.Backspace yang direkomendasikan
+import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,22 +24,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// import com.example.sealnote.R // Jika warna dari resource
 
-// Definisi Warna (disesuaikan agar lebih cocok dengan gambar)
-val CalcScreenBackground = Color(0xFF152332)
-val CalcDisplayCardBackground = Color(0xFF152332)
-val CalcDisplayTextColor = Color.White
-val CalcDisplayDividerColor = Color(0x33FFFFFF) // Alpha 20% untuk #33FFFFFF
-
-// Warna Tombol Disederhanakan (berdasarkan gambar)
-val CalcNonOperatorButtonBg = Color(0xFF2A2D57) // Warna ungu gelap solid untuk angka dan fungsi
-val CalcOperatorGradient = Brush.horizontalGradient(
-    // Gradien dari gambar tampak sedikit berbeda, sesuaikan jika perlu
-    listOf(Color(0xFF5C33A1), Color(0xFF3E71D6)) // Contoh ungu ke biru
-)
-val CalcButtonTextColor = Color.White
-val CalcButtonIconColor = Color.White
+// --- START: Impor warna kustom dari Color.kt ---
+import com.example.sealnote.ui.theme.CalcScreenBackground
+import com.example.sealnote.ui.theme.CalcDisplayCardBackground
+import com.example.sealnote.ui.theme.CalcDisplayTextColor
+import com.example.sealnote.ui.theme.CalcDisplayDividerColor
+import com.example.sealnote.ui.theme.CalcNonOperatorButtonBg
+import com.example.sealnote.ui.theme.CalcOperatorGradientStart
+import com.example.sealnote.ui.theme.CalcOperatorGradientEnd
+import com.example.sealnote.ui.theme.CalcButtonTextColor
+import com.example.sealnote.ui.theme.CalcButtonIconColor
+// --- END: Impor warna kustom ---
 
 // Data class untuk merepresentasikan setiap tombol kalkulator
 private data class CalcButtonInfo(
@@ -60,10 +57,10 @@ fun StealthCalculatorScreen() {
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = CalcScreenBackground
+        color = CalcScreenBackground // Menggunakan warna dari Color.kt
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            CalculatorDisplay( // Tidak banyak berubah, mungkin padding
+            CalculatorDisplay(
                 displayText = displayText,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -104,13 +101,13 @@ private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp), // Sedikit rounded corner untuk display card
-        colors = CardDefaults.cardColors(containerColor = CalcDisplayCardBackground),
+        colors = CardDefaults.cardColors(containerColor = CalcDisplayCardBackground), // Menggunakan warna dari Color.kt
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // Di gambar, display tidak terlalu menonjol
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Text(
                 text = displayText,
-                color = CalcDisplayTextColor,
+                color = CalcDisplayTextColor, // Menggunakan warna dari Color.kt
                 fontSize = 56.sp, // Ukuran font display bisa lebih besar sesuai gambar
                 fontWeight = FontWeight.Normal, // Di gambar tidak terlihat tebal sekali
                 textAlign = TextAlign.End,
@@ -121,7 +118,8 @@ private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Divider(color = CalcDisplayDividerColor, thickness = 1.dp)
+            // REVISI: Menggunakan HorizontalDivider yang direkomendasikan
+            HorizontalDivider(color = CalcDisplayDividerColor, thickness = 1.dp) // Menggunakan warna dari Color.kt
         }
     }
 }
@@ -136,7 +134,8 @@ private fun CalculatorButtonsGridModified(
     // Konfigurasi Tombol berdasarkan gambar
     val buttonRowsConfig = listOf(
         listOf(
-            CalcButtonInfo("", ButtonType.BACKSPACE, 24.sp, "Backspace", Icons.Outlined.Backspace),
+            // REVISI: Menggunakan Icons.AutoMirrored.Filled.Backspace
+            CalcButtonInfo("", ButtonType.BACKSPACE, 24.sp, "Backspace", Icons.AutoMirrored.Filled.Backspace),
             CalcButtonInfo("X/Y", ButtonType.FUNCTION, 20.sp, "X divided by Y"), // Ukuran font disesuaikan
             CalcButtonInfo("%", ButtonType.FUNCTION, 24.sp, "Percent"),
             CalcButtonInfo("÷", ButtonType.OPERATOR, 30.sp, "Divide")
@@ -200,6 +199,11 @@ private fun CalculatorButtonModified(
     val backgroundColor: Color?
     val backgroundBrush: Brush?
 
+    // Membuat Brush di sini menggunakan warna dari Color.kt
+    val CalcOperatorGradient = Brush.horizontalGradient(
+        listOf(CalcOperatorGradientStart, CalcOperatorGradientEnd)
+    )
+
     when (info.type) {
         ButtonType.OPERATOR -> {
             backgroundColor = null; backgroundBrush = CalcOperatorGradient
@@ -229,13 +233,13 @@ private fun CalculatorButtonModified(
             Icon(
                 imageVector = info.icon,
                 contentDescription = info.description, // Deskripsi bisa juga untuk ikon
-                tint = CalcButtonIconColor,
+                tint = CalcButtonIconColor, // Menggunakan warna dari Color.kt
                 modifier = Modifier.size(28.dp) // Ukuran ikon
             )
         } else {
             Text(
                 text = info.symbol,
-                color = CalcButtonTextColor,
+                color = CalcButtonTextColor, // Menggunakan warna dari Color.kt
                 fontSize = info.textSize,
                 fontWeight = FontWeight.Medium
             )

@@ -15,23 +15,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// import com.example.sealnote.R // Jika Anda menggunakan resource warna dari R
+import com.example.sealnote.ui.theme.ItemNoteCardBackground
+import com.example.sealnote.ui.theme.ItemNoteContentColor
+import com.example.sealnote.ui.theme.ItemNoteDateColor
+import com.example.sealnote.ui.theme.ItemNoteRestoreButtonBackground
+import com.example.sealnote.ui.theme.ItemNoteRestoreButtonTextColor
+import com.example.sealnote.ui.theme.ItemNoteTitleColor
+import com.example.sealnote.ui.theme.TrashScreenBackground
+import com.example.sealnote.model.DeletedNote // <-- ADD THIS IMPORT
 
-// Data class dari langkah sebelumnya, pastikan definisinya konsisten
+// REMOVE THE data class DeletedNote DEFINITION FROM HERE
 // data class DeletedNote(
 //    val id: String,
 //    val title: String,
 //    val contentSnippet: String,
 //    val deletionDate: String // Harus berisi teks lengkap seperti "Deleted date : 22 Mei 2022"
 // )
-
-// Warna yang akan digunakan, sesuaikan jika perlu
-val ItemNoteCardBackground = Color(0xFF2C2F48) // Latar belakang kartu yang gelap
-val ItemNoteTitleColor = Color.White
-val ItemNoteContentColor = Color(0xFFE0E0E0) // Sedikit lebih redup dari putih
-val ItemNoteDateColor = Color.White // Di XML bold, jadi tetap putih agar kontras
-val ItemNoteRestoreButtonBackground = Color(0xFF00897B) // Contoh warna Teal untuk tombol restore
-val ItemNoteRestoreButtonTextColor = Color.White
 
 @Composable
 fun TrashNoteItem( // Ini akan menggantikan placeholder TrashNoteItem di TrashScreen.kt
