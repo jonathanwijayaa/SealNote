@@ -59,6 +59,7 @@ dependencies {
     // --- View System Dependencies (Retained based on your original file) ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation("net.objecthunter:exp4j:0.4.8")
     // Using libs.material for Material Components for View System.
     // Removed libs.material.v1100 and libs.material.v190 to avoid duplicates.
     implementation(libs.material)

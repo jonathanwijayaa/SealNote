@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
-import androidx.compose.material.icons.filled.Menu // Import ikon menu
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,24 +25,13 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController // Import NavHostController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.launch // Untuk CoroutineScope
-
-// Import warna kustom dari Color.kt
-import com.example.sealnote.ui.theme.CalcScreenBackground
-import com.example.sealnote.ui.theme.CalcDisplayCardBackground
-import com.example.sealnote.ui.theme.CalcDisplayTextColor
-import com.example.sealnote.ui.theme.CalcDisplayDividerColor
-import com.example.sealnote.ui.theme.CalcNonOperatorButtonBg
-import com.example.sealnote.ui.theme.CalcOperatorGradientStart
-import com.example.sealnote.ui.theme.CalcOperatorGradientEnd
-import com.example.sealnote.ui.theme.CalcButtonTextColor
-import com.example.sealnote.ui.theme.CalcButtonIconColor
-import com.example.sealnote.viewmodel.StealthCalculatorViewModel
+import com.example.sealnote.ui.theme.*
 import com.example.sealnote.viewmodel.CalculatorHistoryViewModel
+import com.example.sealnote.viewmodel.StealthCalculatorViewModel
+import kotlinx.coroutines.launch
 
-// Data class untuk merepresentasikan setiap tombol kalkulator
 private data class CalcButtonInfo(
     val symbol: String,
     val type: ButtonType,
@@ -51,7 +40,6 @@ private data class CalcButtonInfo(
     val icon: ImageVector? = null
 )
 
-// Enum untuk tipe tombol
 private enum class ButtonType {
     NUMBER, OPERATOR, FUNCTION, CLEAR, DECIMAL, BACKSPACE
 }
@@ -67,15 +55,10 @@ fun StealthCalculatorScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // REVISI: Mengatur tombol target untuk triple-click
-    DisposableEffect(Unit) {
-        viewModel.targetButtonSymbolForTripleClick = "C" // Targetkan tombol "C"
-        // Atur callback untuk menyimpan riwayat
+    // Mengatur callback untuk menyimpan riwayat saat composable pertama kali dijalankan
+    LaunchedEffect(historyViewModel) {
         viewModel.onCalculationFinished = { expression, result ->
             historyViewModel.addHistoryEntry(expression, result)
-        }
-        onDispose {
-            viewModel.onCalculationFinished = null
         }
     }
 
@@ -90,7 +73,6 @@ fun StealthCalculatorScreen(
                     selected = true,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        // Tidak perlu navigasi, karena sudah di halaman ini
                     },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
@@ -110,9 +92,7 @@ fun StealthCalculatorScreen(
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        navController.navigate("stealthHistory") {
-                            popUpTo("stealthCalculator") { inclusive = true }
-                        }
+                        navController.navigate("stealthHistory")
                     },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
@@ -145,13 +125,14 @@ fun StealthCalculatorScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(CalcScreenBackground)
                     .padding(paddingValues)
             ) {
                 CalculatorDisplay(
                     displayText = viewModel.displayText,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp)
+                        .weight(1f)
                         .padding(horizontal = 16.dp, vertical = 24.dp)
                 )
 
@@ -160,44 +141,40 @@ fun StealthCalculatorScreen(
                         if (isBackspace) {
                             viewModel.onBackspaceClick()
                         } else {
-                            // REVISI: Teruskan onNavigateToLogin ke ViewModel
+                            // Meneruskan aksi navigasi ke ViewModel pada setiap klik
                             viewModel.onCalculatorButtonClick(buttonSymbol, onNavigateToLogin)
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp)
+                        .padding(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 8.dp)
                 )
             }
         }
     }
 }
 
-// ... (CalculatorDisplay, CalculatorButtonsGridModified, CalculatorButtonModified tetap sama)
-
 @Composable
 private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = CalcDisplayCardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp),
+            contentAlignment = Alignment.BottomEnd
+        ) {
             Text(
                 text = displayText,
                 color = CalcDisplayTextColor,
                 fontSize = 56.sp,
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.End,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            HorizontalDivider(color = CalcDisplayDividerColor, thickness = 1.dp)
         }
     }
 }
@@ -211,7 +188,7 @@ private fun CalculatorButtonsGridModified(
 
     val buttonRowsConfig = listOf(
         listOf(
-            CalcButtonInfo("", ButtonType.BACKSPACE, 24.sp, "Backspace", Icons.AutoMirrored.Filled.Backspace),
+            CalcButtonInfo("C", ButtonType.CLEAR, 26.sp, "Clear"),
             CalcButtonInfo("X/Y", ButtonType.FUNCTION, 20.sp, "X divided by Y"),
             CalcButtonInfo("%", ButtonType.FUNCTION, 24.sp, "Percent"),
             CalcButtonInfo("÷", ButtonType.OPERATOR, 30.sp, "Divide")
@@ -235,7 +212,7 @@ private fun CalculatorButtonsGridModified(
             CalcButtonInfo("+", ButtonType.OPERATOR, 30.sp, "Add")
         ),
         listOf(
-            CalcButtonInfo("C", ButtonType.CLEAR, 26.sp, "Clear"),
+            CalcButtonInfo("", ButtonType.BACKSPACE, 24.sp, "Backspace", Icons.AutoMirrored.Filled.Backspace),
             CalcButtonInfo("0", ButtonType.NUMBER, 26.sp, "Zero"),
             CalcButtonInfo(",", ButtonType.DECIMAL, 26.sp, "Comma"),
             CalcButtonInfo("=", ButtonType.OPERATOR, 30.sp, "Equal")
@@ -291,15 +268,14 @@ private fun CalculatorButtonModified(
     val finalBackgroundModifier = when {
         backgroundBrush != null -> Modifier.background(brush = backgroundBrush, shape = shape)
         backgroundColor != null -> Modifier.background(color = backgroundColor, shape = shape)
-        else -> Modifier.background(Color.DarkGray, shape = shape)
+        else -> Modifier // Harusnya tidak pernah terjadi
     }
 
     Box(
         modifier = modifier
             .aspectRatio(1f)
-            .defaultMinSize(minWidth = 70.dp, minHeight = 70.dp)
-            .then(finalBackgroundModifier)
             .clip(shape)
+            .then(finalBackgroundModifier)
             .clickable(onClick = onClick)
             .semantics { contentDescription = info.description },
         contentAlignment = Alignment.Center
