@@ -1,24 +1,25 @@
 package com.example.sealnote.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.sealnote.data.NotesRepository
 import com.example.sealnote.model.Notes
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class SecretNotesViewModel : ViewModel() {
-    private val _secretNotes = MutableLiveData<List<Notes>>()
-    val secretNotes: LiveData<List<Notes>> get() = _secretNotes
+@HiltViewModel
+class SecretNotesViewModel @Inject constructor(
+    private val repository: NotesRepository
+) : ViewModel() {
 
-    init {
-        loadSecretNotes()
-    }
-
-    private fun loadSecretNotes() {
-        val dummyNotes = listOf(
-            Notes(1, "Password List", "Saved passwords"),
-            Notes(2, "Private Diary", "Today's secret thoughts"),
-            Notes(3, "Top Secret", "Confidential Information")
+    // StateFlow untuk menampung daftar catatan rahasia dari repository
+    val secretNotes: StateFlow<List<Notes>> = repository.getSecretNotes()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = emptyList()
         )
-        _secretNotes.value = dummyNotes
-    }
 }

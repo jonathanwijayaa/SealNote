@@ -2,21 +2,19 @@ package com.example.sealnote.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.sealnote.viewmodel.BookmarksViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.MutableLiveData
+import androidx.navigation.navArgument
+import com.example.sealnote.viewmodel.CalculatorHistoryViewModel
 import com.example.sealnote.viewmodel.StealthCalculatorViewModel
 import com.example.sealnote.viewmodel.StealthScientificViewModel
-import com.example.sealnote.viewmodel.CalculatorHistoryViewModel
 
 /**
  * Mendefinisikan semua rute dan Composables untuk navigasi aplikasi.
- *
- * @param navController NavHostController untuk mengelola tumpukan belakang navigasi.
  */
 @Composable
 fun AppNavigation(
@@ -24,7 +22,7 @@ fun AppNavigation(
     navController: NavHostController = rememberNavController(),
     startDestination: String = "stealthCalculator"
 ) {
-    val calculatorHistoryViewModel: CalculatorHistoryViewModel = viewModel()
+    val calculatorHistoryViewModel: CalculatorHistoryViewModel = hiltViewModel()
 
     NavHost(
         navController = navController,
@@ -33,7 +31,7 @@ fun AppNavigation(
     ) {
         // --- Stealth Mode ---
         composable("stealthCalculator") {
-            val stealthCalculatorViewModel: StealthCalculatorViewModel = viewModel()
+            val stealthCalculatorViewModel: StealthCalculatorViewModel = hiltViewModel()
             StealthCalculatorScreen(
                 onNavigateToLogin = {
                     navController.navigate("login") {
@@ -46,10 +44,10 @@ fun AppNavigation(
             )
         }
         composable("stealthScientific") {
-            val stealthScientificViewModel: StealthScientificViewModel = viewModel()
+            val stealthScientificViewModel: StealthScientificViewModel = hiltViewModel()
             StealthScientificScreen(
                 navController = navController,
-                onNavigateToLogin = { // Teruskan callback onNavigateToLogin
+                onNavigateToLogin = {
                     navController.navigate("login") {
                         popUpTo("stealthScientific") { inclusive = true }
                     }
@@ -68,142 +66,125 @@ fun AppNavigation(
         // --- SealNote Login & Signup ---
         composable("login") {
             LoginScreen(
-                onLoginClick = { email, password ->
+                // Ganti 'onLoginClick' menjadi 'onLoginSuccess'
+                onLoginSuccess = {
+                    // Logika navigasi setelah login berhasil tetap sama
                     navController.navigate("homepage") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
                 onGoogleSignInClick = {
-                    navController.navigate("homepage") {
-                        popUpTo("login") { inclusive = true }
-                    }
+                    navController.navigate("homepage") { popUpTo("login") { inclusive = true } }
                 },
-                onForgotPasswordClick = {
-                },
-                onSignUpClick = {
-                    navController.navigate("signup")
-                }
+                onForgotPasswordClick = {},
+                onSignUpClick = { navController.navigate("signup") }
             )
         }
         composable("signup") {
-            SignupScreen(
-                onSignUpClick = { email, password ->
+            // Memanggil SignUpScreen versi BARU yang sudah terhubung ke ViewModel
+            SignUpScreen(
+                // Parameter 'onSignUpClick' sudah tidak ada lagi.
+                // Sebagai gantinya, 'onSignUpSuccess' akan dipanggil secara otomatis
+                // dari dalam SignUpScreen setelah ViewModel melaporkan proses berhasil.
+                onSignUpSuccess = {
+                    // Logika navigasi tetap sama: arahkan ke halaman login.
                     navController.navigate("login") {
                         popUpTo("signup") { inclusive = true }
                     }
                 },
+
+                // Parameter ini tidak berubah, logikanya tetap sama.
+                onGoogleSignInClick = {
+                    // Setelah sign-in dengan Google, mungkin langsung ke homepage
+                    navController.navigate("homepage") { popUpTo("signup") { inclusive = true } }
+                },
+
+                // Parameter ini juga tidak berubah.
                 onLoginClick = {
-                    navController.navigate("login") {
-                        popUpTo("signup") { inclusive = true }
-                    }
+                    // Jika pengguna sudah punya akun, kembali ke halaman login
+                    navController.navigate("login") { popUpTo("signup") { inclusive = true } }
                 }
             )
         }
 
         // --- Note Mode ---
         composable("homepage") {
-            HomepageScreen(
-                onNavigateToAddNote = { navController.navigate("addNotes") },
-                onNavigateToProfile = { navController.navigate("profile") },
-                onNavigateToBookmarks = { navController.navigate("bookmarks") },
-                onNavigateToSecretNotes = { navController.navigate("secretNotesLocked") },
-                onNavigateToTrash = { navController.navigate("trash") },
-                onNavigateToSettings = { navController.navigate("settings") }
-            )
+            HomepageRoute(navController = navController)
         }
+
         composable("profile") {
             ProfileScreen(
                 onSignOutClick = {
-                    navController.navigate("login") {
-                        popUpTo("homepage") { inclusive = true }
-                    }
+                    navController.navigate("login") { popUpTo("homepage") { inclusive = true } }
                 },
                 onBack = { navController.popBackStack() }
             )
         }
         composable("bookmarks") {
-            val bookmarksViewModel: BookmarksViewModel = viewModel()
-            BookmarksScreen(
-                bookmarksViewModel = bookmarksViewModel,
-                onNavigateToAddNote = { navController.navigate("addNotes") },
-                onNavigateTo = { destination ->
-                    when (destination) {
-                        "all_notes" -> navController.navigate("homepage") {
-                            popUpTo("homepage") {
-                                inclusive = true
-                            }
-                        }
-                        "secret_notes" -> navController.navigate("secretNotesLocked") {
-                            popUpTo("homepage") {
-                                inclusive = true
-                            }
-                        }
-                        "trash" -> navController.navigate("trash") {
-                            popUpTo("homepage") {
-                                inclusive = true
-                            }
-                        }
-                        "settings" -> navController.navigate("settings") {
-                            popUpTo("homepage") {
-                                inclusive = true
-                            }
-                        }
-                        "profile" -> navController.navigate("profile") {
-                            popUpTo("homepage") {
-                                inclusive = true
-                            }
-                        }
-                        else -> { /* Do nothing or handle unknown destination */
-                        }
-                    }
+            // Panggil BookmarksRoute dengan parameter yang benar sesuai definisinya
+            BookmarksRoute(
+                onNavigateToAddNote = {
+                    // Arahkan ke layar tambah/edit dengan ID null untuk catatan baru
+                    navController.navigate("add_edit_note_screen/null")
                 },
-                bookmarkedNotes = emptyList(),
-                searchQuery = "",
-                onSearchQueryChange = {}
+                onNavigateTo = { destination ->
+                    // Logika untuk navigasi dari drawer
+                    val route = when (destination) {
+                        "all_notes" -> "homepage"
+                        "secret_notes" -> "secretNotesLocked"
+                        else -> destination
+                    }
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                    }
+                }
             )
         }
         composable("secretNotes") {
             SecretNotesScreen(
-                onFabClick = { navController.navigate("addNotes") },
-                onNoteClick = { /* Handle note click */ },
+                onFabClick = { navController.navigate("add_edit_note_screen/null") },
+                onNoteClick = { noteId ->
+                    navController.navigate("add_edit_note_screen/$noteId")
+                },
                 onSortClick = { /* Handle sort click */ }
             )
         }
         composable("secretNotesLocked") {
             SecretNotesLockedScreen(
-                onAuthenticate = {
-                    navController.navigate("authentication")
-                }
+                onAuthenticate = { navController.navigate("authentication") }
             )
         }
         composable("authentication") {
             AuthenticationScreen(
                 onUsePinClick = {
-                    navController.navigate("login") {
-                        popUpTo("authentication") { inclusive = true }
-                    }
+                    navController.navigate("login") { popUpTo("authentication") { inclusive = true } }
                 },
                 onAuthSuccess = {
-                    navController.navigate("secretNotes") {
-                        popUpTo("authentication") { inclusive = true }
-                    }
+                    navController.navigate("secretNotes") { popUpTo("authentication") { inclusive = true } }
                 }
             )
         }
+
+        // HANYA ADA SATU BLOK INI
         composable("trash") {
-            TrashScreen()
+            TrashRoute(navController = navController)
         }
+
         composable("settings") {
             SettingsScreen(
                 onBack = { navController.popBackStack() }
             )
         }
-        composable("addNotes") {
-            AddNotesScreen(
-                onBack = { navController.popBackStack() },
-                onSave = { title, notes ->
-                    navController.popBackStack()
-                }
+
+        composable(
+            route = "add_edit_note_screen/{noteId}",
+            arguments = listOf(navArgument("noteId") {
+                type = NavType.StringType
+                nullable = true
+            })
+        ) {
+            AddEditNoteRoute(
+                onBack = { navController.popBackStack() }
             )
         }
     }

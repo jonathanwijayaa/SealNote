@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.sealnote" />
+                  <option name="mobileSdkAppId" value="1:393292911710:android:f97b5ecb2d5d78047b50cf" />
+                  <option name="projectId" value="sealnote-d96a4" />
+                  <option name="projectNumber" value="393292911710" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
