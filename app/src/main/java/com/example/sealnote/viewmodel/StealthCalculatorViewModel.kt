@@ -12,28 +12,24 @@ import java.math.RoundingMode
 class StealthCalculatorViewModel : ViewModel() {
 
     // --- Kalkulator Logic ---
-    // REVISI: Mengubah displayText untuk menyimpan ekspresi
     var displayText by mutableStateOf("0")
         private set
 
-    // REVISI: Variabel untuk menyimpan ekspresi penuh sebelum dievaluasi
     private var currentExpression: String = ""
     private var lastInputWasOperator: Boolean = false
     private var lastInputWasEquals: Boolean = false
 
-    fun onCalculatorButtonClick(symbol: String) {
+    var onCalculationFinished: ((expression: String, result: String) -> Unit)? = null
+
+    fun onCalculatorButtonClick(symbol: String, onTripleClick: () -> Unit) {
         when (symbol) {
             "C" -> clearAll()
             "+", "-", "×", "÷" -> handleOperator(symbol)
             "=" -> handleEquals()
             "," -> handleDecimal()
-            else -> handleNumber(symbol) // Angka 0-9
+            else -> handleNumber(symbol) // Digits 0-9
         }
-        // Reset triple click counter jika user mulai mengetik angka setelah C
-        if (symbol != targetButtonSymbolForTripleClick) {
-            handler.removeCallbacks(resetCounter)
-            clickCount = 0
-        }
+        registerButtonClickForTripleClick(symbol, onTripleClick)
     }
 
     fun onBackspaceClick() {
@@ -45,9 +41,8 @@ class StealthCalculatorViewModel : ViewModel() {
                 lastInputWasEquals = false
             } else {
                 displayText = currentExpression
-                // Cek apakah karakter terakhir adalah operator setelah backspace
                 lastInputWasOperator = isOperator(currentExpression.last().toString())
-                lastInputWasEquals = false // Backspace pasti membatalkan state "equals"
+                lastInputWasEquals = false
             }
         } else {
             displayText = "0"
@@ -61,95 +56,106 @@ class StealthCalculatorViewModel : ViewModel() {
         currentExpression = ""
         lastInputWasOperator = false
         lastInputWasEquals = false
-        // Selalu reset triple click counter saat "C" diklik
         handler.removeCallbacks(resetCounter)
         clickCount = 0
     }
 
     private fun handleNumber(numberChar: String) {
-        if (lastInputWasEquals || displayText == "0") { // Jika sebelumnya "=" atau display hanya "0"
-            currentExpression = numberChar // Mulai ekspresi baru
-            displayText = numberChar
+        if (lastInputWasEquals) {
+            currentExpression = numberChar
             lastInputWasEquals = false
-        } else {
+        } else if (currentExpression == "0" && numberChar != "0" && numberChar != ",") {
+            currentExpression = numberChar
+        } else if (lastInputWasOperator) {
             currentExpression += numberChar
-            displayText = currentExpression
+        } else {
+            // FIX: Use Regex to find the last number part
+            val lastNumberPartMatch = Regex("[0-9]+(,[0-9]*)?$").find(currentExpression)
+            val lastNumberPart = lastNumberPartMatch?.value ?: ""
+
+            if (lastNumberPart.length < 12) {
+                currentExpression += numberChar
+            } else {
+                return
+            }
         }
+        displayText = currentExpression
         lastInputWasOperator = false
     }
 
     private fun handleDecimal() {
         if (lastInputWasEquals) {
             currentExpression = "0,"
-            displayText = "0,"
             lastInputWasEquals = false
         } else if (currentExpression.isEmpty() || lastInputWasOperator) {
             currentExpression += "0,"
-            displayText = currentExpression
-        } else if (!currentNumberContainsDecimal()) {
-            currentExpression += ","
-            displayText = currentExpression
-        }
-        lastInputWasOperator = false
-    }
+        } else {
+            // FIX: Use Regex to find the last number part and then check contains
+            val lastNumberPartMatch = Regex("[0-9]+(,[0-9]*)?$").find(currentExpression)
+            val lastNumberPart = lastNumberPartMatch?.value ?: ""
 
-    private fun currentNumberContainsDecimal(): Boolean {
-        // Mendapatkan angka terakhir dalam ekspresi untuk memeriksa desimal
-        val parts = currentExpression.split("+", "-", "×", "÷")
-        return parts.lastOrNull()?.contains(",") ?: false
+            if (!lastNumberPart.contains(',')) { // Corrected: Use Char literal for contains
+                currentExpression += ","
+            } else {
+                return
+            }
+        }
+        displayText = currentExpression
+        lastInputWasOperator = false
     }
 
     private fun handleOperator(newOperator: String) {
         if (currentExpression.isEmpty()) {
-            // Jika ekspresi kosong, dan user menekan operator (misal "-"), mulai dengan "0-"
-            currentExpression = "0" + newOperator
-            displayText = currentExpression
-        } else if (lastInputWasEquals) { // Jika sebelumnya hasil perhitungan
-            // Gunakan hasil perhitungan sebagai angka pertama untuk operasi baru
+            if (newOperator == "-") {
+                currentExpression = "-"
+            } else {
+                currentExpression = "0" + newOperator
+            }
+        } else if (lastInputWasEquals) {
             currentExpression = displayText + newOperator
-            displayText = currentExpression
             lastInputWasEquals = false
         } else if (lastInputWasOperator) {
-            // Ganti operator terakhir jika operator baru ditekan
             currentExpression = currentExpression.dropLast(1) + newOperator
-            displayText = currentExpression
         } else {
             currentExpression += newOperator
-            displayText = currentExpression
         }
+        displayText = currentExpression
         lastInputWasOperator = true
     }
 
     private fun handleEquals() {
         if (currentExpression.isEmpty() || lastInputWasOperator) {
-            // Jika ekspresi kosong atau berakhir dengan operator, tidak melakukan apa-apa atau tampilkan error
             return
         }
 
-        try {
-            // REVISI: Mengganti koma dengan titik untuk evaluasi BigMath
-            val expressionToEvaluate = currentExpression.replace("×", "*").replace("÷", "/").replace(",", ".")
+        val originalExpressionForHistory = currentExpression
 
-            // Evaluasi ekspresi menggunakan shunting-yard algorithm sederhana atau library
-            // Untuk kesederhanaan, kita akan menggunakan pendekatan evaluasi berurutan dari kiri ke kanan
-            // Untuk kalkulator yang lebih canggih, Anda akan memerlukan parser ekspresi yang tepat
+        try {
+            val expressionToEvaluate = currentExpression
+                .replace("×", "*")
+                .replace("÷", "/")
+                .replace(",", ".")
+
             val result = evaluateExpression(expressionToEvaluate)
-            displayText = formatResult(result)
-            currentExpression = formatResult(result) // Set currentExpression ke hasil untuk operasi selanjutnya
+            val formattedResult = formatResult(result)
+
+            displayText = formattedResult
+            currentExpression = formattedResult
             lastInputWasEquals = true
             lastInputWasOperator = false
+
+            onCalculationFinished?.invoke(originalExpressionForHistory + " =", formattedResult)
+
         } catch (e: Exception) {
             displayText = "Error"
             currentExpression = ""
             lastInputWasEquals = false
             lastInputWasOperator = false
+            onCalculationFinished?.invoke(originalExpressionForHistory + " =", "Error")
         }
     }
 
-    // Fungsi sederhana untuk mengevaluasi ekspresi (perhatikan ini sangat dasar dan tidak menangani prioritas operator)
-    // Untuk kalkulator nyata, Anda memerlukan algoritma Shunting-yard atau library ekspresi.
     private fun evaluateExpression(expression: String): BigDecimal {
-        // Memisahkan angka dan operator
         val tokens = mutableListOf<String>()
         var currentNumber = StringBuilder()
 
@@ -170,11 +176,23 @@ class StealthCalculatorViewModel : ViewModel() {
 
         if (tokens.isEmpty()) return BigDecimal.ZERO
 
-        var result = tokens[0].toBigDecimal()
+        var result: BigDecimal
+        try {
+            result = tokens[0].toBigDecimal()
+        } catch (e: NumberFormatException) {
+            throw IllegalArgumentException("Invalid number format: ${tokens[0]}", e)
+        }
+
         var i = 1
         while (i < tokens.size - 1) {
             val op = tokens[i]
-            val nextNum = tokens[i+1].toBigDecimal()
+            val nextNum: BigDecimal
+            try {
+                nextNum = tokens[i+1].toBigDecimal()
+            } catch (e: NumberFormatException) {
+                throw IllegalArgumentException("Invalid number format after operator: ${tokens[i+1]}", e)
+            }
+
             result = when (op) {
                 "+" -> result.add(nextNum)
                 "-" -> result.subtract(nextNum)
@@ -191,20 +209,24 @@ class StealthCalculatorViewModel : ViewModel() {
     }
 
     private fun formatResult(result: BigDecimal): String {
-        // Hapus trailing zeros jika tidak ada desimal, lalu ganti titik menjadi koma
-        // Batasi panjang tampilan agar tidak terlalu panjang
         val formatted = result.stripTrailingZeros().toPlainString()
-        val maxLength = 12 // Misalnya, batasi hingga 12 karakter
+        val maxLength = 12
+
         return if (formatted.length > maxLength) {
-            // Jika terlalu panjang, coba bulatkan lagi atau gunakan notasi ilmiah
-            // Untuk contoh ini, kita potong atau tampilkan error sederhana
             if (formatted.contains(".")) {
                 val integerPart = formatted.substringBefore(".")
-                val decimalPart = formatted.substringAfter(".")
-                if (integerPart.length >= maxLength) "ERR" // Integer terlalu besar
-                else formatted.substring(0, minOf(maxLength, formatted.length)).replace(".", ",")
+                if (integerPart.length >= maxLength) {
+                    "ERR"
+                } else {
+                    val maxDecimalLength = maxLength - integerPart.length - 1
+                    if (maxDecimalLength >= 0) {
+                        formatted.substring(0, integerPart.length + 1 + minOf(formatted.substringAfter(".").length, maxDecimalLength)).replace(".", ",")
+                    } else {
+                        "ERR"
+                    }
+                }
             } else {
-                "ERR" // Integer terlalu besar
+                "ERR"
             }
         } else {
             formatted.replace(".", ",")
@@ -217,14 +239,14 @@ class StealthCalculatorViewModel : ViewModel() {
 
     // --- Triple Click Logic ---
     private var clickCount = 0
-    var targetButtonSymbolForTripleClick: String = "C" // Default target: "C"
+    var targetButtonSymbolForTripleClick: String = "C"
         set(value) {
             field = value
-            clickCount = 0 // Reset counter jika target diubah
+            clickCount = 0
             handler.removeCallbacks(resetCounter)
         }
 
-    private val resetTime = 1000L // Reset dalam 1 detik (dipercepat sedikit)
+    private val resetTime = 1000L
     private val handler = Handler(Looper.getMainLooper())
     private val resetCounter = Runnable { clickCount = 0 }
 
@@ -234,12 +256,11 @@ class StealthCalculatorViewModel : ViewModel() {
             handler.removeCallbacks(resetCounter)
             handler.postDelayed(resetCounter, resetTime)
 
-            if (clickCount >= 3) { // Menggunakan >= 3 untuk lebih fleksibel
-                onTripleClick() // Panggil callback jika sudah 3 kali klik
-                resetCounter.run() // Reset counter setelah menavigasi
+            if (clickCount >= 3) {
+                onTripleClick()
+                resetCounter.run()
             }
         } else {
-            // Jika tombol yang berbeda diklik, reset counter
             clickCount = 0
             handler.removeCallbacks(resetCounter)
         }

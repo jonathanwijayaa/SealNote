@@ -4,10 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +15,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.offset
-// import com.example.sealnote.R // Jika menggunakan resource @color/background
+import androidx.lifecycle.viewmodel.compose.viewModel // Import untuk ViewModel
+import androidx.navigation.NavHostController // Import NavHostController
+import androidx.navigation.compose.rememberNavController
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import kotlinx.coroutines.launch // Untuk CoroutineScope
+import androidx.compose.runtime.rememberCoroutineScope
+
+import com.example.sealnote.viewmodel.CalculatorHistoryViewModel // Import History ViewModel
 
 // Definisi Warna dari XML
 val HistoryScreenBackground = Color(0xFF152332)
@@ -26,41 +31,135 @@ val HistoryItemExpressionColor = Color(0xFF8090A6)
 val HistoryItemResultColor = Color.White
 val HistoryItemDividerColor = Color(0xFF2A2F3A)
 
-// Data class untuk setiap entri riwayat
+// Data class untuk setiap entri riwayat (pastikan ini di tingkat atas file atau di folder model)
 data class CalculationHistoryEntry(
     val id: String, // Untuk key jika menggunakan LazyColumn
     val expression: String,
     val result: String
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StealthHistoryScreen(
-    historyEntries: List<CalculationHistoryEntry> = emptyList()
+    navController: NavHostController, // Tambahkan NavHostController
+    historyViewModel: CalculatorHistoryViewModel = viewModel() // Inject History ViewModel
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = HistoryScreenBackground // Background utama dari root ConstraintLayout
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Spacer(Modifier.height(16.dp))
+                Text("Mode Kalkulator", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
+                NavigationDrawerItem(
+                    label = { Text("Kalkulator Standar") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("stealthCalculator") {
+                            popUpTo("stealthHistory") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                NavigationDrawerItem(
+                    label = { Text("Kalkulator Ilmiah") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("stealthScientific") {
+                            popUpTo("stealthHistory") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                NavigationDrawerItem(
+                    label = { Text("Riwayat Kalkulasi") },
+                    selected = true, // Ini adalah halaman saat ini
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        // Tidak perlu navigasi, karena sudah di halaman ini
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                NavigationDrawerItem(
+                    label = { Text("Bersihkan Riwayat") },
+                    selected = false,
+                    onClick = {
+                        historyViewModel.clearHistory()
+                        scope.launch { drawerState.close() }
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+            }
+        },
+        gesturesEnabled = drawerState.isOpen
     ) {
-        // Box ini bertindak sebagai parent ConstraintLayout untuk memposisikan ScrollView
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column( // Ini adalah Composable yang meniru ScrollView
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Riwayat Kalkulasi",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = HistoryScreenBackground, // Sesuaikan dengan background riwayat
+                        titleContentColor = HistoryItemResultColor // Warna teks judul
+                    )
+                )
+            }
+        ) { paddingValues ->
+            Surface(
                 modifier = Modifier
-                    .align(Alignment.TopCenter) // Memusatkan ScrollView secara horizontal, dan menempel ke atas sebelum offset
-                    .offset(y = 159.dp)         // Menerapkan layout_marginTop="159dp"
-                    .width(416.dp)              // Menerapkan layout_width="416dp"
-                    .height(732.dp)             // Menerapkan layout_height="732dp"
-                    .background(HistoryScreenBackground) // Background ScrollView dari XML
-                    .verticalScroll(rememberScrollState()) // Membuat Column ini bisa di-scroll
+                    .fillMaxSize()
+                    .padding(paddingValues), // Penting untuk apply padding dari Scaffold
+                color = HistoryScreenBackground
             ) {
-                // Column ini adalah LinearLayout vertikal di dalam ScrollView
-                // fillMaxHeight() untuk meniru android:fillViewport="true"
-                Column(modifier = Modifier.fillMaxHeight()) {
-                    historyEntries.forEach { entry ->
-                        HistoryItemView(entry = entry)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Gunakan LazyColumn untuk riwayat yang efisien
+                    // Karena `offset` dan `height` yang hardcoded dari XML lama,
+                    // mungkin perlu penyesuaian jika ingin responsif.
+                    // Untuk menjaga kesesuaian visual dengan preview, saya akan biarkan offset-nya.
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = 0.dp) // Sesuaikan offset setelah TopAppBar
+                            .fillMaxSize() // Gunakan fillMaxSize dan biarkan scroll mengisi sisanya
+                            .background(HistoryScreenBackground)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        if (historyViewModel.historyEntries.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight(), // Untuk membuat teks di tengah jika kosong
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Tidak ada riwayat kalkulasi.",
+                                    color = HistoryItemExpressionColor,
+                                    fontSize = 16.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                        } else {
+                            historyViewModel.historyEntries.forEach { entry ->
+                                HistoryItemView(entry = entry)
+                            }
+                        }
                     }
-                    // Jika tidak ada item, fillMaxHeight akan membuat Column ini setinggi viewport
-                    // Jika ada item dan lebih pendek, juga akan setinggi viewport
-                    // Jika item lebih panjang, akan bisa di-scroll.
                 }
             }
         }
@@ -72,19 +171,19 @@ private fun HistoryItemView(entry: CalculationHistoryEntry) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(HistoryScreenBackground) // background="#152332" pada RelativeLayout
-            .padding(vertical = 15.dp)    // paddingVertical="15dp" pada RelativeLayout
+            .background(HistoryScreenBackground)
+            .padding(vertical = 15.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp - 1.dp) // Kurangi 1dp untuk ruang divider di bawahnya
+                .height(60.dp - 1.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .align(Alignment.TopEnd) // Menempatkan teks di kanan atas dalam Box 60dp ini
-                    .padding(end = 20.dp),    // layout_marginEnd="20dp" untuk kedua TextView
-                horizontalAlignment = Alignment.End // Teks di dalam Column ini rata kanan
+                    .align(Alignment.TopEnd)
+                    .padding(end = 20.dp),
+                horizontalAlignment = Alignment.End
             ) {
                 Text(
                     text = entry.expression,
@@ -92,29 +191,25 @@ private fun HistoryItemView(entry: CalculationHistoryEntry) {
                     fontSize = 14.sp,
                     textAlign = TextAlign.End
                 )
-                // Menggunakan padding atas dengan nilai dp tetap
                 Text(
                     text = entry.result,
                     color = HistoryItemResultColor,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.End,
-                    // Ganti dengan nilai dp yang sesuai secara visual, misal 4.dp atau 8.dp
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
-
-        Divider(
+        HorizontalDivider(
             color = HistoryItemDividerColor,
             thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth() // android:layout_width="match_parent"
+            modifier = Modifier.fillMaxWidth()
         )
     }
-
 }
 
-@Preview(showBackground = true, widthDp = 416, heightDp = 891) // Mensimulasikan ukuran layar jika diperlukan
+@Preview(showBackground = true, widthDp = 416, heightDp = 891)
 @Composable
 fun CalculationHistoryScreenPreview() {
     val sampleHistory = listOf(
@@ -125,7 +220,10 @@ fun CalculationHistoryScreenPreview() {
         CalculationHistoryEntry("id5", "150.000 - 45.000", "45.000"),
         CalculationHistoryEntry("id6", "30.000 - 7.500", "7.500"),
     )
-    MaterialTheme { // Atau tema kustom aplikasi Anda
-        StealthHistoryScreen(historyEntries = sampleHistory)
+    MaterialTheme {
+        // Untuk preview, inisialisasi ViewModel dengan data dummy jika diperlukan
+        val dummyHistoryViewModel: CalculatorHistoryViewModel = viewModel()
+        dummyHistoryViewModel.historyEntries.addAll(sampleHistory) // Tambahkan data dummy
+        StealthHistoryScreen(navController = rememberNavController(), historyViewModel = dummyHistoryViewModel)
     }
 }

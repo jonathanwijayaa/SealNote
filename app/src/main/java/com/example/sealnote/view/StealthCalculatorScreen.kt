@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.filled.Menu // Import ikon menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,7 +24,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel // Import untuk ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController // Import NavHostController
+import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch // Untuk CoroutineScope
 
 // Import warna kustom dari Color.kt
 import com.example.sealnote.ui.theme.CalcScreenBackground
@@ -35,7 +39,8 @@ import com.example.sealnote.ui.theme.CalcOperatorGradientStart
 import com.example.sealnote.ui.theme.CalcOperatorGradientEnd
 import com.example.sealnote.ui.theme.CalcButtonTextColor
 import com.example.sealnote.ui.theme.CalcButtonIconColor
-import com.example.sealnote.viewmodel.StealthCalculatorViewModel // Import ViewModel kita
+import com.example.sealnote.viewmodel.StealthCalculatorViewModel
+import com.example.sealnote.viewmodel.CalculatorHistoryViewModel
 
 // Data class untuk merepresentasikan setiap tombol kalkulator
 private data class CalcButtonInfo(
@@ -43,7 +48,7 @@ private data class CalcButtonInfo(
     val type: ButtonType,
     val textSize: TextUnit,
     val description: String,
-    val icon: ImageVector? = null // Tambahkan field untuk ikon opsional
+    val icon: ImageVector? = null
 )
 
 // Enum untuk tipe tombol
@@ -51,51 +56,124 @@ private enum class ButtonType {
     NUMBER, OPERATOR, FUNCTION, CLEAR, DECIMAL, BACKSPACE
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StealthCalculatorScreen(
-    // Callback untuk navigasi ke LoginScreen
     onNavigateToLogin: () -> Unit,
-    viewModel: StealthCalculatorViewModel = viewModel() // Inject ViewModel
+    navController: NavHostController,
+    viewModel: StealthCalculatorViewModel = viewModel(),
+    historyViewModel: CalculatorHistoryViewModel = viewModel()
 ) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
     // REVISI: Mengatur tombol target untuk triple-click
-    // Anda bisa mengubah ini ke tombol lain sesuai kebutuhan, contohnya "7"
-    // Pastikan tombol tersebut ada di konfigurasi buttonRowsConfig
     DisposableEffect(Unit) {
         viewModel.targetButtonSymbolForTripleClick = "C" // Targetkan tombol "C"
-        onDispose { }
+        // Atur callback untuk menyimpan riwayat
+        viewModel.onCalculationFinished = { expression, result ->
+            historyViewModel.addHistoryEntry(expression, result)
+        }
+        onDispose {
+            viewModel.onCalculationFinished = null
+        }
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = CalcScreenBackground
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Spacer(Modifier.height(16.dp))
+                Text("Mode Kalkulator", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
+                NavigationDrawerItem(
+                    label = { Text("Kalkulator Standar") },
+                    selected = true,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        // Tidak perlu navigasi, karena sudah di halaman ini
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                NavigationDrawerItem(
+                    label = { Text("Kalkulator Ilmiah") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("stealthScientific") {
+                            popUpTo("stealthCalculator") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                NavigationDrawerItem(
+                    label = { Text("Riwayat Kalkulasi") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate("stealthHistory") {
+                            popUpTo("stealthCalculator") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+            }
+        },
+        gesturesEnabled = drawerState.isOpen
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            CalculatorDisplay(
-                displayText = viewModel.displayText, // Ambil dari ViewModel
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Kalkulator",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = CalcScreenBackground,
+                        titleContentColor = CalcDisplayTextColor
+                    )
+                )
+            }
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(220.dp)
-                    .padding(horizontal = 16.dp, vertical = 24.dp)
-            )
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                CalculatorDisplay(
+                    displayText = viewModel.displayText,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                )
 
-            CalculatorButtonsGridModified(
-                onButtonClick = { buttonSymbol, isBackspace ->
-                    // Logika kalkulator ditangani di ViewModel
-                    if (isBackspace) {
-                        viewModel.onBackspaceClick()
-                    } else {
-                        viewModel.onCalculatorButtonClick(buttonSymbol)
-                    }
-                    // Daftarkan setiap klik tombol ke triple-click logic
-                    viewModel.registerButtonClickForTripleClick(buttonSymbol, onNavigateToLogin)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp)
-            )
+                CalculatorButtonsGridModified(
+                    onButtonClick = { buttonSymbol, isBackspace ->
+                        if (isBackspace) {
+                            viewModel.onBackspaceClick()
+                        } else {
+                            // REVISI: Teruskan onNavigateToLogin ke ViewModel
+                            viewModel.onCalculatorButtonClick(buttonSymbol, onNavigateToLogin)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+            }
         }
     }
 }
+
+// ... (CalculatorDisplay, CalculatorButtonsGridModified, CalculatorButtonModified tetap sama)
 
 @Composable
 private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier) {
@@ -205,7 +283,7 @@ private fun CalculatorButtonModified(
         ButtonType.OPERATOR -> {
             backgroundColor = null; backgroundBrush = CalcOperatorGradient
         }
-        else -> { // NUMBER, FUNCTION, CLEAR, DECIMAL, BACKSPACE
+        else -> {
             backgroundColor = CalcNonOperatorButtonBg; backgroundBrush = null
         }
     }
@@ -213,7 +291,7 @@ private fun CalculatorButtonModified(
     val finalBackgroundModifier = when {
         backgroundBrush != null -> Modifier.background(brush = backgroundBrush, shape = shape)
         backgroundColor != null -> Modifier.background(color = backgroundColor, shape = shape)
-        else -> Modifier.background(Color.DarkGray, shape = shape) // Fallback
+        else -> Modifier.background(Color.DarkGray, shape = shape)
     }
 
     Box(
@@ -248,7 +326,6 @@ private fun CalculatorButtonModified(
 @Composable
 fun CalculatorScreenModifiedPreview() {
     MaterialTheme {
-        // Dalam preview, kita tidak memiliki LoginScreen, jadi kita berikan lambda kosong.
-        StealthCalculatorScreen(onNavigateToLogin = {})
+        StealthCalculatorScreen(onNavigateToLogin = {}, navController = rememberNavController())
     }
 }
