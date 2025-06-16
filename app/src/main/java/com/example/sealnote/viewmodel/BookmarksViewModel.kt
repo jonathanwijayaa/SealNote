@@ -1,24 +1,24 @@
 package com.example.sealnote.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.sealnote.data.NotesRepository
 import com.example.sealnote.model.Notes
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class BookmarksViewModel : ViewModel() {
-    private val _bookmarkedNotes = MutableLiveData<List<Notes>>()
-    val bookmarkedNotes: LiveData<List<Notes>> get() = _bookmarkedNotes
+@HiltViewModel
+class BookmarksViewModel @Inject constructor(
+    notesRepository: NotesRepository
+) : ViewModel() {
 
-    init {
-        loadBookmarksNotes()
-    }
-
-    private fun loadBookmarksNotes() {
-        val dummyNotes = listOf(
-            Notes(1, "Meeting Notes", "Discuss project details", false, false),
-            Notes(2, "Grocery List", "Buy milk and bread", true,false),
-            Notes(3, "Meeting Notes", "Discuss project details", false, true)
+    val bookmarkedNotes: StateFlow<List<Notes>> = notesRepository.getBookmarkedNotes()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = emptyList()
         )
-        _bookmarkedNotes.value = dummyNotes.filter { it.isBookmarked }
-    }
 }

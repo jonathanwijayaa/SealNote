@@ -1,6 +1,6 @@
 package com.example.sealnote.view
 
-import androidx.compose.foundation.background // <-- ADD THIS IMPORT for Modifier.background
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -13,7 +13,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Restore
-import androidx.compose.material3.* // Make sure this is Material3
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,26 +23,56 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sealnote.ui.theme.SealnoteTheme // Pastikan tema Anda diimpor
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import com.example.sealnote.model.Notes
+import com.example.sealnote.ui.theme.SealnoteTheme
+import com.example.sealnote.viewmodel.TrashViewModel
 import kotlinx.coroutines.launch
+import java.util.*
+import java.util.concurrent.TimeUnit
 
-// Data class untuk item catatan di tempat sampah
-data class DeletedNote(
-    val id: String,
-    val title: String,
-    val contentSnippet: String,
-    val deletionDate: String
-)
+/**
+ * Composable "Cerdas" yang menjadi pintu masuk untuk layar Sampah.
+ * Menghubungkan ViewModel dengan UI.
+ */
+@Composable
+fun TrashRoute(
+    navController: NavHostController,
+    viewModel: TrashViewModel = hiltViewModel()
+) {
+    val trashedNotes by viewModel.trashedNotes.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    // Efek untuk menampilkan pesan dari ViewModel (misal: "Catatan dipulihkan")
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collect { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
+
+    TrashScreen(
+        trashedNotes = trashedNotes,
+        snackbarHostState = snackbarHostState,
+        onRestoreNote = { noteId -> viewModel.restoreNote(noteId) },
+        onPermanentlyDeleteNote = { noteId -> viewModel.deletePermanently(noteId) },
+        onNavigateTo = { route -> navController.navigate(route) }
+    )
+}
+
+/**
+ * Composable "Bodoh" yang hanya bertugas menampilkan UI.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrashScreen(
-    deletedNotes: List<DeletedNote> = emptyList(),
-    onRestoreNote: (DeletedNote) -> Unit = {},
-    onPermanentlyDeleteNote: (DeletedNote) -> Unit = {},
-    onNavigateTo: (String) -> Unit = {}
+    trashedNotes: List<Notes>,
+    snackbarHostState: SnackbarHostState,
+    onRestoreNote: (String) -> Unit,
+    onPermanentlyDeleteNote: (String) -> Unit,
+    onNavigateTo: (String) -> Unit
 ) {
-    // --- State Management ---
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
@@ -59,7 +89,7 @@ fun TrashScreen(
                 NavigationDrawerItem(
                     label = { Text("All Notes") },
                     selected = false,
-                    onClick = { onNavigateTo("all_notes"); scope.launch { drawerState.close() } },
+                    onClick = { onNavigateTo("homepage"); scope.launch { drawerState.close() } },
                     icon = { Icon(Icons.Outlined.Home, contentDescription = "All Notes") }
                 )
                 NavigationDrawerItem(
@@ -72,6 +102,7 @@ fun TrashScreen(
         }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             topBar = {
                 TopAppBar(
                     title = { Text("Trash") },
@@ -91,11 +122,11 @@ fun TrashScreen(
                             DropdownMenu(
                                 expanded = isSortMenuExpanded,
                                 onDismissRequest = { isSortMenuExpanded = false },
-                                modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme color or custom DropdownMenuBackground
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                             ) {
                                 sortOptions.forEach { option ->
                                     DropdownMenuItem(
-                                        text = { Text(option, color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme color or custom DropdownMenuItemTextColor
+                                        text = { Text(option, color = MaterialTheme.colorScheme.onSurface) },
                                         onClick = {
                                             selectedSortOption = option
                                             isSortMenuExpanded = false
@@ -108,11 +139,19 @@ fun TrashScreen(
                 )
             }
         ) { innerPadding ->
-            val filteredNotes = remember(searchQuery, deletedNotes) {
-                if (searchQuery.isBlank()) deletedNotes
-                else deletedNotes.filter {
+            val filteredNotes = remember(searchQuery, trashedNotes) {
+                if (searchQuery.isBlank()) trashedNotes
+                else trashedNotes.filter {
                     it.title.contains(searchQuery, ignoreCase = true) ||
-                            it.contentSnippet.contains(searchQuery, ignoreCase = true)
+                            it.content.contains(searchQuery, ignoreCase = true)
+                }
+            }
+
+            val sortedNotes = remember(selectedSortOption, filteredNotes) {
+                when (selectedSortOption) {
+                    "Sort by Deletion Date" -> filteredNotes.sortedByDescending { it.updatedAt }
+                    "Sort by Title" -> filteredNotes.sortedBy { it.title }
+                    else -> filteredNotes
                 }
             }
 
@@ -121,50 +160,30 @@ fun TrashScreen(
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                // FIX: Corrected DockedSearchBar usage
                 DockedSearchBar(
                     query = searchQuery,
                     onQueryChange = { newQuery -> searchQuery = newQuery },
                     onSearch = { newQuery ->
-                        println("Search submitted: $newQuery")
-                        isSearchActive = false // Close the search bar after search
+                        isSearchActive = false
                     },
                     active = isSearchActive,
                     onActiveChange = { newActiveState -> isSearchActive = newActiveState },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp), // Adjust padding as needed
-                    placeholder = { Text("Search in trash...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarHintColor
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Use MaterialTheme color or SearchBarIconColor
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    placeholder = { Text("Search in trash...") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { searchQuery = "" }) {
-                                Icon(Icons.Default.Close, contentDescription = "Clear search", tint = MaterialTheme.colorScheme.onSurfaceVariant) // Use MaterialTheme color or SearchBarIconColor
+                                Icon(Icons.Default.Close, contentDescription = "Clear search")
                             }
                         }
-                    },
-                    colors = SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant, // Use MaterialTheme color or SearchBarBackgroundColor
-                        inputFieldColors = TextFieldDefaults.colors(
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
-                            cursorColor = MaterialTheme.colorScheme.onSurface, // Use MaterialTheme color or SearchBarTextColor
-                            focusedIndicatorColor = MaterialTheme.colorScheme.primary, // Use MaterialTheme color or SearchBarBorderColor
-                            unfocusedIndicatorColor = MaterialTheme.colorScheme.outline, // Use MaterialTheme color or SearchBarBorderColor
-                        )
-                    )
-                ) {
-                    // Konten untuk menampilkan hasil/saran pencarian
-                    // This is the content that appears *inside* the expanded DockedSearchBar
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            "Hasil untuk '$searchQuery' akan ditampilkan di sini.",
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
                     }
+                ) {
+                    // Konten untuk menampilkan hasil/saran pencarian saat search bar aktif
                 }
 
-                // Conditionally display the main content (Text and Grid) based on search active state
                 if (!isSearchActive) {
                     Column(modifier = Modifier.fillMaxSize()) {
                         Text(
@@ -174,7 +193,7 @@ fun TrashScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant // Add color for consistency
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
@@ -183,11 +202,11 @@ fun TrashScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(filteredNotes, key = { it.id }) { note ->
+                            items(sortedNotes, key = { it.id }) { note ->
                                 TrashNoteCard(
                                     note = note,
-                                    onRestore = { onRestoreNote(note) },
-                                    onPermanentlyDelete = { onPermanentlyDeleteNote(note) }
+                                    onRestore = { onRestoreNote(note.id) },
+                                    onPermanentlyDelete = { onPermanentlyDeleteNote(note.id) }
                                 )
                             }
                         }
@@ -200,7 +219,7 @@ fun TrashScreen(
 
 @Composable
 fun TrashNoteCard(
-    note: DeletedNote,
+    note: Notes,
     onRestore: () -> Unit,
     onPermanentlyDelete: () -> Unit
 ) {
@@ -228,35 +247,35 @@ fun TrashNoteCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant // Add color for consistency
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Box {
                     IconButton(
                         onClick = { isMenuExpanded = true },
                         modifier = Modifier.size(24.dp)
                     ) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "More Options", tint = MaterialTheme.colorScheme.onSurfaceVariant) // Add color for consistency
+                        Icon(Icons.Default.MoreVert, "More Options", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     DropdownMenu(
                         expanded = isMenuExpanded,
                         onDismissRequest = { isMenuExpanded = false },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Use MaterialTheme color or custom background
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Restore", color = MaterialTheme.colorScheme.onSurface) }, // Use MaterialTheme color or custom text color
+                            text = { Text("Restore", color = MaterialTheme.colorScheme.onSurface) },
                             onClick = { onRestore(); isMenuExpanded = false },
-                            leadingIcon = { Icon(Icons.Outlined.Restore, contentDescription = "Restore", tint = MaterialTheme.colorScheme.onSurface) } // Use MaterialTheme color or custom tint
+                            leadingIcon = { Icon(Icons.Outlined.Restore, "Restore", tint = MaterialTheme.colorScheme.onSurface) }
                         )
                         DropdownMenuItem(
-                            text = { Text("Delete forever", color = MaterialTheme.colorScheme.error) }, // Use MaterialTheme color (error for delete)
+                            text = { Text("Delete forever", color = MaterialTheme.colorScheme.error) },
                             onClick = { onPermanentlyDelete(); isMenuExpanded = false },
-                            leadingIcon = { Icon(Icons.Outlined.DeleteForever, contentDescription = "Delete Forever", tint = MaterialTheme.colorScheme.error) } // Use MaterialTheme color (error for delete)
+                            leadingIcon = { Icon(Icons.Outlined.DeleteForever, "Delete Forever", tint = MaterialTheme.colorScheme.error) }
                         )
                     }
                 }
             }
             Text(
-                text = note.contentSnippet,
+                text = note.content,
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
                 maxLines = 3,
@@ -264,7 +283,7 @@ fun TrashNoteCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
             )
             Text(
-                text = "Deleted: ${note.deletionDate}",
+                text = "Deleted: ${note.updatedAt.toRelativeTimeString()}",
                 fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -272,19 +291,39 @@ fun TrashNoteCard(
     }
 }
 
+private fun Date?.toRelativeTimeString(): String {
+    if (this == null) return "a moment ago"
+    val now = System.currentTimeMillis()
+    val diff = now - this.time
+
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(diff)
+    if (seconds < 60) return "just now"
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(diff)
+    if (minutes < 60) return "$minutes min ago"
+    val hours = TimeUnit.MILLISECONDS.toHours(diff)
+    if (hours < 24) return "$hours hours ago"
+    val days = TimeUnit.MILLISECONDS.toDays(diff)
+    return "$days days ago"
+}
 
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun TrashScreenPreview() {
     val sampleNotes = List(5) { index ->
-        DeletedNote(
+        Notes(
             id = "note_$index",
             title = "Judul Catatan Dihapus $index",
-            contentSnippet = "Ini adalah cuplikan singkat dari konten catatan yang telah dihapus...",
-            deletionDate = "2 hari lalu"
+            content = "Ini adalah cuplikan singkat dari konten catatan yang telah dihapus...",
+            updatedAt = Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(index.toLong()))
         )
     }
     SealnoteTheme(darkTheme = true) {
-        TrashScreen(deletedNotes = sampleNotes)
+        TrashScreen(
+            trashedNotes = sampleNotes,
+            snackbarHostState = remember { SnackbarHostState() },
+            onRestoreNote = {},
+            onPermanentlyDeleteNote = {},
+            onNavigateTo = {}
+        )
     }
 }

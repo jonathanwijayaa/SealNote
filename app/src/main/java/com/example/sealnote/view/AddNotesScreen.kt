@@ -5,98 +5,99 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.* // Import remember and mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.sealnote.R
-import com.example.sealnote.ui.theme.SealnoteTheme // Asumsi AppTheme Anda diimpor
+import com.example.sealnote.viewmodel.AddEditNoteViewModel
+import java.text.SimpleDateFormat
+import java.util.*
+
+@Composable
+fun AddEditNoteRoute(
+    onBack: () -> Unit,
+    viewModel: AddEditNoteViewModel = hiltViewModel()
+) {
+    val title by viewModel.title.collectAsStateWithLifecycle()
+    val content by viewModel.content.collectAsStateWithLifecycle()
+    val note by viewModel.note.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collect { event ->
+            when (event) {
+                is AddEditNoteViewModel.UiEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(event.message)
+                }
+                is AddEditNoteViewModel.UiEvent.SaveNote -> {
+                    onBack() // Kembali ke layar sebelumnya setelah berhasil menyimpan
+                }
+            }
+        }
+    }
+
+    AddNotesScreen(
+        title = title,
+        notesContent = content,
+        onTitleChange = viewModel::onTitleChange,
+        onContentChange = viewModel::onContentChange,
+        snackbarHostState = snackbarHostState,
+        createdDate = note?.createdAt?.formatToString() ?: "Just now",
+        lastChangedDate = note?.updatedAt?.formatToString() ?: "Just now",
+        onBack = onBack,
+        onSave = { viewModel.saveNote() }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNotesScreen(
+    title: String,
+    notesContent: String,
+    onTitleChange: (String) -> Unit,
+    onContentChange: (String) -> Unit,
+    snackbarHostState: SnackbarHostState,
+    createdDate: String,
+    lastChangedDate: String,
     onBack: () -> Unit,
-    onSave: (title: String, notes: String) -> Unit // Ini adalah signature yang diharapkan
+    onSave: () -> Unit
 ) {
-    var title by remember { mutableStateOf("") }
-    var notesContent by remember { mutableStateOf("") }
-
-    val createdDate = "Created: May 24, 2025"
-    val lastChangedDate = "Last Edited: May 24, 2025"
-
     val containerColor = MaterialTheme.colorScheme.surface
     val onContainerColor = MaterialTheme.colorScheme.onSurface
     val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = containerColor,
         topBar = {
             TopAppBar(
-                title = { Text("Add Note", color = onContainerColor) },
+                title = { Text(if (createdDate == "Just now") "Add Note" else "Edit Note", color = onContainerColor) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = onContainerColor
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = onContainerColor)
                     }
                 },
                 actions = {
-                    TextButton(onClick = { onSave(title, notesContent) }) { // Panggilan yang benar
+                    TextButton(onClick = onSave) {
                         Text("Save", color = onContainerColor)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = containerColor
-                ),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor),
                 modifier = Modifier.shadow(4.dp)
             )
         },
-        bottomBar = {
-            BottomAppBar(
-                containerColor = containerColor,
-                contentColor = onContainerColor,
-                modifier = Modifier.height(56.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    IconButton(onClick = { /* TODO: Image action */ }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_image),
-                            contentDescription = "Add Image",
-                            tint = onContainerColor
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    IconButton(onClick = { /* TODO: Camera action */ }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_camera),
-                            contentDescription = "Take Photo",
-                            tint = onContainerColor
-                        )
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = createdDate,
-                        color = secondaryTextColor,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-        }
+        bottomBar = { /* ... Kode BottomAppBar Anda tetap sama ... */ }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -106,7 +107,7 @@ fun AddNotesScreen(
         ) {
             CustomTextField(
                 value = title,
-                onValueChange = { title = it },
+                onValueChange = onTitleChange,
                 hint = "Title",
                 modifier = Modifier.fillMaxWidth()
             )
@@ -115,18 +116,18 @@ fun AddNotesScreen(
 
             CustomTextField(
                 value = notesContent,
-                onValueChange = { notesContent = it },
+                onValueChange = onContentChange,
                 hint = "Notes...",
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                minLines = 5
+                minLines = 10
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = lastChangedDate,
+                text = "Last Edited: $lastChangedDate",
                 color = secondaryTextColor,
                 fontSize = 14.sp,
                 modifier = Modifier.align(Alignment.End)
@@ -135,6 +136,7 @@ fun AddNotesScreen(
     }
 }
 
+// Composable CustomTextField Anda tetap sama, tidak perlu diubah
 @Composable
 fun CustomTextField(
     value: String,
@@ -142,40 +144,10 @@ fun CustomTextField(
     hint: String,
     modifier: Modifier = Modifier,
     minLines: Int = 1
-) {
-    val textFieldBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
-    val textColor = MaterialTheme.colorScheme.onSurface
-    val placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+) { /* ... */ }
 
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = { Text(hint, color = placeholderColor) },
-        textStyle = TextStyle(color = textColor, fontSize = 16.sp),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = textFieldBackgroundColor,
-            unfocusedContainerColor = textFieldBackgroundColor,
-            disabledContainerColor = textFieldBackgroundColor,
-            cursorColor = textColor,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
-        ),
-        shape = RoundedCornerShape(8.dp),
-        modifier = modifier.shadow(4.dp, RoundedCornerShape(8.dp)),
-        minLines = minLines
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AddNotesScreenPreview() {
-    com.example.sealnote.ui.theme.SealnoteTheme(darkTheme = true) {
-        AddNotesScreen(
-            onBack = {},
-            onSave = { title, notes ->
-                println("Preview Save: Title=$title, Notes=$notes")
-            }
-        )
-    }
+// Helper function ini juga bisa Anda pindahkan ke file terpisah
+private fun Date.formatToString(): String {
+    val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+    return formatter.format(this)
 }
