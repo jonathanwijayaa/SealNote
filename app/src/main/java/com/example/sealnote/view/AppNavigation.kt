@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.sealnote.viewmodel.BookmarksViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.MutableLiveData // Import untuk Preview ViewModel
+import com.example.sealnote.viewmodel.StealthCalculatorViewModel // Import ViewModel StealthCalculator
 
 /**
  * Mendefinisikan semua rute dan Composables untuk navigasi aplikasi.
@@ -28,7 +29,18 @@ fun AppNavigation(
     ) {
         // --- Stealth Mode ---
         composable("stealthCalculator") {
-            StealthCalculatorScreen()
+            // Dapatkan instance ViewModel untuk StealthCalculatorScreen
+            val stealthCalculatorViewModel: StealthCalculatorViewModel = viewModel()
+            StealthCalculatorScreen(
+                // Meneruskan lambda untuk navigasi ke LoginScreen
+                onNavigateToLogin = {
+                    navController.navigate("login") {
+                        // Opsi popUpTo untuk membersihkan back stack dan mencegah kembali ke kalkulator
+                        popUpTo("stealthCalculator") { inclusive = true }
+                    }
+                },
+                viewModel = stealthCalculatorViewModel // Meneruskan ViewModel ke Composable
+            )
         }
         composable("stealthHistory") {
             StealthHistoryScreen()
@@ -140,9 +152,9 @@ fun AppNavigation(
                         }
                     }
                 },
-                bookmarkedNotes = TODO(),
-                searchQuery = TODO(),
-                onSearchQueryChange = TODO()
+                bookmarkedNotes = emptyList(), // FIX: Sesuaikan dengan data asli Anda, ini hanya placeholder
+                searchQuery = "",            // FIX: Sesuaikan dengan data asli Anda, ini hanya placeholder
+                onSearchQueryChange = {}     // FIX: Sesuaikan dengan data asli Anda, ini hanya placeholder
             )
         }
         composable("secretNotes") {
@@ -155,8 +167,8 @@ fun AppNavigation(
         composable("secretNotesLocked") {
             SecretNotesLockedScreen(
                 onAuthenticate = {
-                    // Jika autentikasi berhasil, navigasi ke secretNotes
-                    navController.navigate("authentication") // Navigate to authentication screen
+                    // Jika autentikasi berhasil, navigasi ke authentication
+                    navController.navigate("authentication")
                 }
             )
         }
@@ -187,7 +199,7 @@ fun AppNavigation(
         composable("addNotes") {
             AddNotesScreen(
                 onBack = { navController.popBackStack() },
-                onSave = { title, notes -> // FIX: Memperbaiki signature lambda ini
+                onSave = { title, notes ->
                     // TODO: Implementasi logika simpan catatan (misalnya memanggil ViewModel)
                     navController.popBackStack() // Kembali setelah menyimpan
                 }
