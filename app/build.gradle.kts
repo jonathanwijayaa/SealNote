@@ -100,7 +100,7 @@ dependencies {
      implementation(libs.androidx.lifecycle.viewmodel.compose)
      implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.navigation.compose) // This is the correct primary dependency
-
+    implementation("io.coil-kt:coil-compose:2.6.0")
     // Compose Icons
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)

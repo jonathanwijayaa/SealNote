@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import java.util.Calendar // <-- DITAMBAHKAN: Import yang diperlukan untuk Calendar
+import java.util.Calendar
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,6 +26,7 @@ class NotesRepository @Inject constructor(
         firestore.collection("users").document(it).collection("notes")
     }
 
+    // --- FUNGSI GET (Sudah Baik, Tidak Perlu Diubah) ---
     fun getAllNotes(): Flow<List<Notes>> {
         val collection = getUserNotesCollection() ?: return flowOf(emptyList())
         return collection.whereEqualTo("isTrashed", false)
@@ -60,26 +61,29 @@ class NotesRepository @Inject constructor(
             .map { snapshot -> snapshot.documents.mapNotNull { it.toObject<Notes>() } }
     }
 
-    fun getNoteById(noteId: String): Flow<Notes?>? {
-        return getUserNotesCollection()
-            ?.document(noteId)
-            ?.snapshots()
-            ?.map { it.toObject<Notes>() }
+    fun getNoteById(noteId: String): Flow<Notes?> {
+        val collection = getUserNotesCollection() ?: return flowOf(null)
+        return collection.document(noteId)
+            .snapshots()
+            .map { it.toObject<Notes>() }
     }
 
-    suspend fun saveNote(noteId: String?, title: String, content: String) {
-        val collection = getUserNotesCollection() ?: throw Exception("User not logged in.")
+    // --- FUNGSI CREATE / UPDATE (Sudah Baik, Tidak Perlu Diubah) ---
+    suspend fun saveNote(noteId: String?, title: String, content: String, userId: String) {
+        val collection = firestore.collection("users").document(userId).collection("notes")
         val currentTime = Date()
 
         if (noteId == null) {
+            val newNoteDocument = collection.document()
             val newNote = Notes(
-                userId = getUserId()!!,
+                id = newNoteDocument.id,
+                userId = userId,
                 title = title,
                 content = content,
                 createdAt = currentTime,
                 updatedAt = currentTime
             )
-            collection.add(newNote).await()
+            newNoteDocument.set(newNote).await()
         } else {
             collection.document(noteId).update(
                 mapOf(
@@ -91,19 +95,34 @@ class NotesRepository @Inject constructor(
         }
     }
 
+    // --- FUNGSI AKSI (DENGAN PENINGKATAN) ---
+
     suspend fun toggleSecretStatus(noteId: String, isSecret: Boolean) {
-        getUserNotesCollection()?.document(noteId)?.update("isSecret", isSecret)?.await()
+        getUserNotesCollection()?.document(noteId)?.update(
+            mapOf(
+                "isSecret" to isSecret,
+                "updatedAt" to Date() // Perbarui updatedAt
+            )
+        )?.await()
     }
 
-    // DIHAPUS: Fungsi trashNote yang duplikat dan lebih sederhana telah dihapus dari sini.
-
+    // --- FUNGSI BARU ---
     /**
-     * Memindahkan catatan ke sampah dan mengatur waktu kadaluwarsa 30 hari.
+     * Mengubah status bookmark pada catatan.
      */
+    suspend fun toggleBookmarkStatus(noteId: String, isBookmarked: Boolean) {
+        getUserNotesCollection()?.document(noteId)?.update(
+            mapOf(
+                "isBookmarked" to isBookmarked,
+                "updatedAt" to Date() // Perbarui updatedAt
+            )
+        )?.await()
+    }
+    // --------------------
+
     suspend fun trashNote(noteId: String) {
         val collection = getUserNotesCollection() ?: return
 
-        // Hitung waktu 30 hari dari sekarang
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.DAY_OF_YEAR, 30)
         val expireTime = calendar.time
@@ -111,27 +130,23 @@ class NotesRepository @Inject constructor(
         collection.document(noteId).update(
             mapOf(
                 "isTrashed" to true,
-                "expireAt" to expireTime // Atur waktu penghapusan otomatis
+                "expireAt" to expireTime,
+                "updatedAt" to Date() // Perbarui updatedAt
             )
         ).await()
     }
 
-    /**
-     * Memulihkan catatan dari sampah.
-     */
     suspend fun restoreNoteFromTrash(noteId: String) {
         val collection = getUserNotesCollection() ?: return
         collection.document(noteId).update(
             mapOf(
                 "isTrashed" to false,
-                "expireAt" to null // Hapus waktu kadaluwarsa
+                "expireAt" to null,
+                "updatedAt" to Date() // Perbarui updatedAt
             )
         ).await()
     }
 
-    /**
-     * Menghapus catatan secara permanen dari database.
-     */
     suspend fun deleteNotePermanently(noteId: String) {
         getUserNotesCollection()?.document(noteId)?.delete()?.await()
     }
