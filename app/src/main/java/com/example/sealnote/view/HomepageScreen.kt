@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.R
-import com.example.sealnote.ui.theme.AppTheme
+import com.example.sealnote.ui.theme.SealnoteTheme
 import kotlinx.coroutines.launch
 
 // Definisi Warna sesuai gambar
@@ -308,7 +308,7 @@ fun NoteCard(note: Note) { // Tetap di file ini atau pindah ke file terpisah jik
 @Preview(showBackground = true, name = "Home Screen Preview Dark")
 @Composable
 fun HomeScreenPreview() {
-    AppTheme {
+    SealnoteTheme {
         HomepageScreen(
             onNavigateToAddNote = {},
             onNavigateToProfile = {},
@@ -323,7 +323,7 @@ fun HomeScreenPreview() {
 @Preview(showBackground = true, name = "Note Card Preview Dark", backgroundColor = 0xFF1A1C2E)
 @Composable
 fun NoteCardPreview() {
-    AppTheme {
+    SealnoteTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             NoteCard(
                 Note(

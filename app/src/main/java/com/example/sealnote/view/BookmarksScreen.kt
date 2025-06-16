@@ -15,7 +15,7 @@ import com.example.sealnote.viewmodel.BookmarksViewModel
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.sealnote.model.Notes
 import kotlinx.coroutines.launch
-import com.example.sealnote.ui.theme.AppTheme // Pastikan AppTheme diimpor
+import com.example.sealnote.ui.theme.SealnoteTheme // Pastikan AppTheme diimpor
 import androidx.compose.ui.graphics.Color // Tetap impor jika Anda ingin menggunakan Color.Transparent
 import androidx.compose.ui.res.painterResource
 import com.example.sealnote.R
@@ -204,7 +204,7 @@ fun BookmarksScreenPreview() {
     )
 
     // Wrap preview dengan AppTheme agar warna tema diterapkan
-    AppTheme(darkTheme = true) { // Anda bisa mengatur darkTheme = true atau false untuk melihat perbedaannya
+    SealnoteTheme(darkTheme = true) { // Anda bisa mengatur darkTheme = true atau false untuk melihat perbedaannya
         BookmarksScreen(
             bookmarkedNotes = dummyNotes,
             searchQuery = "",

@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.sealnote.ui.theme.AppTheme
+import com.example.sealnote.ui.theme.SealnoteTheme
 
 @Composable
 fun SignupScreen(
@@ -37,7 +37,7 @@ fun SignupScreen(
 @Preview(showBackground = true)
 @Composable
 fun SignupScreenPreview() {
-    AppTheme {
+    SealnoteTheme {
         SignupScreen(
             onSignUpClick = { email, password ->
                 println("Preview Sign Up Clicked: $email, $password")

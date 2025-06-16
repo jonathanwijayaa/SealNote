@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.R
-import com.example.sealnote.ui.theme.AppTheme // Asumsi AppTheme Anda
+import com.example.sealnote.ui.theme.SealnoteTheme // Asumsi AppTheme Anda
 
 // Definisi Warna dari XML
 val LockedScreenBackground = Color(0xFF152332)
@@ -69,7 +69,7 @@ fun SecretNotesLockedScreen(
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
 fun NotesLockedScreenPreviewWithOuterBackground() {
-    AppTheme {
+    SealnoteTheme {
         Box(Modifier.fillMaxSize().background(Color.White)) {
             SecretNotesLockedScreen(onAuthenticate = {}) // Lambda kosong untuk preview
         }
@@ -79,7 +79,7 @@ fun NotesLockedScreenPreviewWithOuterBackground() {
 @Preview(showBackground = true)
 @Composable
 fun NotesLockedScreenPreview() {
-    AppTheme {
+    SealnoteTheme {
         SecretNotesLockedScreen(onAuthenticate = {}) // Lambda kosong untuk preview
     }
 }
