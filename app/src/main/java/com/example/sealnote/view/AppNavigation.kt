@@ -8,8 +8,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sealnote.viewmodel.BookmarksViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.MutableLiveData // Import untuk Preview ViewModel
-import com.example.sealnote.viewmodel.StealthCalculatorViewModel // Import ViewModel StealthCalculator
+import androidx.lifecycle.MutableLiveData
+import com.example.sealnote.viewmodel.StealthCalculatorViewModel
+import com.example.sealnote.viewmodel.StealthScientificViewModel
+import com.example.sealnote.viewmodel.CalculatorHistoryViewModel
 
 /**
  * Mendefinisikan semua rute dan Composables untuk navigasi aplikasi.
@@ -20,8 +22,10 @@ import com.example.sealnote.viewmodel.StealthCalculatorViewModel // Import ViewM
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "stealthCalculator" // Ubah ini sesuai mode default Anda
+    startDestination: String = "stealthCalculator"
 ) {
+    val calculatorHistoryViewModel: CalculatorHistoryViewModel = viewModel()
+
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -29,44 +33,52 @@ fun AppNavigation(
     ) {
         // --- Stealth Mode ---
         composable("stealthCalculator") {
-            // Dapatkan instance ViewModel untuk StealthCalculatorScreen
             val stealthCalculatorViewModel: StealthCalculatorViewModel = viewModel()
             StealthCalculatorScreen(
-                // Meneruskan lambda untuk navigasi ke LoginScreen
                 onNavigateToLogin = {
                     navController.navigate("login") {
-                        // Opsi popUpTo untuk membersihkan back stack dan mencegah kembali ke kalkulator
                         popUpTo("stealthCalculator") { inclusive = true }
                     }
                 },
-                viewModel = stealthCalculatorViewModel // Meneruskan ViewModel ke Composable
+                navController = navController,
+                viewModel = stealthCalculatorViewModel,
+                historyViewModel = calculatorHistoryViewModel
+            )
+        }
+        composable("stealthScientific") {
+            val stealthScientificViewModel: StealthScientificViewModel = viewModel()
+            StealthScientificScreen(
+                navController = navController,
+                onNavigateToLogin = { // Teruskan callback onNavigateToLogin
+                    navController.navigate("login") {
+                        popUpTo("stealthScientific") { inclusive = true }
+                    }
+                },
+                viewModel = stealthScientificViewModel,
+                historyViewModel = calculatorHistoryViewModel
             )
         }
         composable("stealthHistory") {
-            StealthHistoryScreen()
-        }
-        composable("stealthScientific") {
-            StealthScientificScreen()
+            StealthHistoryScreen(
+                navController = navController,
+                historyViewModel = calculatorHistoryViewModel
+            )
         }
 
         // --- SealNote Login & Signup ---
         composable("login") {
             LoginScreen(
                 onLoginClick = { email, password ->
-                    // TODO: Implementasi logika login
                     navController.navigate("homepage") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
                 onGoogleSignInClick = {
-                    // TODO: Implementasi login Google
                     navController.navigate("homepage") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
                 onForgotPasswordClick = {
-                    // TODO: Implementasi lupa password
-                    // Anda mungkin ingin menavigasi ke layar khusus Lupa Password
                 },
                 onSignUpClick = {
                     navController.navigate("signup")
@@ -76,7 +88,6 @@ fun AppNavigation(
         composable("signup") {
             SignupScreen(
                 onSignUpClick = { email, password ->
-                    // TODO: Implementasi logika sign up
                     navController.navigate("login") {
                         popUpTo("signup") { inclusive = true }
                     }
@@ -103,7 +114,6 @@ fun AppNavigation(
         composable("profile") {
             ProfileScreen(
                 onSignOutClick = {
-                    // TODO: Implementasi logika sign out
                     navController.navigate("login") {
                         popUpTo("homepage") { inclusive = true }
                     }
@@ -123,38 +133,33 @@ fun AppNavigation(
                                 inclusive = true
                             }
                         }
-
                         "secret_notes" -> navController.navigate("secretNotesLocked") {
                             popUpTo("homepage") {
                                 inclusive = true
                             }
                         }
-
                         "trash" -> navController.navigate("trash") {
                             popUpTo("homepage") {
                                 inclusive = true
                             }
                         }
-
                         "settings" -> navController.navigate("settings") {
                             popUpTo("homepage") {
                                 inclusive = true
                             }
                         }
-
                         "profile" -> navController.navigate("profile") {
                             popUpTo("homepage") {
                                 inclusive = true
                             }
                         }
-
                         else -> { /* Do nothing or handle unknown destination */
                         }
                     }
                 },
-                bookmarkedNotes = emptyList(), // FIX: Sesuaikan dengan data asli Anda, ini hanya placeholder
-                searchQuery = "",            // FIX: Sesuaikan dengan data asli Anda, ini hanya placeholder
-                onSearchQueryChange = {}     // FIX: Sesuaikan dengan data asli Anda, ini hanya placeholder
+                bookmarkedNotes = emptyList(),
+                searchQuery = "",
+                onSearchQueryChange = {}
             )
         }
         composable("secretNotes") {
@@ -167,7 +172,6 @@ fun AppNavigation(
         composable("secretNotesLocked") {
             SecretNotesLockedScreen(
                 onAuthenticate = {
-                    // Jika autentikasi berhasil, navigasi ke authentication
                     navController.navigate("authentication")
                 }
             )
@@ -175,13 +179,11 @@ fun AppNavigation(
         composable("authentication") {
             AuthenticationScreen(
                 onUsePinClick = {
-                    // Navigasi ke login jika pengguna memilih PIN
                     navController.navigate("login") {
                         popUpTo("authentication") { inclusive = true }
                     }
                 },
                 onAuthSuccess = {
-                    // Setelah autentikasi berhasil, kembali ke secretNotes
                     navController.navigate("secretNotes") {
                         popUpTo("authentication") { inclusive = true }
                     }
@@ -200,8 +202,7 @@ fun AppNavigation(
             AddNotesScreen(
                 onBack = { navController.popBackStack() },
                 onSave = { title, notes ->
-                    // TODO: Implementasi logika simpan catatan (misalnya memanggil ViewModel)
-                    navController.popBackStack() // Kembali setelah menyimpan
+                    navController.popBackStack()
                 }
             )
         }
