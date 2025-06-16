@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-// REVISI: Menggunakan Icons.AutoMirrored.Filled.Backspace yang direkomendasikan
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,8 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel // Import untuk ViewModel
 
-// --- START: Impor warna kustom dari Color.kt ---
+// Import warna kustom dari Color.kt
 import com.example.sealnote.ui.theme.CalcScreenBackground
 import com.example.sealnote.ui.theme.CalcDisplayCardBackground
 import com.example.sealnote.ui.theme.CalcDisplayTextColor
@@ -35,7 +35,7 @@ import com.example.sealnote.ui.theme.CalcOperatorGradientStart
 import com.example.sealnote.ui.theme.CalcOperatorGradientEnd
 import com.example.sealnote.ui.theme.CalcButtonTextColor
 import com.example.sealnote.ui.theme.CalcButtonIconColor
-// --- END: Impor warna kustom ---
+import com.example.sealnote.viewmodel.StealthCalculatorViewModel // Import ViewModel kita
 
 // Data class untuk merepresentasikan setiap tombol kalkulator
 private data class CalcButtonInfo(
@@ -52,45 +52,46 @@ private enum class ButtonType {
 }
 
 @Composable
-fun StealthCalculatorScreen() {
-    var displayText by remember { mutableStateOf("5.000") } // Contoh dari gambar
+fun StealthCalculatorScreen(
+    // Callback untuk navigasi ke LoginScreen
+    onNavigateToLogin: () -> Unit,
+    viewModel: StealthCalculatorViewModel = viewModel() // Inject ViewModel
+) {
+    // REVISI: Mengatur tombol target untuk triple-click
+    // Anda bisa mengubah ini ke tombol lain sesuai kebutuhan, contohnya "7"
+    // Pastikan tombol tersebut ada di konfigurasi buttonRowsConfig
+    DisposableEffect(Unit) {
+        viewModel.targetButtonSymbolForTripleClick = "C" // Targetkan tombol "C"
+        onDispose { }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = CalcScreenBackground // Menggunakan warna dari Color.kt
+        color = CalcScreenBackground
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             CalculatorDisplay(
-                displayText = displayText,
+                displayText = viewModel.displayText, // Ambil dari ViewModel
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(220.dp) // Sesuaikan tinggi display jika perlu
-                    .padding(horizontal = 16.dp, vertical = 24.dp) // Padding display
+                    .height(220.dp)
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
             )
 
             CalculatorButtonsGridModified(
                 onButtonClick = { buttonSymbol, isBackspace ->
-                    when {
-                        isBackspace -> {
-                            if (displayText.length > 1) {
-                                displayText = displayText.dropLast(1)
-                            } else if (displayText != "0") {
-                                displayText = "0"
-                            }
-                        }
-                        buttonSymbol == "C" -> displayText = "0"
-                        else -> {
-                            if (displayText == "0" && buttonSymbol != ",") { // Menggunakan koma dari gambar
-                                displayText = buttonSymbol
-                            } else if (displayText.length < 12) { // Batas panjang tampilan (sesuaikan)
-                                displayText += buttonSymbol
-                            }
-                        }
+                    // Logika kalkulator ditangani di ViewModel
+                    if (isBackspace) {
+                        viewModel.onBackspaceClick()
+                    } else {
+                        viewModel.onCalculatorButtonClick(buttonSymbol)
                     }
+                    // Daftarkan setiap klik tombol ke triple-click logic
+                    viewModel.registerButtonClickForTripleClick(buttonSymbol, onNavigateToLogin)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp) // Padding horizontal untuk grid agar lebih ke tengah
+                    .padding(horizontal = 24.dp, vertical = 8.dp)
             )
         }
     }
@@ -100,16 +101,16 @@ fun StealthCalculatorScreen() {
 private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(8.dp), // Sedikit rounded corner untuk display card
-        colors = CardDefaults.cardColors(containerColor = CalcDisplayCardBackground), // Menggunakan warna dari Color.kt
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // Di gambar, display tidak terlalu menonjol
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = CalcDisplayCardBackground),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Text(
                 text = displayText,
-                color = CalcDisplayTextColor, // Menggunakan warna dari Color.kt
-                fontSize = 56.sp, // Ukuran font display bisa lebih besar sesuai gambar
-                fontWeight = FontWeight.Normal, // Di gambar tidak terlihat tebal sekali
+                color = CalcDisplayTextColor,
+                fontSize = 56.sp,
+                fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.End,
                 modifier = Modifier
                     .weight(1f)
@@ -118,8 +119,7 @@ private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            // REVISI: Menggunakan HorizontalDivider yang direkomendasikan
-            HorizontalDivider(color = CalcDisplayDividerColor, thickness = 1.dp) // Menggunakan warna dari Color.kt
+            HorizontalDivider(color = CalcDisplayDividerColor, thickness = 1.dp)
         }
     }
 }
@@ -129,14 +129,12 @@ private fun CalculatorButtonsGridModified(
     onButtonClick: (symbol: String, isBackspace: Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val buttonCornerRadius = 16.dp // Radius untuk tombol "sedikit berbentuk kotak"
+    val buttonCornerRadius = 16.dp
 
-    // Konfigurasi Tombol berdasarkan gambar
     val buttonRowsConfig = listOf(
         listOf(
-            // REVISI: Menggunakan Icons.AutoMirrored.Filled.Backspace
             CalcButtonInfo("", ButtonType.BACKSPACE, 24.sp, "Backspace", Icons.AutoMirrored.Filled.Backspace),
-            CalcButtonInfo("X/Y", ButtonType.FUNCTION, 20.sp, "X divided by Y"), // Ukuran font disesuaikan
+            CalcButtonInfo("X/Y", ButtonType.FUNCTION, 20.sp, "X divided by Y"),
             CalcButtonInfo("%", ButtonType.FUNCTION, 24.sp, "Percent"),
             CalcButtonInfo("÷", ButtonType.OPERATOR, 30.sp, "Divide")
         ),
@@ -161,7 +159,7 @@ private fun CalculatorButtonsGridModified(
         listOf(
             CalcButtonInfo("C", ButtonType.CLEAR, 26.sp, "Clear"),
             CalcButtonInfo("0", ButtonType.NUMBER, 26.sp, "Zero"),
-            CalcButtonInfo(",", ButtonType.DECIMAL, 26.sp, "Comma"), // Mengganti . dengan ,
+            CalcButtonInfo(",", ButtonType.DECIMAL, 26.sp, "Comma"),
             CalcButtonInfo("=", ButtonType.OPERATOR, 30.sp, "Equal")
         )
     )
@@ -169,19 +167,19 @@ private fun CalculatorButtonsGridModified(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp) // Jarak antar baris tombol
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         buttonRowsConfig.forEach { row ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp) // Jarak antar tombol dalam satu baris
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 row.forEach { buttonInfo ->
                     CalculatorButtonModified(
                         info = buttonInfo,
                         onClick = { onButtonClick(buttonInfo.symbol, buttonInfo.type == ButtonType.BACKSPACE) },
                         shape = RoundedCornerShape(buttonCornerRadius),
-                        modifier = Modifier.weight(1f) // Membuat tombol mengisi ruang secara merata
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -199,7 +197,6 @@ private fun CalculatorButtonModified(
     val backgroundColor: Color?
     val backgroundBrush: Brush?
 
-    // Membuat Brush di sini menggunakan warna dari Color.kt
     val CalcOperatorGradient = Brush.horizontalGradient(
         listOf(CalcOperatorGradientStart, CalcOperatorGradientEnd)
     )
@@ -221,8 +218,8 @@ private fun CalculatorButtonModified(
 
     Box(
         modifier = modifier
-            .aspectRatio(1f) // Membuat tombol menjadi persegi (atau mendekati jika tingginya diatur oleh Row)
-            .defaultMinSize(minWidth = 70.dp, minHeight = 70.dp) // Ukuran minimal tombol
+            .aspectRatio(1f)
+            .defaultMinSize(minWidth = 70.dp, minHeight = 70.dp)
             .then(finalBackgroundModifier)
             .clip(shape)
             .clickable(onClick = onClick)
@@ -232,14 +229,14 @@ private fun CalculatorButtonModified(
         if (info.icon != null) {
             Icon(
                 imageVector = info.icon,
-                contentDescription = info.description, // Deskripsi bisa juga untuk ikon
-                tint = CalcButtonIconColor, // Menggunakan warna dari Color.kt
-                modifier = Modifier.size(28.dp) // Ukuran ikon
+                contentDescription = info.description,
+                tint = CalcButtonIconColor,
+                modifier = Modifier.size(28.dp)
             )
         } else {
             Text(
                 text = info.symbol,
-                color = CalcButtonTextColor, // Menggunakan warna dari Color.kt
+                color = CalcButtonTextColor,
                 fontSize = info.textSize,
                 fontWeight = FontWeight.Medium
             )
@@ -251,6 +248,7 @@ private fun CalculatorButtonModified(
 @Composable
 fun CalculatorScreenModifiedPreview() {
     MaterialTheme {
-        StealthCalculatorScreen()
+        // Dalam preview, kita tidak memiliki LoginScreen, jadi kita berikan lambda kosong.
+        StealthCalculatorScreen(onNavigateToLogin = {})
     }
 }
