@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.R
-import com.example.sealnote.ui.theme.AppTheme // Asumsi AppTheme Anda diimpor
+import com.example.sealnote.ui.theme.SealnoteTheme // Asumsi AppTheme Anda diimpor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,7 +170,7 @@ fun CustomTextField(
 @Preview(showBackground = true)
 @Composable
 fun AddNotesScreenPreview() {
-    com.example.sealnote.ui.theme.AppTheme(darkTheme = true) {
+    com.example.sealnote.ui.theme.SealnoteTheme(darkTheme = true) {
         AddNotesScreen(
             onBack = {},
             onSave = { title, notes ->

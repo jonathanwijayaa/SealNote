@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.R
-import com.example.sealnote.ui.theme.AppTheme
+import com.example.sealnote.ui.theme.SealnoteTheme
 
 // Definisi Warna (sesuaikan dengan @color/background dan nilai hex dari XML)
 val LoginScreenBackground = Color(0xFF152332)
@@ -295,7 +295,7 @@ private fun ClickableSignUpText(onSignUpClick: () -> Unit) {
 @Preview(showBackground = true, backgroundColor = 0xFF152332)
 @Composable
 fun LoginScreenPreview() {
-    AppTheme {
+    SealnoteTheme {
         LoginScreen(
             onLoginClick = { email, password ->
                 println("Preview Login Clicked: $email, $password")

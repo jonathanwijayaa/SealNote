@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.R
-import com.example.sealnote.ui.theme.AppTheme // Asumsi AppTheme Anda
+import com.example.sealnote.ui.theme.SealnoteTheme // Asumsi AppTheme Anda
 
 // Definisi Warna dari XML
 val AuthScreenBackground = Color(0xFF0A0F1E)
@@ -192,7 +192,7 @@ private val R.drawable.ic_fingerprint_placeholder: Int
 @Preview(showBackground = true, backgroundColor = 0xFF0A0F1E)
 @Composable
 fun AuthenticationScreenPreview() {
-    AppTheme {
+    SealnoteTheme {
         // Berikan lambda kosong untuk callbacks di preview
         AuthenticationScreen(onUsePinClick = {}, onAuthSuccess = {})
     }

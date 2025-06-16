@@ -3,7 +3,7 @@ package com.example.sealnote
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.sealnote.ui.theme.AppTheme
+import com.example.sealnote.ui.theme.SealnoteTheme
 import com.example.sealnote.view.AppNavigation // Impor navigasi utama Compose Anda
 
 class MainActivity : ComponentActivity() {
@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             // Setel tema aplikasi Anda
-            AppTheme {
+            SealnoteTheme {
                 // Panggil Composable Navigasi utama Anda
                 AppNavigation()
             }

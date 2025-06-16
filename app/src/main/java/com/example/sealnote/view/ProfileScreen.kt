@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.R
-import com.example.sealnote.ui.theme.AppTheme
+import com.example.sealnote.ui.theme.SealnoteTheme
 
 // Warna berdasarkan UI yang diberikan
 val ProfilePageBackgroundColor = Color(0xFF152332)
@@ -223,7 +223,7 @@ private fun ProfileTextFieldItem(
 @Preview(showBackground = true, backgroundColor = 0xFF152332)
 @Composable
 fun ProfileScreenPreview() {
-    AppTheme {
+    SealnoteTheme {
         ProfileScreen(onSignOutClick = {}, onBack = {}) // Memberikan lambda kosong untuk preview
     }
 }
