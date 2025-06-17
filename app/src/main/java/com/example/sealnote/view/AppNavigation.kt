@@ -30,35 +30,35 @@ fun AppNavigation(
     ) {
         // --- Stealth Mode ---
         composable("stealthCalculator") {
-            val stealthCalculatorViewModel: StealthCalculatorViewModel = viewModel()
+            // TIDAK PERLU lagi mendeklarasikan viewModel di sini
+            // val stealthCalculatorViewModel: StealthCalculatorViewModel = viewModel()
             StealthCalculatorScreen(
                 onNavigateToLogin = {
                     navController.navigate("login") {
                         popUpTo("stealthCalculator") { inclusive = true }
                     }
                 },
-                navController = navController,
-                viewModel = stealthCalculatorViewModel,
-                historyViewModel = calculatorHistoryViewModel
+                navController = navController, // Tetap teruskan navController jika diperlukan di dalam layar
             )
         }
         composable("stealthScientific") {
-            val stealthScientificViewModel: StealthScientificViewModel = viewModel()
+            // TIDAK PERLU lagi mendeklarasikan viewModel di sini
+            // val stealthScientificViewModel: StealthScientificViewModel = viewModel()
             StealthScientificScreen(
                 navController = navController,
-                onNavigateToLogin = { // Teruskan callback onNavigateToLogin
+                onNavigateToLogin = {
                     navController.navigate("login") {
                         popUpTo("stealthScientific") { inclusive = true }
                     }
                 },
-                viewModel = stealthScientificViewModel,
-                historyViewModel = calculatorHistoryViewModel
             )
         }
         composable("stealthHistory") {
+            // TIDAK PERLU lagi mendeklarasikan viewModel di sini
             StealthHistoryScreen(
                 navController = navController,
-                historyViewModel = calculatorHistoryViewModel
+                // HAPUS parameter historyViewModel
+                // historyViewModel = calculatorHistoryViewModel
             )
         }
 
