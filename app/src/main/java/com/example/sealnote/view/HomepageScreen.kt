@@ -10,7 +10,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocalOffer
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -106,6 +112,30 @@ fun HomepageScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
+
+            ModalDrawerSheet(
+                drawerContainerColor = MaterialTheme.colorScheme.surface
+            ) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "SealNote Menu",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                // Navigation Drawer Items
+                NavigationDrawerItem(
+                    label = { Text("All Notes", color = MaterialTheme.colorScheme.onSurface) },
+                    selected = true,
+                    onClick = { scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Home, contentDescription = "All Notes", tint = MaterialTheme.colorScheme.onSurface) },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurface
+                    )
+
             ModalDrawerSheet {
                 Spacer(modifier = Modifier.height(16.dp))
                 NavigationDrawerItem(
@@ -116,20 +146,40 @@ fun HomepageScreen(
                         scope.launch { drawerState.close() }
                         onNavigateToAddNote()
                     }
+
                 )
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Outlined.BookmarkBorder, "Bookmarks") },
                     label = { Text("Bookmarks") },
                     selected = false,
+
+                    onClick = { onNavigateToBookmarks(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.BookmarkBorder, contentDescription = "Bookmarks", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+
                     onClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToBookmarks()
                     }
+
                 )
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Outlined.Lock, "Secret Notes") },
                     label = { Text("Secret Notes") },
                     selected = false,
+
+                    onClick = { onNavigateToSecretNotes(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Lock, contentDescription = "Secret Notes", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+                )
+                NavigationDrawerItem(
+                    label = { Text("Trash", color = MaterialTheme.colorScheme.onSecondaryContainer) },
+                    selected = false,
+                    onClick = { onNavigateToTrash(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Delete, contentDescription = "Trash", tint = MaterialTheme.colorScheme.onSecondaryContainer) },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                     onClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToSecretNotes()
@@ -149,6 +199,8 @@ fun HomepageScreen(
                     icon = { Icon(Icons.Outlined.Settings, "Settings") },
                     label = { Text("Settings") },
                     selected = false,
+                    onClick = { onNavigateToSettings(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
                     onClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToSettings()
@@ -167,6 +219,9 @@ fun HomepageScreen(
                     icon = { Icon(Icons.Outlined.Logout, "Logout") },
                     label = { Text("Logout") },
                     selected = false,
+
+                    onClick = { onNavigateToProfile(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
                     onClick = {
                         scope.launch { drawerState.close() }
                         onLogoutClick()
@@ -178,7 +233,17 @@ fun HomepageScreen(
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = "All notes",
+                            color = PrimaryTextColor,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+
                     title = { Text("Home") },
+
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Default.Menu, "Menu")

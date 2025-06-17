@@ -117,6 +117,8 @@ fun AddNotesScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = containerColor,
         topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Add Note", color = onContainerColor) },
             TopAppBar(
                 title = { Text(if (createdDate == "Just now") "Add Note" else "Edit Note", color = onContainerColor) },
                 navigationIcon = {

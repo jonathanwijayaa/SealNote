@@ -55,7 +55,7 @@ fun ProfileScreen( // Nama Composable: ProfileScreen
     Scaffold(
         containerColor = ProfilePageBackgroundColor,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { Text("Profile", color = ProfileNameTextColor) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

@@ -8,6 +8,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
+// import androidx.lifecycle.MutableLiveData // Tidak digunakan di sini, bisa dihapus
+
+import com.example.sealnote.viewmodel.BookmarksViewModel
 import androidx.navigation.navArgument
 import com.example.sealnote.viewmodel.CalculatorHistoryViewModel
 import com.example.sealnote.viewmodel.StealthCalculatorViewModel
@@ -109,6 +113,31 @@ fun AppNavigation(
 
         // --- Note Mode ---
         composable("homepage") {
+            // Perbarui panggilan HomepageScreen untuk menyertakan parameter drawer
+            HomepageScreen(
+                onNavigateToAddNote = { navController.navigate("addNotes") },
+                onNavigateToProfile = { navController.navigate("profile") },
+                onNavigateToBookmarks = {
+                    navController.navigate("bookmarks") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToSecretNotes = {
+                    navController.navigate("secretNotesLocked") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToTrash = {
+                    navController.navigate("trash") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToSettings = {
+                    navController.navigate("settings") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+            )
             HomepageRoute(navController = navController)
         }
 
@@ -121,6 +150,41 @@ fun AppNavigation(
             )
         }
         composable("bookmarks") {
+            val bookmarksViewModel: BookmarksViewModel = viewModel()
+            // Perbarui panggilan BookmarksScreen untuk menyertakan parameter drawer
+            BookmarksScreen(
+                bookmarksViewModel = bookmarksViewModel,
+                onNavigateToAddNote = { navController.navigate("addNotes") },
+                // Hapus `onNavigateTo` dan ganti dengan parameter spesifik
+                onNavigateHomepage = {
+                    navController.navigate("homepage") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToSecretNotes = {
+                    navController.navigate("secretNotesLocked") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToTrash = {
+                    navController.navigate("trash") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToSettings = {
+                    navController.navigate("settings") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToProfile = {
+                    navController.navigate("profile") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToBookmarks = { /* Sudah di Bookmarks, tidak perlu navigasi ulang */ },
+                bookmarkedNotes = emptyList(), // Sediakan data yang sebenarnya
+                searchQuery = "", // Sediakan data yang sebenarnya
+                onSearchQueryChange = {} // Sediakan fungsi yang sebenarnya
             // Panggil BookmarksRoute dengan parameter yang benar sesuai definisinya
             BookmarksRoute(
                 onNavigateToAddNote = {
@@ -142,6 +206,37 @@ fun AppNavigation(
         }
         composable("secretNotes") {
             SecretNotesScreen(
+                onFabClick = { navController.navigate("addNotes") },
+                onNoteClick = { /* Handle note click */ },
+                onSortClick = { /* Handle sort click */ },
+                onNavigateHomepage = {
+                    navController.navigate("homepage") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToAddNote = { navController.navigate("addNotes") },
+                onNavigateToProfile = {
+                    navController.navigate("profile") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToBookmarks = {
+                    navController.navigate("bookmarks") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToSecretNotes = { /* Sudah di secretNotes, tidak perlu navigasi ulang */ },
+                onNavigateToTrash = {
+                    navController.navigate("trash") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToSettings = {
+                    navController.navigate("settings") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                notes = emptyList() // Pastikan parameter ini juga disediakan
                 onFabClick = { navController.navigate("add_edit_note_screen/null") },
                 onNoteClick = { noteId ->
                     navController.navigate("add_edit_note_screen/$noteId")
@@ -167,12 +262,47 @@ fun AppNavigation(
 
         // HANYA ADA SATU BLOK INI
         composable("trash") {
+            TrashScreen(
+                deletedNotes = emptyList(), // Pastikan parameter ini disediakan
+                onRestoreNote = { /* TODO */ },
+                onPermanentlyDeleteNote = { /* TODO */ },
+                onNavigateHomepage = {
+                    navController.navigate("homepage") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToAddNote = { navController.navigate("addNotes") },
+                onNavigateToProfile = {
+                    navController.navigate("profile") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToBookmarks = {
+                    navController.navigate("bookmarks") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToSecretNotes = {
+                    navController.navigate("secretNotesLocked") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                },
+                onNavigateToTrash = { /* Sudah di Trash, tidak perlu navigasi ulang */ },
+                onNavigateToSettings = {
+                    navController.navigate("settings") {
+                        popUpTo("homepage") { inclusive = true }
+                    }
+                }
+            )
             TrashRoute(navController = navController)
         }
 
         composable("settings") {
             SettingsScreen(
                 onBack = { navController.popBackStack() }
+                // Jika SettingsScreen juga menggunakan drawer, tambahkan parameter navigasi di sini
+                // onNavigateHomepage = { /* ... */ },
+                // ... dan lainnya
             )
         }
 
