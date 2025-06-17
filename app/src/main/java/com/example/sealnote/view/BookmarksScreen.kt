@@ -8,6 +8,12 @@ import androidx.compose.material3.* // Impor semua yang diperlukan dari Material
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,8 +32,13 @@ fun BookmarksScreen(
     bookmarkedNotes: List<Notes>,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    onNavigateHomepage: () -> Unit,
     onNavigateToAddNote: () -> Unit,
-    onNavigateTo: (String) -> Unit,
+    onNavigateToProfile: () -> Unit,
+    onNavigateToBookmarks: () -> Unit,
+    onNavigateToSecretNotes: () -> Unit,
+    onNavigateToTrash: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     bookmarksViewModel: BookmarksViewModel
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -41,78 +52,63 @@ fun BookmarksScreen(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = colorScheme.surface // Menggunakan warna tema untuk drawer
+                drawerContainerColor = MaterialTheme.colorScheme.surface
             ) {
+                Spacer(Modifier.height(12.dp))
                 Text(
                     "SealNote Menu",
                     modifier = Modifier.padding(16.dp),
-                    style = typography.titleLarge, // Menggunakan typography tema
-                    color = colorScheme.onSurface // Warna teks menu
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Divider(color = colorScheme.outlineVariant) // Warna divider
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                // Navigation Drawer Items
                 NavigationDrawerItem(
-                    label = { Text("All Notes", color = colorScheme.onSurface) }, // Warna teks
+                    label = { Text("All Notes", color = MaterialTheme.colorScheme.onSurface) },
                     selected = false,
-                    onClick = {
-                        onNavigateTo("all_notes")
-                        scope.launch { drawerState.close() }
-                    },
+                    onClick = { onNavigateHomepage(); scope.launch { drawerState.close() } },
+
+                    icon = { Icon(Icons.Outlined.Home, contentDescription = "All Notes", tint = MaterialTheme.colorScheme.onSurface) },
                     colors = NavigationDrawerItemDefaults.colors(
-                        // Warna item saat tidak terpilih
-                        unselectedContainerColor = Color.Transparent, // Biarkan transparan
-                        unselectedTextColor = colorScheme.onSurface,
-                        unselectedIconColor = colorScheme.onSurface
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
                 NavigationDrawerItem(
-                    label = { Text("Bookmarks", color = colorScheme.onSecondaryContainer) }, // Warna teks item terpilih
+                    label = { Text("Bookmarks", color = MaterialTheme.colorScheme.onSurface) },
                     selected = true,
                     onClick = { scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.BookmarkBorder, contentDescription = "Bookmarks", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+                )
+                NavigationDrawerItem(
+                    label = { Text("Secret Notes", color = MaterialTheme.colorScheme.onSurface) },
+                    selected = false,
+                    onClick = { onNavigateToSecretNotes(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Lock, contentDescription = "Secret Notes", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+                )
+                NavigationDrawerItem(
+                    label = { Text("Trash", color = MaterialTheme.colorScheme.onSecondaryContainer) },
+                    selected = false,
+                    onClick = { onNavigateToTrash(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Delete, contentDescription = "Trash", tint = MaterialTheme.colorScheme.onSecondaryContainer) },
                     colors = NavigationDrawerItemDefaults.colors(
-                        // Warna item saat terpilih
-                        selectedContainerColor = colorScheme.secondaryContainer,
-                        selectedTextColor = colorScheme.onSecondaryContainer,
-                        selectedIconColor = colorScheme.onSecondaryContainer
+                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 )
                 NavigationDrawerItem(
-                    label = { Text("Secret Notes", color = colorScheme.onSurface) },
+                    label = { Text("Settings", color = MaterialTheme.colorScheme.onSurface) },
                     selected = false,
-                    onClick = {
-                        onNavigateTo("secret_notes")
-                        scope.launch { drawerState.close() }
-                    },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = colorScheme.onSurface,
-                        unselectedIconColor = colorScheme.onSurface
-                    )
+                    onClick = { onNavigateToSettings(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
                 )
                 NavigationDrawerItem(
-                    label = { Text("Trash", color = colorScheme.onSurface) },
+                    label = { Text("Profile", color = MaterialTheme.colorScheme.onSurface) },
                     selected = false,
-                    onClick = {
-                        onNavigateTo("trash")
-                        scope.launch { drawerState.close() }
-                    },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = colorScheme.onSurface,
-                        unselectedIconColor = colorScheme.onSurface
-                    )
-                )
-                NavigationDrawerItem(
-                    label = { Text("Settings", color = colorScheme.onSurface) },
-                    selected = false,
-                    onClick = {
-                        onNavigateTo("settings")
-                        scope.launch { drawerState.close() }
-                    },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = colorScheme.onSurface,
-                        unselectedIconColor = colorScheme.onSurface
-                    )
+                    onClick = { onNavigateToProfile(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
                 )
             }
         }
@@ -120,7 +116,7 @@ fun BookmarksScreen(
         Scaffold(
             containerColor = colorScheme.background, // Menggunakan warna tema untuk latar belakang Scaffold
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = {
                         // Judul layar
                         Text("Bookmarks", color = colorScheme.onSurface)
@@ -191,6 +187,7 @@ fun BookmarksScreen(
     }
 }
 
+
 @Preview(showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 fun BookmarksScreenPreview() {
@@ -207,11 +204,16 @@ fun BookmarksScreenPreview() {
     SealnoteTheme(darkTheme = true) { // Anda bisa mengatur darkTheme = true atau false untuk melihat perbedaannya
         BookmarksScreen(
             bookmarkedNotes = dummyNotes,
-            searchQuery = "",
-            onSearchQueryChange = {},
+            onNavigateHomepage = {},
             onNavigateToAddNote = {},
-            onNavigateTo = {},
-            bookmarksViewModel = TODO()
+            onNavigateToProfile = {},
+            onNavigateToBookmarks = {},
+            onNavigateToSecretNotes = {},
+            onNavigateToTrash = {},
+            onNavigateToSettings = {},
+            bookmarksViewModel = TODO(),
+            searchQuery = TODO(),
+            onSearchQueryChange = TODO()
         )
     }
 }

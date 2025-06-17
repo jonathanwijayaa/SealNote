@@ -38,7 +38,7 @@ fun AddNotesScreen(
     Scaffold(
         containerColor = containerColor,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { Text("Add Note", color = onContainerColor) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

@@ -9,7 +9,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalOffer
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -74,17 +80,43 @@ fun HomepageScreen(
             ModalDrawerSheet(
                 drawerContainerColor = MaterialTheme.colorScheme.surface
             ) {
+                Spacer(Modifier.height(12.dp))
                 Text(
                     "SealNote Menu",
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Divider(color = MaterialTheme.colorScheme.outlineVariant)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                // Navigation Drawer Items
                 NavigationDrawerItem(
-                    label = { Text("All Notes", color = MaterialTheme.colorScheme.onSecondaryContainer) },
+                    label = { Text("All Notes", color = MaterialTheme.colorScheme.onSurface) },
                     selected = true,
                     onClick = { scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Home, contentDescription = "All Notes", tint = MaterialTheme.colorScheme.onSurface) },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+                NavigationDrawerItem(
+                    label = { Text("Bookmarks", color = MaterialTheme.colorScheme.onSurface) },
+                    selected = false,
+                    onClick = { onNavigateToBookmarks(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.BookmarkBorder, contentDescription = "Bookmarks", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+                )
+                NavigationDrawerItem(
+                    label = { Text("Secret Notes", color = MaterialTheme.colorScheme.onSurface) },
+                    selected = false,
+                    onClick = { onNavigateToSecretNotes(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Lock, contentDescription = "Secret Notes", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+                )
+                NavigationDrawerItem(
+                    label = { Text("Trash", color = MaterialTheme.colorScheme.onSecondaryContainer) },
+                    selected = false,
+                    onClick = { onNavigateToTrash(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Delete, contentDescription = "Trash", tint = MaterialTheme.colorScheme.onSecondaryContainer) },
                     colors = NavigationDrawerItemDefaults.colors(
                         selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                         selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -92,69 +124,16 @@ fun HomepageScreen(
                     )
                 )
                 NavigationDrawerItem(
-                    label = { Text("Bookmarks", color = MaterialTheme.colorScheme.onSurface) },
-                    selected = false,
-                    onClick = {
-                        onNavigateToBookmarks()
-                        scope.launch { drawerState.close() }
-                    },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-                NavigationDrawerItem(
-                    label = { Text("Secret Notes", color = MaterialTheme.colorScheme.onSurface) },
-                    selected = false,
-                    onClick = {
-                        onNavigateToSecretNotes()
-                        scope.launch { drawerState.close() }
-                    },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-                NavigationDrawerItem(
-                    label = { Text("Trash", color = MaterialTheme.colorScheme.onSurface) },
-                    selected = false,
-                    onClick = {
-                        onNavigateToTrash()
-                        scope.launch { drawerState.close() }
-                    },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-                NavigationDrawerItem(
                     label = { Text("Settings", color = MaterialTheme.colorScheme.onSurface) },
                     selected = false,
-                    onClick = {
-                        onNavigateToSettings()
-                        scope.launch { drawerState.close() }
-                    },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurface
-                    )
+                    onClick = { onNavigateToSettings(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
                 )
                 NavigationDrawerItem(
                     label = { Text("Profile", color = MaterialTheme.colorScheme.onSurface) },
                     selected = false,
-                    onClick = {
-                        onNavigateToProfile()
-                        scope.launch { drawerState.close() }
-                    },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurface
-                    )
+                    onClick = { onNavigateToProfile(); scope.launch { drawerState.close() } },
+                    icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
                 )
             }
         }
@@ -162,7 +141,7 @@ fun HomepageScreen(
         Scaffold(
             containerColor = ScreenBackground,
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = {
                         Text(
                             text = "All notes",
