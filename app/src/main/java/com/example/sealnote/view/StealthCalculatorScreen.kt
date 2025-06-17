@@ -2,7 +2,9 @@ package com.example.sealnote.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
@@ -55,10 +57,14 @@ fun StealthCalculatorScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Mengatur callback untuk menyimpan riwayat saat composable pertama kali dijalankan
-    LaunchedEffect(historyViewModel) {
+    // Mengatur callback untuk histori dan navigasi dari ViewModel
+    LaunchedEffect(viewModel, historyViewModel) {
         viewModel.onCalculationFinished = { expression, result ->
             historyViewModel.addHistoryEntry(expression, result)
+        }
+        // Observe the event from ViewModel for navigation
+        viewModel.onLoginRequired = {
+            onNavigateToLogin() // Trigger navigation when ViewModel signals
         }
     }
 
@@ -128,8 +134,10 @@ fun StealthCalculatorScreen(
                     .background(CalcScreenBackground)
                     .padding(paddingValues)
             ) {
+                // ---- Gunakan CalculatorDisplay yang mengambil state dari ViewModel ----
                 CalculatorDisplay(
-                    displayText = viewModel.displayText,
+                    displayTopRow = viewModel.displayTopRow,
+                    displayBottomRow = viewModel.displayBottomRow,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -137,12 +145,12 @@ fun StealthCalculatorScreen(
                 )
 
                 CalculatorButtonsGridModified(
+                    // Pass the regular onButtonClick to the grid
                     onButtonClick = { buttonSymbol, isBackspace ->
                         if (isBackspace) {
-                            viewModel.onBackspaceClick()
+                            viewModel.onBackspaceClick() // Call ViewModel's backspace logic
                         } else {
-                            // Meneruskan aksi navigasi ke ViewModel pada setiap klik
-                            viewModel.onCalculatorButtonClick(buttonSymbol, onNavigateToLogin)
+                            viewModel.onCalculatorButtonClick(buttonSymbol) // Call ViewModel's main button logic
                         }
                     },
                     modifier = Modifier
@@ -155,29 +163,53 @@ fun StealthCalculatorScreen(
 }
 
 @Composable
-private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier) {
+private fun CalculatorDisplay(
+    displayTopRow: String,
+    displayBottomRow: String,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = CalcDisplayCardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Box(
+        Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp),
-            contentAlignment = Alignment.BottomEnd
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.End
         ) {
+            if (displayTopRow.isNotEmpty()) {
+                val topRowScrollState = rememberScrollState()
+                Text(
+                    text = displayTopRow,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(topRowScrollState, reverseScrolling = true),
+                    color = CalcDisplayTextColor.copy(alpha = 0.6f),
+                    textAlign = TextAlign.End,
+                    fontSize = 32.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            val bottomRowScrollState = rememberScrollState()
             Text(
-                text = displayText,
+                text = displayBottomRow,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(bottomRowScrollState, reverseScrolling = true),
                 color = CalcDisplayTextColor,
-                fontSize = 56.sp,
-                fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.End,
-                maxLines = 2,
+                fontSize = 56.sp,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
+
 
 @Composable
 private fun CalculatorButtonsGridModified(
@@ -268,7 +300,7 @@ private fun CalculatorButtonModified(
     val finalBackgroundModifier = when {
         backgroundBrush != null -> Modifier.background(brush = backgroundBrush, shape = shape)
         backgroundColor != null -> Modifier.background(color = backgroundColor, shape = shape)
-        else -> Modifier // Harusnya tidak pernah terjadi
+        else -> Modifier
     }
 
     Box(
@@ -301,7 +333,7 @@ private fun CalculatorButtonModified(
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun CalculatorScreenModifiedPreview() {
-    MaterialTheme {
+    SealnoteTheme {
         StealthCalculatorScreen(onNavigateToLogin = {}, navController = rememberNavController())
     }
 }
