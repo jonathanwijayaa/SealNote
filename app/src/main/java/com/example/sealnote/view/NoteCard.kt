@@ -1,28 +1,137 @@
 package com.example.sealnote.view
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.sealnote.model.Notes
+// Pastikan Anda memiliki impor untuk warna kustom Anda
+// import com.example.sealnote.ui.theme.CardBackgroundColor
+// import com.example.sealnote.ui.theme.PrimaryTextColor
+// import com.example.sealnote.ui.theme.SecondaryTextColor
+// import com.example.sealnote.ui.theme.TertiaryTextColor
+import java.text.SimpleDateFormat
+import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteCard(note: Notes) {
-    Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
+fun NoteCard(
+    note: Notes,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onToggleSecretClick: () -> Unit
+) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+
+    ElevatedCard(
+        // Membuat seluruh kartu bisa diklik untuk mengedit
+        onClick = onEditClick,
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(note.title, style = MaterialTheme.typography.titleMedium)
-            Text(note.content, style = MaterialTheme.typography.bodyMedium, maxLines = 3)
+        // Box digunakan untuk menampung konten dan tombol menu yang menumpang (overlay)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = note.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    // Beri sedikit ruang di kanan agar tidak tertimpa menu
+                    modifier = Modifier.padding(end = 32.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = note.content,
+                    style = MaterialTheme.typography.bodyMedium,
+                    lineHeight = 18.sp,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = note.updatedAt.formatToReadableDate(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Box untuk tombol menu, diposisikan di pojok kanan atas
+            Box(
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                IconButton(onClick = { isMenuExpanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More options"
+                    )
+                }
+                DropdownMenu(
+                    expanded = isMenuExpanded,
+                    onDismissRequest = { isMenuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Edit") },
+                        onClick = {
+                            onEditClick()
+                            isMenuExpanded = false
+                        },
+                        leadingIcon = { Icon(Icons.Outlined.Edit, "Edit") }
+                    )
+                    DropdownMenuItem(
+                        text = {
+                            val text = if (note.isSecret) "Remove from Secret" else "Add to Secret"
+                            Text(text)
+                        },
+                        onClick = {
+                            onToggleSecretClick()
+                            isMenuExpanded = false
+                        },
+                        leadingIcon = {
+                            Icon(
+                                if (note.isSecret) Icons.Outlined.LockOpen else Icons.Outlined.Lock,
+                                contentDescription = "Toggle Secret"
+                            )
+                        }
+                    )
+                    Divider()
+                    DropdownMenuItem(
+                        text = { Text("Move to Trash") },
+                        onClick = {
+                            onDeleteClick()
+                            isMenuExpanded = false
+                        },
+                        leadingIcon = { Icon(Icons.Outlined.Delete, "Move to Trash") }
+                    )
+                }
+            }
         }
     }
+}
+
+// Fungsi helper untuk mengubah format tanggal (bisa dipindah ke file util)
+private fun Date?.formatToReadableDate(): String {
+    if (this == null) return ""
+    return SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(this)
 }

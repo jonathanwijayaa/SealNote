@@ -304,3 +304,7 @@ val AuthTabLayoutBackgroundColor = Color(0xFF0D1326)
 val AuthSelectedTabBrushStart = Color(0xFF7B5DFF)
 val AuthSelectedTabBrushEnd = Color(0xFF5D7FFF)
 val AuthUnselectedTabColor = Color.Transparent
+val CardBackgroundColor = Color(0xFF2C2F48)
+val PrimaryTextColor = Color.White
+val SecondaryTextColor = Color(0xFFD1D1D1)
+val TertiaryTextColor = Color(0xFF9E9E9E)

@@ -1,14 +1,15 @@
+// path: app/src/main/java/com/example/sealnote/view/HomepageScreen.kt
+
 package com.example.sealnote.view
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Home
@@ -16,67 +17,102 @@ import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.sealnote.R
-import com.example.sealnote.ui.theme.SealnoteTheme
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import com.example.sealnote.model.Notes
+import com.example.sealnote.util.SortOption
+import com.example.sealnote.viewmodel.HomepageViewModel
 import kotlinx.coroutines.launch
 
-// Definisi Warna sesuai gambar
-val ScreenBackground = Color(0xFF1A1C2E)
-val CardBackgroundColor = Color(0xFF2C2F48)
-val FabColor = Color(0xFF7B5DFF)
-val PrimaryTextColor = Color.White
-val SecondaryTextColor = Color(0xFFD1D1D1)
-val TertiaryTextColor = Color(0xFF9E9E9E)
-val IconColor = Color.White
+// Pastikan import NoteCard dari filenya sendiri
+import com.example.sealnote.view.NoteCard
 
-// Data class Anda (tetap sama)
-data class Note(
-    val id: Int,
-    val title: String,
-    val content: String,
-    val date: String,
-    val tag: String
-)
+@Composable
+fun HomepageRoute(
+    navController: NavHostController,
+    viewModel: HomepageViewModel = hiltViewModel()
+) {
+    val notes by viewModel.notes.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val sortOption by viewModel.sortOption.collectAsStateWithLifecycle()
+
+    HomepageScreen(
+        notes = notes,
+        searchQuery = searchQuery,
+        sortOption = sortOption,
+        onSearchQueryChange = viewModel::onSearchQueryChange,
+        onSortOptionChange = viewModel::onSortOptionChange,
+        onNoteClick = { noteId ->
+            navController.navigate("add_edit_note_screen/$noteId")
+        },
+        onDeleteNoteClick = { noteId ->
+            viewModel.trashNote(noteId)
+        },
+        onNavigateToAddNote = {
+            navController.navigate("add_edit_note_screen/null")
+        },
+        onToggleSecretClick = { noteId, currentStatus ->
+            viewModel.toggleSecretStatus(noteId, currentStatus)
+        },
+        onNavigateToBookmarks = { navController.navigate("bookmarks") },
+        onNavigateToProfile = { navController.navigate("profile") },
+        onNavigateToSecretNotes = { navController.navigate("secretNotesLocked") },
+        onNavigateToTrash = { navController.navigate("trash") },
+        onNavigateToSettings = { navController.navigate("settings") },
+        onLogoutClick = {
+            // Panggil fungsi logout dari ViewModel untuk menghapus sesi user
+            viewModel.logout()
+            // Kemudian navigasikan ke halaman login
+            navController.navigate("login") {
+                // Hapus semua halaman sebelumnya dari back stack agar user tidak bisa kembali
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+                // Pastikan hanya ada satu instance halaman login
+                launchSingleTop = true
+            }
+        },
+        onNavigateToCalculator = {
+            navController.navigate("stealthCalculator") { popUpTo("homepage") { inclusive = true } }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomepageScreen(
-    modifier: Modifier = Modifier,
+    notes: List<Notes>,
+    searchQuery: String,
+    sortOption: SortOption,
+    onSearchQueryChange: (String) -> Unit,
+    onSortOptionChange: (SortOption) -> Unit,
+    onNoteClick: (String) -> Unit,
+    onDeleteNoteClick: (String) -> Unit,
     onNavigateToAddNote: () -> Unit,
-    onNavigateToProfile: () -> Unit,
+    onToggleSecretClick: (String, Boolean) -> Unit,
     onNavigateToBookmarks: () -> Unit,
+    onNavigateToProfile: () -> Unit,
     onNavigateToSecretNotes: () -> Unit,
     onNavigateToTrash: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onLogoutClick: () -> Unit,
+    onNavigateToCalculator: () -> Unit
 ) {
-    val notes = remember {
-        List(8) { index ->
-            Note(
-                id = index,
-                title = "Title",
-                content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id.",
-                date = "Mar 22, 2025",
-                tag = "Example"
-            )
-        }
-    }
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var isSortMenuExpanded by remember { mutableStateOf(false) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
+
             ModalDrawerSheet(
                 drawerContainerColor = MaterialTheme.colorScheme.surface
             ) {
@@ -99,16 +135,38 @@ fun HomepageScreen(
                         unselectedTextColor = MaterialTheme.colorScheme.onSurface,
                         unselectedIconColor = MaterialTheme.colorScheme.onSurface
                     )
+
+            ModalDrawerSheet {
+                Spacer(modifier = Modifier.height(16.dp))
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Outlined.AddCircleOutline, "New Note") },
+                    label = { Text("New Note") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToAddNote()
+                    }
+
                 )
                 NavigationDrawerItem(
-                    label = { Text("Bookmarks", color = MaterialTheme.colorScheme.onSurface) },
+                    icon = { Icon(Icons.Outlined.BookmarkBorder, "Bookmarks") },
+                    label = { Text("Bookmarks") },
                     selected = false,
+
                     onClick = { onNavigateToBookmarks(); scope.launch { drawerState.close() } },
                     icon = { Icon(Icons.Outlined.BookmarkBorder, contentDescription = "Bookmarks", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToBookmarks()
+                    }
+
                 )
                 NavigationDrawerItem(
-                    label = { Text("Secret Notes", color = MaterialTheme.colorScheme.onSurface) },
+                    icon = { Icon(Icons.Outlined.Lock, "Secret Notes") },
+                    label = { Text("Secret Notes") },
                     selected = false,
+
                     onClick = { onNavigateToSecretNotes(); scope.launch { drawerState.close() } },
                     icon = { Icon(Icons.Outlined.Lock, contentDescription = "Secret Notes", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
                 )
@@ -122,24 +180,57 @@ fun HomepageScreen(
                         selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
                     )
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToSecretNotes()
+                    }
                 )
                 NavigationDrawerItem(
-                    label = { Text("Settings", color = MaterialTheme.colorScheme.onSurface) },
+                    icon = { Icon(Icons.Outlined.Delete, "Trash") },
+                    label = { Text("Trash") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToTrash()
+                    }
+                )
+                Divider(modifier = Modifier.padding(vertical = 16.dp))
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Outlined.Settings, "Settings") },
+                    label = { Text("Settings") },
                     selected = false,
                     onClick = { onNavigateToSettings(); scope.launch { drawerState.close() } },
                     icon = { Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToSettings()
+                    }
                 )
                 NavigationDrawerItem(
-                    label = { Text("Profile", color = MaterialTheme.colorScheme.onSurface) },
+                    icon = { Icon(Icons.Outlined.Calculate, "Back to Calculator") },
+                    label = { Text("Back to Calculator") },
                     selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToCalculator()
+                    }
+                )
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Outlined.Logout, "Logout") },
+                    label = { Text("Logout") },
+                    selected = false,
+
                     onClick = { onNavigateToProfile(); scope.launch { drawerState.close() } },
                     icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onLogoutClick()
+                    }
                 )
             }
         }
     ) {
         Scaffold(
-            containerColor = ScreenBackground,
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
@@ -150,169 +241,90 @@ fun HomepageScreen(
                             fontWeight = FontWeight.Bold
                         )
                     },
+
+                    title = { Text("Home") },
+
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = PrimaryTextColor)
+                            Icon(Icons.Default.Menu, "Menu")
                         }
                     },
                     actions = {
-                        IconButton(onClick = {
-                            // TODO: Action to show/hide search TextField or navigate to a separate search screen
-                        }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_search),
-                                contentDescription = "Search",
-                                tint = IconColor
-                            )
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .clickable { /* TODO: Aksi untuk mengurutkan catatan */ }
-                                .padding(horizontal = 8.dp)
-                        ) {
-                            Text(
-                                text = "Sorted by",
-                                color = PrimaryTextColor,
-                                fontSize = 14.sp
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Sort notes",
-                                tint = PrimaryTextColor,
-                                modifier = Modifier.size(24.dp)
-                            )
+                        Box {
+                            IconButton(onClick = { isSortMenuExpanded = true }) {
+                                Icon(Icons.AutoMirrored.Filled.Sort, "Sort Notes")
+                            }
+                            DropdownMenu(
+                                expanded = isSortMenuExpanded,
+                                onDismissRequest = { isSortMenuExpanded = false }
+                            ) {
+                                SortOption.entries.forEach { option ->
+                                    DropdownMenuItem(
+                                        text = { Text(option.displayName) },
+                                        onClick = {
+                                            onSortOptionChange(option)
+                                            isSortMenuExpanded = false
+                                        }
+                                    )
+                                }
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = ScreenBackground,
-                        titleContentColor = PrimaryTextColor,
-                        navigationIconContentColor = PrimaryTextColor,
-                        actionIconContentColor = PrimaryTextColor
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(
-                    onClick = onNavigateToAddNote,
-                    containerColor = FabColor,
-                    contentColor = IconColor,
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add new note"
-                    )
+                FloatingActionButton(onClick = onNavigateToAddNote) {
+                    Icon(Icons.Default.Add, "Add Note")
                 }
-            },
-            modifier = modifier
-        ) { innerPadding ->
+            }
+        ) { paddingValues ->
             Column(
                 modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp)
+                    .padding(paddingValues)
+                    .fillMaxSize()
             ) {
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = onSearchQueryChange,
+                    onSearch = { },
+                    active = false,
+                    onActiveChange = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    placeholder = { Text("Search notes...") },
+                    leadingIcon = { Icon(Icons.Default.Search, "Search") },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { onSearchQueryChange("") }) {
+                                Icon(Icons.Default.Close, "Clear search")
+                            }
+                        }
+                    }
+                ) {}
+
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(bottom = 16.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(notes, key = { it.id }) { note ->
-                        NoteCard(note)
+                        NoteCard(
+                            note = note,
+                            onEditClick = { onNoteClick(note.id) },
+                            onDeleteClick = { onDeleteNoteClick(note.id) },
+                            onToggleSecretClick = { onToggleSecretClick(note.id, note.isSecret) }
+                        )
                     }
                 }
             }
-        }
-    }
-}
-
-
-@Composable
-fun NoteCard(note: Note) { // Tetap di file ini atau pindah ke file terpisah jika NoteCard.kt tidak ada
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = CardBackgroundColor),
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = note.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = PrimaryTextColor
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = note.content,
-                fontSize = 13.sp,
-                color = SecondaryTextColor,
-                lineHeight = 18.sp,
-                maxLines = 4
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = note.date,
-                    fontSize = 11.sp,
-                    color = TertiaryTextColor
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Outlined.LocalOffer,
-                        contentDescription = "Tag",
-                        tint = TertiaryTextColor,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = note.tag,
-                        fontSize = 11.sp,
-                        color = TertiaryTextColor
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Home Screen Preview Dark")
-@Composable
-fun HomeScreenPreview() {
-    SealnoteTheme {
-        HomepageScreen(
-            onNavigateToAddNote = {},
-            onNavigateToProfile = {},
-            onNavigateToBookmarks = {},
-            onNavigateToSecretNotes = {},
-            onNavigateToTrash = {},
-            onNavigateToSettings = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Note Card Preview Dark", backgroundColor = 0xFF1A1C2E)
-@Composable
-fun NoteCardPreview() {
-    SealnoteTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            NoteCard(
-                Note(
-                    id = 0,
-                    title = "Title",
-                    content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed id.",
-                    date = "Mar 22, 2025",
-                    tag = "Example"
-                )
-            )
         }
     }
 }

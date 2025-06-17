@@ -18,6 +18,8 @@ activity = "1.10.1"
 constraintlayout = "2.2.1"
 materialVersion = "1.10.0"
 drawerlayout = "1.2.0"
+hilt = "2.51.1"
+hiltNavigationCompose = "1.2.0"
 
 # --- CRITICAL NAVIGATION VERSION CONSISTENCY ---
 # Set a single, consistent version for ALL navigation components
@@ -104,8 +106,14 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "playServicesOssLicenses" }
 androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
 androidx-benchmark-macro = { group = "androidx.benchmark", name = "benchmark-macro", version.ref = "benchmarkMacro" }
+=======
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
