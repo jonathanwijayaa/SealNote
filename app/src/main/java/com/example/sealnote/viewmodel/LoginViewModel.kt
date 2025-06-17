@@ -1,38 +1,45 @@
 package com.example.sealnote.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginViewModel : ViewModel() {
 
     private val _loginResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> get() = _loginResult
 
-    fun login(username: String, password: String, context: Context) {
-        if (username.isEmpty() || password.isEmpty()) {
-            _loginResult.value = LoginResult.Error("Username dan Password harus diisi!")
+    private val auth = FirebaseAuth.getInstance()
+
+    // Check if a user is already logged in
+    val isLoggedIn: LiveData<Boolean> = MutableLiveData<Boolean>().apply {
+        value = auth.currentUser != null
+    }
+
+    fun login(email: String, password: String) {
+        if (email.isEmpty() || password.isEmpty()) {
+            _loginResult.value = LoginResult.Error("Email and Password must be filled!")
             return
         }
 
-        // Replace with your actual authentication logic
-        if (username == "admin" && password == "admin") {
-            // Simulate successful login
-            // In a real app, you'd likely interact with a backend or database here.
-            // For example, you might use a Repository to handle authentication.
+        _loginResult.value = LoginResult.Loading
 
-            // Save login status (you might want to move this to a Repository as well)
-            val sharedPreferences = context.getSharedPreferences("SealNotePrefs", Context.MODE_PRIVATE)
-            sharedPreferences.edit().putBoolean("isLoggedIn", true).apply()
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnSuccessListener {
+                _loginResult.value = LoginResult.Success
+            }
+            .addOnFailureListener { e ->
+                _loginResult.value = LoginResult.Error("Login failed: ${e.message}")
+            }
+    }
 
-            _loginResult.value = LoginResult.Success
-        } else {
-            _loginResult.value = LoginResult.Error("Username atau password salah!")
-        }
+    fun logout() {
+        auth.signOut()
     }
 
     sealed class LoginResult {
+        object Loading: LoginResult()
         object Success : LoginResult()
         data class Error(val message: String) : LoginResult()
     }

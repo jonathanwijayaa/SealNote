@@ -1,10 +1,11 @@
 package com.example.sealnote.view
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.* // Impor semua yang diperlukan dari Material3
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
@@ -15,16 +16,46 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.example.sealnote.viewmodel.BookmarksViewModel
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.sealnote.model.Notes
-import kotlinx.coroutines.launch
-import com.example.sealnote.ui.theme.SealnoteTheme // Pastikan AppTheme diimpor
-import androidx.compose.ui.graphics.Color // Tetap impor jika Anda ingin menggunakan Color.Transparent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.sealnote.R
+import com.example.sealnote.model.Notes
+import com.example.sealnote.viewmodel.BookmarksViewModel
+import kotlinx.coroutines.launch
+
+/**
+ * Entry point cerdas untuk layar bookmark. Menghubungkan ViewModel ke UI.
+ */
+@Composable
+fun BookmarksRoute(
+    onNavigateToAddNote: () -> Unit,
+    onNavigateTo: (String) -> Unit,
+    viewModel: BookmarksViewModel = hiltViewModel()
+) {
+    val bookmarkedNotes by viewModel.bookmarkedNotes.collectAsStateWithLifecycle()
+
+    BookmarksScreen(
+        bookmarkedNotes = bookmarkedNotes,
+        onNavigateToAddNote = onNavigateToAddNote,
+        onNavigateTo = onNavigateTo
+    )
+}
+
+/**
+ * Composable yang hanya bertugas menampilkan UI berdasarkan data yang diterima.
+ */
+
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,13 +71,13 @@ fun BookmarksScreen(
     onNavigateToTrash: () -> Unit,
     onNavigateToSettings: () -> Unit,
     bookmarksViewModel: BookmarksViewModel
+    onNavigateToAddNote: () -> Unit,
+    onNavigateTo: (String) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
-    // Mengambil ColorScheme dari MaterialTheme
     val colorScheme = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography // Tambahkan ini untuk akses ke typography
+    val typography = MaterialTheme.typography
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -109,68 +140,54 @@ fun BookmarksScreen(
                     selected = false,
                     onClick = { onNavigateToProfile(); scope.launch { drawerState.close() } },
                     icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+            ModalDrawerSheet {
+                // Letakkan semua NavigationDrawerItem Anda di sini
+                // Contoh:
+                Text("SealNote Menu", modifier = Modifier.padding(16.dp), style = typography.titleLarge)
+                Divider()
+                NavigationDrawerItem(
+                    label = { Text("All Notes") },
+                    selected = false,
+                    onClick = { onNavigateTo("all_notes") }
                 )
+                NavigationDrawerItem(
+                    label = { Text("Bookmarks") },
+                    selected = true,
+                    onClick = { scope.launch { drawerState.close() } }
+                )
+                // ... item lainnya
             }
         }
     ) {
         Scaffold(
-            containerColor = colorScheme.background, // Menggunakan warna tema untuk latar belakang Scaffold
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
                         // Judul layar
                         Text("Bookmarks", color = colorScheme.onSurface)
                     },
+
+                TopAppBar(
+                    title = { Text("Bookmarks") },
+
                     navigationIcon = {
-                        // Tombol untuk membuka drawer (ikon Menu)
-                        IconButton(onClick = {
-                            scope.launch { drawerState.open() }
-                        }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = colorScheme.onSurface)
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(Icons.Default.Menu, "Menu")
                         }
                     },
                     actions = {
-                        // Ikon pencarian di sisi kanan
-                        IconButton(onClick = {
-                            // TODO: Aksi untuk menampilkan/menyembunyikan TextField pencarian
-                            // atau menavigasi ke layar pencarian terpisah
-                            // Untuk contoh ini, kita bisa menampilkan TextField sebagai overlay atau dialog,
-                            // atau langsung menempatkan SearchBar jika itu yang diinginkan
-                        }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_search), // Anda perlu memiliki drawable ic_search
-                                contentDescription = "Search",
-                                tint = colorScheme.onSurface
-                            )
+                        IconButton(onClick = { /* TODO: Search Action */ }) {
+                            Icon(painterResource(id = R.drawable.ic_search), "Search")
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = colorScheme.surface,
-                        titleContentColor = colorScheme.onSurface,
-                        navigationIconContentColor = colorScheme.onSurface,
-                        actionIconContentColor = colorScheme.onSurface // Menentukan warna ikon aksi
-                    )
+                    }
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(
-                    onClick = onNavigateToAddNote,
-                    containerColor = colorScheme.primary, // Warna FAB dari tema
-                    contentColor = colorScheme.onPrimary // Warna ikon FAB dari tema
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Note")
+                FloatingActionButton(onClick = onNavigateToAddNote) {
+                    Icon(Icons.Default.Add, "Add Note")
                 }
             }
         ) { paddingValues ->
-            val filteredNotes = if (searchQuery.isBlank()) {
-                bookmarkedNotes
-            } else {
-                bookmarkedNotes.filter {
-                    it.title.contains(searchQuery, ignoreCase = true) ||
-                            it.content.contains(searchQuery, ignoreCase = true)
-                }
-            }
-
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
@@ -179,12 +196,16 @@ fun BookmarksScreen(
                     .padding(horizontal = 8.dp),
                 contentPadding = PaddingValues(vertical = 8.dp)
             ) {
-                items(filteredNotes, key = { it.id }) { note ->
-                    NoteCard(note) // Pastikan NoteCard juga menggunakan tema Material3
+                items(bookmarkedNotes, key = { it.id }) { note ->
+                    // Ganti dengan Composable NoteCard Anda yang sebenarnya
+                    Card(modifier = Modifier.padding(4.dp)) {
+                        Text(note.title, modifier = Modifier.padding(16.dp))
+                    }
                 }
             }
         }
     }
+
 }
 
 
