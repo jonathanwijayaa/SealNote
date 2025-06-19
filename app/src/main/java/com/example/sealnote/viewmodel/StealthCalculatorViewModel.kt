@@ -22,12 +22,10 @@ class StealthCalculatorViewModel : ViewModel() {
     private val handler = Handler(Looper.getMainLooper())
     private val resetCounter = Runnable { clickCount = 0 }
 
-    // Exposed event for UI to observe
-    var onLoginRequired: (() -> Unit)? = null // This will be set by the UI to trigger navigation
 
     // --- Calculator State ---
-    var displayTopRow by mutableStateOf("") // Added for the top display
-    var displayBottomRow by mutableStateOf("0") // Changed from displayText
+    var displayText by mutableStateOf("0")
+        private set
 
     private var currentExpression: String = ""
     private var lastInputWasOperator: Boolean = false
@@ -35,34 +33,34 @@ class StealthCalculatorViewModel : ViewModel() {
 
     var onCalculationFinished: ((expression: String, result: String) -> Unit)? = null
 
-    // Renamed for clarity and to indicate it's the primary button handler
-    fun onCalculatorButtonClick(symbol: String) {
-        // Register button click for triple-click detection
-        registerButtonClickForTripleClick(symbol)
 
-        // Run calculator logic
+    fun onCalculatorButtonClick(symbol: String, onTripleClickAction: () -> Unit) {
+        // Daftarkan setiap klik tombol untuk dideteksi sebagai triple-click
+        registerButtonClickForTripleClick(symbol, onTripleClickAction)
+
+        // Jalankan logika kalkulator
         when (symbol) {
             "C" -> clearAll()
             "+", "-", "×", "÷" -> handleOperator(symbol)
             "=" -> handleEquals()
             "," -> handleDecimal()
-            else -> handleNumber(symbol) // Numbers 0-9
+            else -> handleNumber(symbol) // Angka 0-9
         }
     }
 
-    private fun registerButtonClickForTripleClick(buttonSymbol: String) {
+    private fun registerButtonClickForTripleClick(buttonSymbol: String, onTripleClick: () -> Unit) {
         if (buttonSymbol == targetButtonSymbolForTripleClick) {
             clickCount++
             handler.removeCallbacks(resetCounter)
             handler.postDelayed(resetCounter, resetTime)
 
             if (clickCount >= requiredClickCount) {
-                onLoginRequired?.invoke() // Trigger the navigation event
-                clickCount = 0 // Reset count
+                onTripleClick() // Panggil aksi navigasi
+                clickCount = 0 // Reset hitungan
                 handler.removeCallbacks(resetCounter)
             }
         } else {
-            // If another button is pressed, reset the count
+            // Jika tombol lain ditekan, reset hitungan
             clickCount = 0
             handler.removeCallbacks(resetCounter)
         }
@@ -71,20 +69,14 @@ class StealthCalculatorViewModel : ViewModel() {
     fun onBackspaceClick() {
         if (currentExpression.isNotEmpty()) {
             currentExpression = currentExpression.dropLast(1)
-            displayBottomRow = if (currentExpression.isEmpty()) "0" else currentExpression
-            displayTopRow = "" // Clear top row on backspace
+            displayText = if (currentExpression.isEmpty()) "0" else currentExpression
             lastInputWasOperator = if (currentExpression.isNotEmpty()) isOperator(currentExpression.last().toString()) else false
             lastInputWasEquals = false
-        } else {
-            // If expression is already empty, reset to "0" and clear top row
-            displayBottomRow = "0"
-            displayTopRow = ""
         }
     }
 
     private fun clearAll() {
-        displayBottomRow = "0"
-        displayTopRow = "" // Clear top display
+        displayText = "0"
         currentExpression = ""
         lastInputWasOperator = false
         lastInputWasEquals = false
@@ -95,17 +87,12 @@ class StealthCalculatorViewModel : ViewModel() {
             currentExpression = ""
             lastInputWasEquals = false
         }
-        if (currentExpression == "0" && numberChar == "0") {
-            // Do nothing if trying to add more zeros to "0"
-            return
-        }
         if (currentExpression == "0") {
             currentExpression = numberChar
         } else {
             currentExpression += numberChar
         }
-        displayBottomRow = currentExpression
-        displayTopRow = "" // Clear top row when typing new number
+        displayText = currentExpression
         lastInputWasOperator = false
     }
 
@@ -116,30 +103,21 @@ class StealthCalculatorViewModel : ViewModel() {
         } else if (currentExpression.isEmpty() || lastInputWasOperator) {
             currentExpression += "0,"
         } else {
-            // Check if the last number segment already contains a decimal
-            val lastOperatorIndex = currentExpression.indexOfLast { it in "+-×÷" }
-            val lastNumberSegment = if (lastOperatorIndex != -1) {
-                currentExpression.substring(lastOperatorIndex + 1)
-            } else {
-                currentExpression // If no operator, the whole expression is the number
+            val lastNumber = currentExpression.split(Regex("[+\\-×÷]")).last()
+            if (!lastNumber.contains(',')) {
+                currentExpression += ","
             }
         }
-        displayBottomRow = currentExpression
+        displayText = currentExpression
         lastInputWasOperator = false
     }
 
     private fun handleOperator(newOperator: String) {
-        if (currentExpression.isNotEmpty()) {
-            if (lastInputWasOperator) {
-                // Replace the last operator if consecutive operators are entered
-                currentExpression = currentExpression.dropLast(1) + newOperator
-            } else {
-                currentExpression += newOperator
-            }
+        if (currentExpression.isNotEmpty() && !lastInputWasOperator) {
+            currentExpression += newOperator
             lastInputWasEquals = false
             lastInputWasOperator = true
-            displayBottomRow = currentExpression
-            displayTopRow = "" // Clear top row when an operator is pressed
+            displayText = currentExpression
         }
     }
 
@@ -160,16 +138,14 @@ class StealthCalculatorViewModel : ViewModel() {
             val result = expression.evaluate()
             val formattedResult = formatResult(result.toBigDecimal())
 
-            displayTopRow = "$originalExpressionForHistory ="
-            displayBottomRow = formattedResult
-            onCalculationFinished?.invoke(originalExpressionForHistory, formattedResult)
-            currentExpression = formattedResult.replace(",", ".") // Set current expression to result for chaining
+            displayText = formattedResult
+            onCalculationFinished?.invoke("$originalExpressionForHistory =", formattedResult)
+            currentExpression = formattedResult.replace(",",".")
             lastInputWasEquals = true
             lastInputWasOperator = false
         } catch (e: Exception) {
-            displayTopRow = "$originalExpressionForHistory ="
-            displayBottomRow = "Error"
-            onCalculationFinished?.invoke(originalExpressionForHistory, "Error")
+            displayText = "Error"
+            onCalculationFinished?.invoke("$originalExpressionForHistory =", "Error")
             currentExpression = ""
             lastInputWasEquals = false
             lastInputWasOperator = false

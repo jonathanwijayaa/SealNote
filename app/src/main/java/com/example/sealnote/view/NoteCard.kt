@@ -101,7 +101,7 @@ fun NoteCard(
                     )
                     DropdownMenuItem(
                         text = {
-                            val text = if (note.isSecret) "Remove from Secret" else "Add to Secret"
+                            val text = if (note.secret) "Remove from Secret" else "Add to Secret"
                             Text(text)
                         },
                         onClick = {
@@ -110,7 +110,7 @@ fun NoteCard(
                         },
                         leadingIcon = {
                             Icon(
-                                if (note.isSecret) Icons.Outlined.LockOpen else Icons.Outlined.Lock,
+                                if (note.secret) Icons.Outlined.LockOpen else Icons.Outlined.Lock,
                                 contentDescription = "Toggle Secret"
                             )
                         }
