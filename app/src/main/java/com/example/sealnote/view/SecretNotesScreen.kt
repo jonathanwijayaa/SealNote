@@ -1,303 +1,254 @@
+// path: app/src/main/java/com/example/sealnote/view/SecretNotesScreen.kt
+
 package com.example.sealnote.view
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Calculate
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color // Hanya untuk Color.Transparent atau custom color tags
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp // Digunakan untuk lineHeight yang spesifik
-import com.example.sealnote.R
-import com.example.sealnote.ui.theme.SealnoteTheme // Pastikan SealnoteTheme diimpor
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.sealnote.model.Notes
+import com.example.sealnote.util.SortOption
+import com.example.sealnote.viewmodel.SecretNotesViewModel
 import kotlinx.coroutines.launch
 
 
-// Data class placeholder untuk item catatan utama
-data class MainNote(
-    val id: String,
-    val title: String,
-    val contentPreview: String,
-    val date: String,
-    val colorTag: Color? = null // Biarkan Color? di sini untuk custom card colors
-)
-
 @Composable
-fun NoteCardItem(note: MainNote, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            // Gunakan secondaryContainer dari MaterialTheme sebagai default background kartu
-            // Dan onSecondaryContainer untuk teks di atasnya
-            containerColor = note.colorTag ?: MaterialTheme.colorScheme.secondaryContainer
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .defaultMinSize(minHeight = 120.dp)
-        ) {
-            Text(
-                text = note.title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer, // Teks pada kartu
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = note.contentPreview,
-                style = MaterialTheme.typography.bodyMedium,
-                // Gunakan warna yang kontras dengan secondaryContainer, dan sesuaikan alpha
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 20.sp
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = note.date,
-                style = MaterialTheme.typography.labelSmall,
-                // Gunakan warna yang kontras dengan secondaryContainer, dan sesuaikan alpha
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f),
-                modifier = Modifier.align(Alignment.End),
-                textAlign = TextAlign.End
-            )
-        }
-    }
+fun SecretNotesRoute(
+    navController: NavHostController,
+    viewModel: SecretNotesViewModel = hiltViewModel()
+) {
+    val secretNotes by viewModel.secretNotes.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val sortOption by viewModel.sortOption.collectAsStateWithLifecycle()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+
+    // Ambil fungsi dari ViewModel yang akan digunakan di UI
+    val onDeleteNote: (String) -> Unit = viewModel::trashNote
+    val onToggleSecret: (String) -> Unit = viewModel::toggleSecretStatus
+
+    SecretNotesScreen(
+        currentRoute = currentRoute,
+        notes = secretNotes,
+        searchQuery = searchQuery,
+        sortOption = sortOption,
+        onSearchQueryChange = viewModel::onSearchQueryChange,
+        onSortOptionChange = viewModel::onSortOptionChange,
+        onNoteClick = { noteId ->
+            navController.navigate("add_edit_note_screen/$noteId")
+        },
+        onNavigateToAddNote = {
+            navController.navigate("add_edit_note_screen/null?isSecret=true")
+        },
+        onNavigate = { route ->
+            // Cegah navigasi ke halaman yang sama
+            if (currentRoute != route) {
+                navController.navigate(route) { launchSingleTop = true }
+            }
+        },
+        onNavigateToCalculator = {
+            navController.navigate("stealthCalculator") {
+                popUpTo("homepage") { inclusive = true }
+            }
+        },
+        // Teruskan fungsi aksi ke UI
+        onDeleteClick = onDeleteNote,
+        onToggleSecretClick = { noteId, _ -> onToggleSecret(noteId) } // isSecret tidak relevan karena akan selalu di-toggle ke false
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecretNotesScreen(
-    notes: List<MainNote> = emptyList(),
-    onNoteClick: (MainNote) -> Unit = {},
-    onSortClick: () -> Unit = {},
-    onFabClick: () -> Unit = {},
-    onNavigateHomepage: () -> Unit,
+    currentRoute: String?,
+    notes: List<Notes>,
+    searchQuery: String,
+    sortOption: SortOption,
+    onSearchQueryChange: (String) -> Unit,
+    onSortOptionChange: (SortOption) -> Unit,
+    onNoteClick: (String) -> Unit,
     onNavigateToAddNote: () -> Unit,
-    onNavigateToProfile: () -> Unit,
-    onNavigateToBookmarks: () -> Unit,
-    onNavigateToSecretNotes: () -> Unit,
-    onNavigateToTrash: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigate: (String) -> Unit,
+    onNavigateToCalculator: () -> Unit,
+    onDeleteClick: (String) -> Unit, // Tambahkan parameter
+    onToggleSecretClick: (String, Boolean) -> Unit // Tambahkan parameter
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var isSortMenuExpanded by remember { mutableStateOf(false) }
+    var isSearchActive by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    val menuItems = listOf(
+        "homepage" to ("All Notes" to Icons.Default.Home),
+        "bookmarks" to ("Bookmarks" to Icons.Default.BookmarkBorder),
+        "secretNotes" to ("Secret Notes" to Icons.Default.Lock), // Rute ini akan terpilih
+        "trash" to ("Trash" to Icons.Default.Delete),
+        "settings" to ("Settings" to Icons.Default.Settings),
+        "profile" to ("Profile" to Icons.Default.Person)
+    )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(
-                drawerContainerColor = MaterialTheme.colorScheme.surface
-            ) {
+            ModalDrawerSheet {
                 Spacer(Modifier.height(12.dp))
-                Text(
-                    "SealNote Menu",
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                // Navigation Drawer Items
-                NavigationDrawerItem(
-                    label = { Text("All Notes", color = MaterialTheme.colorScheme.onSurface) },
-                    selected = false,
-                    onClick = { onNavigateHomepage(); scope.launch { drawerState.close() } },
-                    icon = { Icon(Icons.Outlined.Home, contentDescription = "All Notes", tint = MaterialTheme.colorScheme.onSurface) },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurface
+                Text("SealNote Menu", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp))
+                menuItems.forEach { (route, details) ->
+                    val (label, icon) = details
+                    // Logika selected yang disederhanakan dan diperbaiki
+                    val selected = currentRoute == route
+                    NavigationDrawerItem(
+                        icon = { Icon(icon, contentDescription = label) },
+                        label = { Text(label) },
+                        selected = selected,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(route)
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
-                )
+                }
+                Divider(modifier = Modifier.padding(vertical = 16.dp))
                 NavigationDrawerItem(
-                    label = { Text("Bookmarks", color = MaterialTheme.colorScheme.onSurface) },
+                    icon = { Icon(Icons.Outlined.Calculate, "Back to Calculator") },
+                    label = { Text("Back to Calculator") },
                     selected = false,
-                    onClick = { onNavigateToBookmarks(); scope.launch { drawerState.close() } },
-                    icon = { Icon(Icons.Outlined.BookmarkBorder, contentDescription = "Bookmarks", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
-                )
-                NavigationDrawerItem(
-                    label = { Text("Secret Notes", color = MaterialTheme.colorScheme.onSurface) },
-                    selected = true,
-                    onClick = { onNavigateToSecretNotes(); scope.launch { drawerState.close() } },
-                    icon = { Icon(Icons.Outlined.Lock, contentDescription = "Secret Notes", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
-                )
-                NavigationDrawerItem(
-                    label = { Text("Trash", color = MaterialTheme.colorScheme.onSecondaryContainer) },
-                    selected = false,
-                    onClick = { onNavigateToTrash(); scope.launch { drawerState.close() } },
-                    icon = { Icon(Icons.Outlined.Delete, contentDescription = "Trash", tint = MaterialTheme.colorScheme.onSecondaryContainer) },
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                )
-                NavigationDrawerItem(
-                    label = { Text("Settings", color = MaterialTheme.colorScheme.onSurface) },
-                    selected = false,
-                    onClick = { onNavigateToSettings(); scope.launch { drawerState.close() } },
-                    icon = { Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
-                )
-                NavigationDrawerItem(
-                    label = { Text("Profile", color = MaterialTheme.colorScheme.onSurface) },
-                    selected = false,
-                    onClick = { onNavigateToProfile(); scope.launch { drawerState.close() } },
-                    icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile", tint = MaterialTheme.colorScheme.onSurface) } // <-- ADDED ICON
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToCalculator()
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
             }
-        },
-        content = {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                containerColor = MaterialTheme.colorScheme.background, // Menggunakan background dari tema
-                topBar = {
-                    CenterAlignedTopAppBar(
-                        title = {
-                            Text(
-                                text = "Secret Notes",
-                                color = MaterialTheme.colorScheme.onSurface, // Teks judul di TopAppBar
-                                style = MaterialTheme.typography.titleLarge
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        if (isSearchActive) {
+                            BasicTextField(
+                                value = searchQuery,
+                                onValueChange = onSearchQueryChange,
+                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                                textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.onPrimary),
+                                singleLine = true,
+                                decorationBox = { innerTextField ->
+                                    Box(contentAlignment = Alignment.CenterStart) {
+                                        if (searchQuery.isEmpty()) {
+                                            Text("Search secret notes...", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f))
+                                        }
+                                        innerTextField()
+                                    }
+                                }
                             )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onSurface) // Ikon menu
+                            LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                        } else {
+                            Text("Secret Notes")
+                        }
+                    },
+                    // --- PERUBAHAN UTAMA DI SINI ---
+                    navigationIcon = {
+                        if (isSearchActive) {
+                            IconButton(onClick = { isSearchActive = false; onSearchQueryChange("") }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                             }
-                        },
-                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface, // Background TopAppBar
-                            titleContentColor = MaterialTheme.colorScheme.onSurface,
-                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface
-                        )
+                        } else {
+                            // Mengganti ArrowBack dengan ikon Menu untuk membuka drawer
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Default.Menu, "Open Menu")
+                            }
+                        }
+                    },
+                    actions = {
+                        if (isSearchActive) {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { onSearchQueryChange("") }) {
+                                    Icon(Icons.Default.Close, "Clear Search")
+                                }
+                            }
+                        } else {
+                            IconButton(onClick = { isSearchActive = true }) {
+                                Icon(Icons.Default.Search, "Search Secret Notes")
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                     )
-                },
-                floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = onFabClick,
-                        containerColor = MaterialTheme.colorScheme.primary, // Menggunakan warna primary dari tema
-                        contentColor = MaterialTheme.colorScheme.onPrimary, // Warna ikon di FAB
-                        shape = FloatingActionButtonDefaults.shape
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_add),
-                            contentDescription = "Add New Note"
-                        )
-                    }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = onNavigateToAddNote) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Secret Note")
                 }
-            ) { innerPadding ->
-                Column(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 8.dp, bottom = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "All Secret Notes",
-                            color = MaterialTheme.colorScheme.onBackground, // Teks di atas background utama
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .clickable(onClick = onSortClick)
-                                .padding(vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "Sorted by",
-                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f), // Warna teks sekunder
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_sort),
-                                contentDescription = "Sort Notes",
-                                tint = MaterialTheme.colorScheme.onBackground, // Warna ikon
-                                modifier = Modifier.size(24.dp)
-                            )
+            }
+        ) { paddingValues ->
+            Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                        TextButton(onClick = { isSortMenuExpanded = true }) {
+                            Text(sortOption.displayName)
+                            Spacer(Modifier.width(4.dp))
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Sort Options")
+                        }
+                        DropdownMenu(expanded = isSortMenuExpanded, onDismissRequest = { isSortMenuExpanded = false }) {
+                            SortOption.entries.forEach { option ->
+                                DropdownMenuItem(text = { Text(option.displayName) }, onClick = {
+                                    onSortOptionChange(option)
+                                    isSortMenuExpanded = false
+                                })
+                            }
                         }
                     }
-
+                }
+                HorizontalDivider()
+                if (notes.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(if(searchQuery.isNotEmpty()) "No results found" else "No secret notes yet. Tap '+' to add one!")
+                    }
+                } else {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp),
-                        contentPadding = PaddingValues(
-                            top = 8.dp,
-                            start = 8.dp,
-                            end = 8.dp,
-                            bottom = 16.dp + 56.dp + 16.dp
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(notes, key = { it.id }) { note ->
-                            NoteCardItem(
+                            NoteCard(
                                 note = note,
-                                onClick = { onNoteClick(note) }
+                                onEditClick = { onNoteClick(note.id) },
+                                onDeleteClick = { onDeleteClick(note.id) },
+                                onToggleSecretClick = { onToggleSecretClick(note.id, note.isSecret) }
                             )
                         }
                     }
                 }
             }
         }
-    )
-}
-
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun SecretNotesScreenPreview() {
-    val sampleNotes = List(7) { index ->
-        MainNote(
-            id = "note_$index",
-            title = "Judul Catatan Penting $index",
-            contentPreview = "Ini adalah isi dari catatan rahasia nomor $index yang sangat penting dan perlu diingat baik-baik. Konten bisa beberapa baris.",
-            date = "Mei ${20 + index}, 2025",
-            colorTag = if (index % 3 == 0) Color(0xFF4A4E69) else if (index % 3 == 1) Color(0xFF2C3E50) else null
-        )
-    }
-    SealnoteTheme {
-        SecretNotesScreen(
-            notes = sampleNotes,
-            onNavigateHomepage = {},
-            onNavigateToAddNote = {},
-            onNavigateToProfile = {},
-            onNavigateToBookmarks = {},
-            onNavigateToSecretNotes = {},
-            onNavigateToTrash = {},
-            onNavigateToSettings = {}
-        )
     }
 }

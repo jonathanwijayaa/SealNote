@@ -6,7 +6,11 @@
         android:name="android.hardware.camera"
         android:required="false" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
+    <queries>
+        <package android:name="com.google.android.gms" />
+    </queries>
     <application
         android:name=".SealNoteApp"
         android:allowBackup="true"

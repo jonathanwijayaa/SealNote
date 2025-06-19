@@ -1,13 +1,13 @@
+// path: app/src/main/java/com/example/sealnote/view/AuthenticationScreen.kt
+
 package com.example.sealnote.view
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,35 +15,83 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sealnote.R
-import com.example.sealnote.ui.theme.SealnoteTheme // Asumsi AppTheme Anda
+import com.example.sealnote.ui.theme.SealnoteTheme
+import com.example.sealnote.viewmodel.AuthViewModel
+import com.example.sealnote.viewmodel.AuthenticatorType
+import com.example.sealnote.viewmodel.BiometricAuthState
 
-// Definisi Warna dari XML
 val AuthScreenBackground = Color(0xFF0A0F1E)
 val AuthCardBackgroundColor = Color(0xFF10182C)
 val AuthTextColor = Color.White
-
-// Warna untuk Tab (berdasarkan asumsi dari @drawable/tab_selector, @drawable/tab_selected)
 val AuthTabLayoutBackgroundColor = Color(0xFF0D1326)
 val AuthSelectedTabBrush = Brush.horizontalGradient(listOf(Color(0xFF7B5DFF), Color(0xFF5D7FFF)))
 val AuthUnselectedTabColor = Color.Transparent
 
+@Composable
+fun AuthenticationRoute(
+    onUsePinClick: () -> Unit,
+    onAuthSuccess: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
+) {
+    val context = LocalContext.current
+    val authState by viewModel.authState.collectAsState()
+
+    // Hoist state tab ke sini
+    var selectedTabIndex by remember { mutableStateOf(1) }
+    val currentAuthType = if (selectedTabIndex == 0) AuthenticatorType.FINGERPRINT else AuthenticatorType.FACE
+
+    // Cek ketersediaan untuk setiap tipe
+    val isBiometricAvailable = remember(currentAuthType) {
+        viewModel.canAuthenticate(context, currentAuthType)
+    }
+
+    LaunchedEffect(authState) {
+        when (val state = authState) {
+            is BiometricAuthState.Success -> {
+                Toast.makeText(context, "Authentication Succeeded!", Toast.LENGTH_SHORT).show()
+                onAuthSuccess()
+                viewModel.resetAuthState()
+            }
+            is BiometricAuthState.Error -> {
+                if (state.message.contains("Cancel", ignoreCase = true).not()) {
+                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                }
+                viewModel.resetAuthState()
+            }
+            else -> {}
+        }
+    }
+
+    AuthenticationScreen(
+        onUsePinClick = onUsePinClick,
+        isBiometricAvailable = isBiometricAvailable,
+        selectedTabIndex = selectedTabIndex,
+        onTabSelected = { index -> selectedTabIndex = index },
+        onAuthClick = {
+            // Kirim tipe autentikasi yang dipilih ke ViewModel
+            viewModel.startAuthentication(context as FragmentActivity, currentAuthType)
+        }
+    )
+}
 
 @Composable
 fun AuthenticationScreen(
     onUsePinClick: () -> Unit,
-    onAuthSuccess: () -> Unit // Callback untuk berhasil autentikasi
+    onAuthClick: () -> Unit,
+    isBiometricAvailable: Boolean,
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit // Terima callback untuk mengubah tab
 ) {
-    // State untuk tab yang terpilih (0: Fingerprint, 1: Face)
-    var selectedTabIndex by remember { mutableStateOf(1) } // Default ke Face
-
     val currentAuthMethod = if (selectedTabIndex == 0) AuthMethod.Fingerprint else AuthMethod.Face
 
     Surface(
@@ -67,10 +115,9 @@ fun AuthenticationScreen(
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Custom Tab Layout
                     AuthCustomTabLayout(
                         selectedTabIndex = selectedTabIndex,
-                        onTabSelected = { index -> selectedTabIndex = index }
+                        onTabSelected = onTabSelected // Gunakan callback
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -85,22 +132,20 @@ fun AuthenticationScreen(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-
                     Image(
                         painter = painterResource(id = currentAuthMethod.iconRes),
                         contentDescription = currentAuthMethod.contentDescription,
                         modifier = Modifier
                             .size(50.dp)
-                            .clickable {
-                                // Contoh: Trigger autentikasi saat ikon diklik (untuk demo)
-                                onAuthSuccess()
+                            .clickable(enabled = isBiometricAvailable) {
+                                onAuthClick()
                             }
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
-                        text = currentAuthMethod.authText,
+                        text = if (isBiometricAvailable) currentAuthMethod.authText else "This biometric type is not available or not set up.",
                         color = AuthTextColor,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center
@@ -130,7 +175,6 @@ private fun AuthCustomTabLayout(
     onTabSelected: (Int) -> Unit
 ) {
     val tabs = listOf("Fingerprint", "Face")
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -145,7 +189,6 @@ private fun AuthCustomTabLayout(
             } else {
                 Modifier.background(AuthUnselectedTabColor, shape = RoundedCornerShape(6.dp))
             }
-
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -155,52 +198,30 @@ private fun AuthCustomTabLayout(
                     .clickable { onTabSelected(index) },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = title,
-                    color = AuthTextColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(text = title, color = AuthTextColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
 }
 
-private enum class AuthMethod(
-    val iconRes: Int,
-    val authText: String,
-    val contentDescription: String
-) {
+// === Teks instruksi disesuaikan kembali agar lebih spesifik ===
+private enum class AuthMethod(val iconRes: Int, val authText: String, val contentDescription: String) {
     Fingerprint(
         iconRes = R.drawable.ic_finger,
-        authText = "Place your finger on the sensor.",
+        authText = "Place your finger on the sensor to authenticate.",
         contentDescription = "Fingerprint Icon"
     ),
     Face(
         iconRes = R.drawable.ic_face_id,
-        authText = "We need to detect your face.",
+        authText = "Position your face in the frame to authenticate.",
         contentDescription = "Face Icon"
     )
 }
-
-// Placeholder untuk R.drawable.ic_fingerprint_placeholder jika belum ada
-// Ini hanya contoh, ganti dengan ikon fingerprint Anda
-private val R.drawable.ic_fingerprint_placeholder: Int
-    get() = android.R.drawable.ic_partial_secure
-
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0F1E)
 @Composable
 fun AuthenticationScreenPreview() {
     SealnoteTheme {
-        // Berikan lambda kosong untuk callbacks di preview
-        AuthenticationScreen(onUsePinClick = {}, onAuthSuccess = {})
+        AuthenticationScreen(onUsePinClick = {}, onAuthClick = {}, isBiometricAvailable = true, selectedTabIndex = 1, onTabSelected = {})
     }
-}
-
-@Preview
-@Composable
-fun AuthCustomTabLayoutPreview() {
-    var selected by remember { mutableStateOf(0) }
-    AuthCustomTabLayout(selectedTabIndex = selected, onTabSelected = { selected = it })
 }

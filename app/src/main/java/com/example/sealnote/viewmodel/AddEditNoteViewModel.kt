@@ -6,91 +6,75 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sealnote.data.NotesRepository
-import com.example.sealnote.model.Notes
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+// Sealed class untuk event yang akan dikirim ke UI
+sealed class UiEvent {
+    data class ShowSnackbar(val message: String) : UiEvent()
+    object NoteSaved : UiEvent()
+}
 
 @HiltViewModel
 class AddEditNoteViewModel @Inject constructor(
     private val repository: NotesRepository,
-    savedStateHandle: SavedStateHandle,
-    private val auth: FirebaseAuth
+    private val savedStateHandle: SavedStateHandle // Hilt akan menyediakan ini secara otomatis
 ) : ViewModel() {
 
-    private val noteId: String? = savedStateHandle.get("noteId")
+    // State untuk judul, konten, dan status rahasia dari catatan
+    val title = MutableStateFlow("")
+    val content = MutableStateFlow("")
+    private val isSecret = MutableStateFlow(false)
 
-    private val _title = MutableStateFlow("")
-    val title = _title.asStateFlow()
-
-    private val _content = MutableStateFlow("")
-    val content = _content.asStateFlow()
-
-    private val _note = MutableStateFlow<Notes?>(null)
-    val note = _note.asStateFlow()
-
+    // Flow untuk mengirim event ke UI (misal: "Catatan Disimpan!")
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
+    private val noteId: String? = savedStateHandle["noteId"]
+
     init {
-        // Jika noteId tidak null (mode edit), muat data catatan
+        // Cek apakah kita mengedit catatan yang ada atau membuat yang baru
         if (noteId != null && noteId != "null") {
+            // Mode Edit: Muat data catatan
             viewModelScope.launch {
                 repository.getNoteById(noteId).collect { existingNote ->
                     if (existingNote != null) {
-                        _title.value = existingNote.title
-                        _content.value = existingNote.content
-                        _note.value = existingNote
+                        title.value = existingNote.title
+                        content.value = existingNote.content
+                        isSecret.value = existingNote.isSecret
                     }
                 }
             }
+        } else {
+            // Mode Tambah Baru: Ambil status isSecret dari argumen navigasi
+            val isSecretFromNav: Boolean = savedStateHandle["isSecret"] ?: false
+            isSecret.value = isSecretFromNav
         }
     }
 
-    fun onTitleChange(newTitle: String) {
-        _title.value = newTitle
-    }
-
-    fun onContentChange(newContent: String) {
-        _content.value = newContent
-    }
-
-    fun saveNote() {
+    /**
+     * Fungsi yang dipanggil oleh UI untuk menyimpan catatan.
+     * Tidak perlu parameter karena semua data sudah ada di dalam state ViewModel ini.
+     */
+    fun onSaveNoteClick() {
         viewModelScope.launch {
-            val userId = auth.currentUser?.uid
-            if (userId == null) {
-                _eventFlow.emit(UiEvent.ShowSnackbar("You must be logged in to save a note."))
-                return@launch
-            }
-
             try {
-                if (_title.value.isBlank()) {
-                    _eventFlow.emit(UiEvent.ShowSnackbar("Judul tidak boleh kosong"))
-                    return@launch
-                }
-
+                // Panggil fungsi BARU di Repository dengan parameter yang benar
+                // Perhatikan, kita tidak perlu lagi mengirim userId dari sini!
                 repository.saveNote(
-                    noteId = if (noteId == "null") null else noteId,
-                    title = _title.value,
-                    content = _content.value,
-                    userId = userId
+                    noteId = noteId,
+                    title = title.value.ifEmpty { "Untitled Note" },
+                    content = content.value,
+                    isSecret = isSecret.value // Kirim status rahasia yang benar
                 )
-
-                _eventFlow.emit(UiEvent.SaveNote)
+                // Kirim event ke UI bahwa penyimpanan berhasil
+                _eventFlow.emit(UiEvent.NoteSaved)
             } catch (e: Exception) {
-                _eventFlow.emit(UiEvent.ShowSnackbar("Gagal menyimpan catatan: ${e.message}"))
+                // Kirim event error jika penyimpanan gagal
+                _eventFlow.emit(UiEvent.ShowSnackbar(e.message ?: "Couldn't save note"))
             }
         }
-    }
-
-    sealed class UiEvent {
-        data class ShowSnackbar(val message: String) : UiEvent()
-        object SaveNote : UiEvent()
     }
 }

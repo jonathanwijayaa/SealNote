@@ -1,5 +1,3 @@
-// path: app/src/main/java/com/example/sealnote/view/AddNotesScreen.kt
-
 package com.example.sealnote.view
 
 import android.Manifest
@@ -12,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.*
@@ -22,69 +21,73 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.example.sealnote.ui.theme.SealnoteTheme // <-- IMPORT YANG DIPERLUKAN
 import com.example.sealnote.viewmodel.AddEditNoteViewModel
-import java.text.SimpleDateFormat
-import java.util.*
+import com.example.sealnote.viewmodel.UiEvent
 
 @Composable
 fun AddEditNoteRoute(
     onBack: () -> Unit,
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
+    // Mengambil state dari ViewModel
     val title by viewModel.title.collectAsStateWithLifecycle()
     val content by viewModel.content.collectAsStateWithLifecycle()
-    val note by viewModel.note.collectAsStateWithLifecycle()
-
-    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // State untuk URI gambar, dikelola di UI level
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val context = LocalContext.current
 
+    // Launcher untuk memilih gambar dari galeri
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         imageUri = uri
+        // TODO: Anda perlu logika untuk meng-upload URI ini ke Firebase Storage
+        // dan menyimpan URL-nya di dalam dokumen catatan Anda.
     }
 
+    // Launcher untuk meminta izin kamera
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
             Toast.makeText(context, "Camera permission granted. Feature under development.", Toast.LENGTH_SHORT).show()
-            // TODO: Implement camera logic with FileProvider to get a URI
         } else {
             Toast.makeText(context, "Camera permission is required.", Toast.LENGTH_SHORT).show()
         }
     }
 
+    // Mendengarkan event dari ViewModel (misal: "Catatan Disimpan" atau "Error")
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collect { event ->
             when (event) {
-                is AddEditNoteViewModel.UiEvent.ShowSnackbar -> {
+                is UiEvent.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(event.message)
                 }
-                is AddEditNoteViewModel.UiEvent.SaveNote -> {
+                is UiEvent.NoteSaved -> {
+                    // Jika event NoteSaved diterima, panggil onBack untuk kembali
                     onBack()
                 }
             }
         }
     }
 
-    AddNotesScreen(
+    AddEditNoteScreen(
         title = title,
-        notesContent = content,
+        content = content,
         imageUri = imageUri,
-        onTitleChange = viewModel::onTitleChange,
-        onContentChange = viewModel::onContentChange,
+        onTitleChange = { viewModel.title.value = it },
+        onContentChange = { viewModel.content.value = it },
         snackbarHostState = snackbarHostState,
-        createdDate = note?.createdAt?.formatToString() ?: "Just now",
-        lastChangedDate = note?.updatedAt?.formatToString() ?: "Just now",
         onBack = onBack,
-        onSave = { viewModel.saveNote() },
+        onSaveClick = viewModel::onSaveNoteClick, // Memanggil fungsi yang benar
         onCameraClick = {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         },
@@ -96,50 +99,41 @@ fun AddEditNoteRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddNotesScreen(
+fun AddEditNoteScreen(
     title: String,
-    notesContent: String,
+    content: String,
     imageUri: Uri?,
     onTitleChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
     snackbarHostState: SnackbarHostState,
-    createdDate: String,
-    lastChangedDate: String,
     onBack: () -> Unit,
-    onSave: () -> Unit,
+    onSaveClick: () -> Unit,
     onCameraClick: () -> Unit,
     onGalleryClick: () -> Unit
 ) {
-    val containerColor = MaterialTheme.colorScheme.surface
-    val onContainerColor = MaterialTheme.colorScheme.onSurface
-
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        containerColor = containerColor,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Add Note", color = onContainerColor) },
             TopAppBar(
-                title = { Text(if (createdDate == "Just now") "Add Note" else "Edit Note", color = onContainerColor) },
+                title = { Text(if (title.isEmpty()) "Add Note" else "Edit Note") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = onContainerColor)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 },
                 actions = {
-                    TextButton(onClick = onSave) {
-                        Text("Save", color = onContainerColor)
+                    // Tombol save sekarang menggunakan ikon centang
+                    IconButton(onClick = onSaveClick) {
+                        Icon(Icons.Default.Check, contentDescription = "Save Note")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor),
-                modifier = Modifier.shadow(4.dp)
+                modifier = Modifier.shadow(2.dp) // Shadow yang lebih halus
             )
         },
         bottomBar = {
-            BottomAppBar(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            ) {
+            BottomAppBar {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
@@ -159,8 +153,10 @@ fun AddNotesScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            // Text field untuk Judul
             CustomTextField(
                 value = title,
                 onValueChange = onTitleChange,
@@ -168,7 +164,9 @@ fun AddNotesScreen(
                 textStyle = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Menampilkan gambar jika ada
             if (imageUri != null) {
                 AsyncImage(
                     model = imageUri,
@@ -178,22 +176,23 @@ fun AddNotesScreen(
                         .height(200.dp),
                     contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
             }
+
+            // Text field untuk Konten
             CustomTextField(
-                value = notesContent,
+                value = content,
                 onValueChange = onContentChange,
                 hint = "Start writing your note here...",
                 textStyle = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                minLines = 10
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 15 // Beri ruang lebih banyak untuk menulis
             )
         }
     }
 }
 
+// Composable terpisah untuk TextField agar lebih bersih
 @Composable
 fun CustomTextField(
     value: String,
@@ -206,10 +205,10 @@ fun CustomTextField(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(hint, style = textStyle) },
+        placeholder = { Text(hint, style = textStyle, color = MaterialTheme.colorScheme.onSurfaceVariant) },
         modifier = modifier,
         minLines = minLines,
-        textStyle = textStyle,
+        textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
@@ -220,7 +219,21 @@ fun CustomTextField(
     )
 }
 
-private fun Date.formatToString(): String {
-    val formatter = SimpleDateFormat("MMM dd, yyyy, HH:mm", Locale.getDefault())
-    return formatter.format(this)
+@Preview(showBackground = true)
+@Composable
+fun AddEditNoteScreenPreview() {
+    SealnoteTheme {
+        AddEditNoteScreen(
+            title = "My Awesome Note",
+            content = "This is the content of the note.",
+            imageUri = null,
+            onTitleChange = {},
+            onContentChange = {},
+            snackbarHostState = SnackbarHostState(),
+            onBack = {},
+            onSaveClick = {},
+            onCameraClick = {},
+            onGalleryClick = {}
+        )
+    }
 }

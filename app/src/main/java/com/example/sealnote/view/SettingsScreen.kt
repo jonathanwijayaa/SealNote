@@ -1,156 +1,215 @@
+// path: app/src/main/java/com/example/sealnote/view/SettingsScreen.kt
+
 package com.example.sealnote.view
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch // Pastikan ini ada
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue // <--- Pastikan ini ada
-import androidx.compose.runtime.mutableStateOf // <--- Pastikan ini ada
-import androidx.compose.runtime.remember // <--- Pastikan ini ada
-import androidx.compose.runtime.setValue // <--- Pastikan ini ada
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Calculate
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.sealnote.R
-import com.example.sealnote.ui.theme.SealnoteTheme
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.sealnote.data.ThemeOption
+import com.example.sealnote.viewmodel.SettingsViewModel
+import kotlinx.coroutines.launch
 
 /**
- * Layar Pengaturan yang diimplementasikan dengan Jetpack Compose.
- * Menyediakan bilah atas dengan tombol kembali dan placeholder konten.
- *
- * @param onBack Callback yang akan dipanggil saat tombol kembali di bilah atas diklik.
+ * Composable "Cerdas" (Smart Composable) untuk halaman Pengaturan.
+ * Menghubungkan ViewModel dengan UI dan menangani navigasi.
  */
+@Composable
+fun SettingsRoute(
+    navController: NavHostController,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    // Mengambil state yang dibutuhkan dari ViewModel
+    val themeOption by viewModel.themeOption.collectAsStateWithLifecycle()
 
+    // Mengambil state rute saat ini dari NavController
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+
+    // Menghubungkan state dan event ke UI
+    SettingsScreen(
+        currentRoute = currentRoute,
+        currentThemeOption = themeOption,
+        onThemeChange = viewModel::onThemeOptionSelected,
+        onNavigate = { route ->
+            // Mencegah navigasi ke halaman yang sama
+            if (currentRoute != route) {
+                navController.navigate(route) { launchSingleTop = true }
+            }
+        },
+        onNavigateToCalculator = {
+            navController.navigate("stealthCalculator") {
+                popUpTo("homepage") { inclusive = true }
+            }
+        }
+    )
+}
+
+/**
+ * Composable "Bodoh" (Dumb Composable) yang hanya menampilkan UI Pengaturan.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBack: () -> Unit
+    currentRoute: String?,
+    currentThemeOption: ThemeOption,
+    onThemeChange: (ThemeOption) -> Unit,
+    onNavigate: (String) -> Unit,
+    onNavigateToCalculator: () -> Unit,
 ) {
-    // Menggunakan skema warna dari MaterialTheme.colorScheme yang disediakan oleh SealnoteTheme
-    val containerColor = MaterialTheme.colorScheme.surface
-    val onContainerColor = MaterialTheme.colorScheme.onSurface
-    val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-    var isSystemThemeChecked by remember { mutableStateOf(true)}
+    // State untuk mengelola drawer
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    Scaffold(
-        containerColor = containerColor,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Settings", color = onContainerColor) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = onContainerColor
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = containerColor
-                ),
-                modifier = Modifier.shadow(4.dp)
-            )
-        }
-    ) { paddingValues ->
-        // Mengubah Box menjadi Column untuk menata item secara vertikal
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues) // Penting: Terapkan padding dari Scaffold di sini
-        ) {
-            // Item "Theme" dengan sub-teks dan switch
-            SettingsThemeItem(
-                title = "Theme",
-                subtitle = "Using system theme",
-                showSwitch = true,
-                switchChecked = isSystemThemeChecked,
-                onSwitchChange = { newValue ->
-                    isSystemThemeChecked = newValue
-                    // Logika untuk menyimpan preferensi tema di sini
-                },
-                onContainerColor = onContainerColor, // Teruskan warna
-                secondaryTextColor = secondaryTextColor // Teruskan warna
-            )
-        }
-    }
-}
-@Composable
-fun SettingsThemeItem(
-    title: String,
-    subtitle: String? = null,
-    showSwitch: Boolean = false,
-    switchChecked: Boolean = false,
-    onSwitchChange: ((Boolean) -> Unit)? = null,
-    onContainerColor: androidx.compose.ui.graphics.Color, // Menerima warna dari luar
-    secondaryTextColor: androidx.compose.ui.graphics.Color // Menerima warna dari luar
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp), // Padding untuk seluruh baris item
-        verticalAlignment = Alignment.CenterVertically // Pusatkan item secara vertikal
-    ) {
-        Column(
-            modifier = Modifier.weight(1f) // Membuat kolom ini mengambil sebagian besar ruang yang tersedia
-        ) {
-            Text(
-                text = title,
-                style = TextStyle(
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight(600),
-                    color = onContainerColor
-                )
-            )
-            subtitle?.let {
-                Text(
-                    text = it,
-                    style = TextStyle(
-                        fontSize = 13.sp, // Ukuran font lebih kecil untuk subtitle
-                        fontWeight = FontWeight(400),
-                        color = secondaryTextColor // Warna abu-abu untuk subtitle
+    // Daftar menu yang konsisten dengan halaman lain
+    val menuItems = listOf(
+        "homepage" to ("All Notes" to Icons.Default.Home),
+        "bookmarks" to ("Bookmarks" to Icons.Default.BookmarkBorder),
+        "secretNotes" to ("Secret Notes" to Icons.Default.Lock),
+        "trash" to ("Trash" to Icons.Default.Delete),
+        "settings" to ("Settings" to Icons.Default.Settings),
+        "profile" to ("Profile" to Icons.Default.Person)
+    )
+
+    // Membungkus Scaffold dengan ModalNavigationDrawer
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Spacer(Modifier.height(12.dp))
+                Text("SealNote Menu", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp))
+                menuItems.forEach { (route, details) ->
+                    val (label, icon) = details
+                    NavigationDrawerItem(
+                        icon = { Icon(icon, contentDescription = label) },
+                        label = { Text(label) },
+                        selected = currentRoute == route, // Akan menyorot "Settings"
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(route)
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
+                }
+                Divider(modifier = Modifier.padding(vertical = 16.dp))
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Outlined.Calculate, "Back to Calculator") },
+                    label = { Text("Back to Calculator") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToCalculator()
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
             }
         }
+    ) {
+        Scaffold(
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = { Text("Settings") },
+                    // --- PERUBAHAN UTAMA DI SINI ---
+                    // Mengganti tombol kembali dengan ikon menu untuk membuka drawer
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Open Menu"
+                            )
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Appearance",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
 
-        if (showSwitch && onSwitchChange != null) {
-            Switch(
-                checked = switchChecked,
-                onCheckedChange = onSwitchChange
-            )
+                ThemeSettingItem(
+                    currentThemeOption = currentThemeOption,
+                    onOptionSelected = onThemeChange
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
+/**
+ * Composable spesifik untuk menampilkan dan mengubah pengaturan tema.
+ * (Tidak ada perubahan di sini)
+ */
 @Composable
-fun SettingsScreenPreview() {
-    SealnoteTheme(darkTheme = true) { // Menggunakan SealnoteTheme untuk pratinjau
-        SettingsScreen(onBack = {})
+fun ThemeSettingItem(
+    currentThemeOption: ThemeOption,
+    onOptionSelected: (ThemeOption) -> Unit
+) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+
+    val currentThemeName = when (currentThemeOption) {
+        ThemeOption.LIGHT -> "Light"
+        ThemeOption.DARK -> "Dark"
+        ThemeOption.SYSTEM -> "System default"
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isMenuExpanded = true }
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Theme",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = currentThemeName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Box {
+            Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Theme")
+            DropdownMenu(
+                expanded = isMenuExpanded,
+                onDismissRequest = { isMenuExpanded = false }
+            ) {
+                ThemeOption.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option.name.replaceFirstChar { it.titlecase() }) },
+                        onClick = {
+                            onOptionSelected(option)
+                            isMenuExpanded = false
+                        }
+                    )
+                }
+            }
+        }
     }
 }
