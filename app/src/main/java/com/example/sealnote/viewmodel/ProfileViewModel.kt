@@ -27,7 +27,8 @@ data class ProfileUiState(
     val editedName: String = "",
     val editedPassword: String = "",
     val isPasswordVisible: Boolean = false,
-    val triggerBiometric: Boolean = false // State untuk memicu prompt biometrik
+    val triggerBiometric: Boolean = false,// State untuk memicu prompt biometrik
+    val isSignedOut: Boolean = false
 )
 
 @HiltViewModel
@@ -162,6 +163,23 @@ class ProfileViewModel @Inject constructor(
             _uiState.update { it.copy(isEditing = false, isPasswordVisible = false) }
             loadUserProfile()
         }
+    }
+
+    // --- FUNGSI SIGN OUT ---
+    fun signOut() {
+        viewModelScope.launch {
+            try {
+                auth.signOut() // Melakukan sign out dari Firebase
+                _uiState.update { it.copy(isSignedOut = true, infoMessage = "Successfully signed out.") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Failed to sign out: ${e.localizedMessage}") }
+            }
+        }
+    }
+
+    // Fungsi untuk mereset isSignedOut setelah navigasi dilakukan
+    fun onSignOutNavigated() {
+        _uiState.update { it.copy(isSignedOut = false) }
     }
 
     fun clearMessages() {
