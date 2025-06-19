@@ -43,7 +43,7 @@ class AddEditNoteViewModel @Inject constructor(
                     if (existingNote != null) {
                         title.value = existingNote.title
                         content.value = existingNote.content
-                        isSecret.value = existingNote.isSecret
+                        isSecret.value = existingNote.secret
                     }
                 }
             }
@@ -59,15 +59,20 @@ class AddEditNoteViewModel @Inject constructor(
      * Tidak perlu parameter karena semua data sudah ada di dalam state ViewModel ini.
      */
     fun onSaveNoteClick() {
+        // Ambil nilai title, jika kosong, beri judul default
+        val currentTitle = title.value.ifBlank { "Untitled Note" }
+        val currentContent = content.value
+        val currentSecretStatus = isSecret.value
+
         viewModelScope.launch {
             try {
-                // Panggil fungsi BARU di Repository dengan parameter yang benar
-                // Perhatikan, kita tidak perlu lagi mengirim userId dari sini!
+                // PANGGIL FUNGSI REPOSITORY DENGAN SIGNATURE YANG SUDAH DIPERBAIKI
+                // Sekarang kita mengirim 'isSecret' dan tidak lagi mengirim 'userId'.
                 repository.saveNote(
-                    noteId = noteId,
-                    title = title.value.ifEmpty { "Untitled Note" },
-                    content = content.value,
-                    isSecret = isSecret.value // Kirim status rahasia yang benar
+                    noteId = if (noteId == "null") null else noteId,
+                    title = currentTitle,
+                    content = currentContent,
+                    isSecret = currentSecretStatus // Menggunakan nama parameter yang benar: 'isSecret'
                 )
                 // Kirim event ke UI bahwa penyimpanan berhasil
                 _eventFlow.emit(UiEvent.NoteSaved)

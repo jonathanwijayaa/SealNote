@@ -273,7 +273,7 @@ fun HomepageScreen(
                                 note = note,
                                 onEditClick = { onNoteClick(note.id) },
                                 onDeleteClick = { onDeleteNoteClick(note.id) },
-                                onToggleSecretClick = { onToggleSecretClick(note.id, note.isSecret) }
+                                onToggleSecretClick = { onToggleSecretClick(note.id, note.secret) }
                             )
                         }
                     }
