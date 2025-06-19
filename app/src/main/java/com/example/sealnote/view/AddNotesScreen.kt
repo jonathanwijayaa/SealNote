@@ -114,8 +114,6 @@ fun AddEditNoteScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Add Note", color = onContainerColor) },
             TopAppBar(
                 title = { Text(if (title.isEmpty()) "Add Note" else "Edit Note") },
                 navigationIcon = {
