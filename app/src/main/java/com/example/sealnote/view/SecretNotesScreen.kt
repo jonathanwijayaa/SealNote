@@ -1,5 +1,3 @@
-// path: app/src/main/java/com/example/sealnote/view/SecretNotesScreen.kt
-
 package com.example.sealnote.view
 
 import androidx.compose.foundation.layout.*
@@ -43,8 +41,10 @@ fun SecretNotesRoute(
 
     // Ambil fungsi dari ViewModel yang akan digunakan di UI
     val onDeleteNote: (String) -> Unit = viewModel::trashNote
-    val onToggleSecret: (String) -> Unit = viewModel::toggleSecretStatus
-    val onToggleBookmark: (String) -> Unit = viewModel::toggleBookmarkStatus
+    // Sudah benar: onToggleSecret hanya perlu noteId
+    val onToggleSecret: (String,Boolean) -> Unit = viewModel::toggleSecretStatus
+    // Sudah benar: onToggleBookmark hanya perlu noteId
+    val onToggleBookmark: (String,Boolean) -> Unit = viewModel::toggleBookmarkStatus
 
     SecretNotesScreen(
         currentRoute = currentRoute,
@@ -72,8 +72,10 @@ fun SecretNotesRoute(
         },
         // Teruskan fungsi aksi ke UI
         onDeleteClick = onDeleteNote,
-        onToggleSecretClick = { noteId, _ -> onToggleSecret(noteId) },
-        onBookmarkClick = { noteId, _ -> onToggleBookmark(noteId)} // isSecret tidak relevan karena akan selalu di-toggle ke false
+        // PERBAIKAN DI SINI: onToggleSecretClick sekarang hanya perlu String
+        onToggleSecretClick = onToggleSecret,
+        // PERBAIKAN DI SINI: onBookmarkClick sekarang hanya perlu String
+        onBookmarkClick = onToggleBookmark
     )
 }
 
@@ -90,9 +92,11 @@ fun SecretNotesScreen(
     onNavigateToAddNote: () -> Unit,
     onNavigate: (String) -> Unit,
     onNavigateToCalculator: () -> Unit,
-    onDeleteClick: (String) -> Unit, // Tambahkan parameter
-    onToggleSecretClick: (String, Boolean) -> Unit, // Tambahkan parameter
-    onBookmarkClick: (String,Boolean) -> Unit
+    onDeleteClick: (String) -> Unit,
+    // PERBAIKAN DI SINI: Ubah parameter onToggleSecretClick menjadi hanya String
+    onToggleSecretClick: (String, Boolean) -> Unit,
+    // PERBAIKAN DI SINI: Ubah parameter onBookmarkClick menjadi hanya String
+    onBookmarkClick: (String, Boolean) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -252,8 +256,10 @@ fun SecretNotesScreen(
                                 note = note,
                                 onEditClick = { onNoteClick(note.id) },
                                 onDeleteClick = { onDeleteClick(note.id) },
+                                // PERBAIKAN DI SINI: Panggil onToggleSecretClick tanpa parameter boolean
                                 onToggleSecretClick = { onToggleSecretClick(note.id, note.secret) },
-                                onBookmarkClick = { onBookmarkClick(note.id,note.bookmarked) }
+                                // PERBAIKAN DI SINI: Panggil onBookmarkClick tanpa parameter boolean
+                                onBookmarkClick = { onBookmarkClick(note.id, note.bookmarked) }
                             )
                         }
                     }

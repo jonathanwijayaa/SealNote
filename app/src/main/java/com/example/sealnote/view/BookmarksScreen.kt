@@ -1,5 +1,3 @@
-// path: app/src/main/java/com/example/sealnote/view/Bookmarks.kt
-
 package com.example.sealnote.view
 
 import androidx.compose.foundation.layout.*
@@ -17,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -45,7 +42,11 @@ fun BookmarksRoute(
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
-    val onToggleBookmark: (String) -> Unit = viewModel::toggleBookmarkStatus
+
+    // Perhatikan: onToggleBookmark di ViewModel hanya butuh noteId,
+    // dan NoteCard juga hanya memanggil tanpa parameter boolean
+    val onToggleBookmark: (String,Boolean) -> Unit = viewModel::toggleBookmarkStatus
+
 
     BookmarksScreen(
         currentRoute = currentRoute,
@@ -58,7 +59,7 @@ fun BookmarksRoute(
             navController.navigate("add_edit_note_screen/$noteId")
         },
         onDeleteNoteClick = viewModel::trashNote,
-        onToggleSecretClick = viewModel::toggleSecretStatus,
+        onToggleSecretClick = viewModel::toggleSecretStatus, // Tetap gunakan signature (String, Boolean) -> Unit
         onNavigate = { route ->
             navController.navigate(route) {
                 launchSingleTop = true
@@ -69,7 +70,8 @@ fun BookmarksRoute(
                 popUpTo("homepage") { inclusive = true }
             }
         },
-        onBookmarkClick = { noteId, _ -> onToggleBookmark(noteId)}
+        // Meneruskan onToggleBookmark yang hanya menerima String noteId
+        onBookmarkClick = onToggleBookmark
     )
 }
 
@@ -88,10 +90,12 @@ fun BookmarksScreen(
     onSortOptionChange: (SortOption) -> Unit,
     onNoteClick: (String) -> Unit,
     onDeleteNoteClick: (String) -> Unit,
+    // Perbaiki parameter onToggleSecretClick
     onToggleSecretClick: (String, Boolean) -> Unit,
     onNavigate: (String) -> Unit,
     onNavigateToCalculator: () -> Unit,
-    onBookmarkClick: (String,Boolean) -> Unit
+    // Perbaiki parameter onBookmarkClick menjadi hanya String
+    onBookmarkClick: (String, Boolean) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -280,7 +284,8 @@ fun BookmarksScreen(
                                 onEditClick = { onNoteClick(note.id) },
                                 onDeleteClick = { onDeleteNoteClick(note.id) },
                                 onToggleSecretClick = { onToggleSecretClick(note.id, note.secret) },
-                                onBookmarkClick = { onBookmarkClick(note.id,note.bookmarked) }
+                                // Panggil onBookmarkClick tanpa parameter boolean, karena NoteCard mengambil dari 'note'
+                                onBookmarkClick = { onBookmarkClick(note.id, note.bookmarked) }
                             )
                         }
                     }

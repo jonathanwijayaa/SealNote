@@ -8,6 +8,7 @@ package com.example.sealnote.view
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Delete
@@ -94,12 +95,20 @@ fun NoteCard(
                     onDismissRequest = { isMenuExpanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Add to Bookmark") },
+                        text = {
+                            val bookmarkText = if (note.bookmarked) "Remove from Bookmark" else "Add to Bookmark"
+                            Text(bookmarkText)
+                        },
                         onClick = {
-                            onBookmarkClick()
+                            onBookmarkClick() // Panggil lambda onBookmarkClick
                             isMenuExpanded = false
                         },
-                        leadingIcon = { Icon(Icons.Outlined.BookmarkBorder, "Add to Bookmark") }
+                        leadingIcon = {
+                            Icon(
+                                imageVector = if (note.bookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = if (note.bookmarked) "Remove from Bookmark" else "Add to Bookmark"
+                            )
+                        }
                     )
                     DropdownMenuItem(
                         text = { Text("Edit") },

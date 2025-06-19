@@ -90,17 +90,17 @@ class BookmarksViewModel @Inject constructor(
         }
     }
 
-    fun toggleBookmarkStatus(noteId: String) {
+    // --- FUNGSI BOOKMARK YANG DIPERBAIKI ---
+    fun toggleBookmarkStatus(noteId: String, currentBookmarkStatus: Boolean) {
         viewModelScope.launch {
             try {
-                val currentNote = bookmarkedNotes.value.find { it.id == noteId }
-                if (currentNote != null) {
-                    // Toggle status bookmark
-                    repository.toggleBookmarkStatus(noteId, isBookmarked =true)
-                    _eventFlow.emit("Status bookmark catatan diubah.")
-                } else {
-                    _eventFlow.emit("Catatan tidak ditemukan.")
-                }
+                // Gunakan currentBookmarkStatus yang diterima dari UI
+                val newBookmarkStatus = !currentBookmarkStatus
+                repository.toggleBookmarkStatus(noteId, newBookmarkStatus)
+
+                val message = if (newBookmarkStatus) "Catatan ditambahkan ke bookmark." else "Catatan dihapus dari bookmark."
+                _eventFlow.emit(message)
+
             } catch (e: Exception) {
                 _eventFlow.emit("Gagal mengubah status bookmark catatan: ${e.localizedMessage}")
             }

@@ -82,29 +82,28 @@ class SecretNotesViewModel @Inject constructor(
     }
 
     // Fungsi ini akan berguna untuk membatalkan status rahasia dari dalam halaman ini
-    fun toggleSecretStatus(noteId: String) {
+    fun toggleSecretStatus(noteId: String, currentStatus: Boolean) {
         viewModelScope.launch {
             try {
-                // Karena ini halaman rahasia, toggle akan selalu membuatnya tidak rahasia
-                repository.toggleSecretStatus(noteId, false)
-                _eventFlow.emit("Catatan dihapus dari rahasia.")
+                repository.toggleSecretStatus(noteId, !currentStatus)
+                val message = if (!currentStatus) "Catatan ditambahkan ke rahasia" else "Catatan dihapus dari rahasia"
+                _eventFlow.emit(message)
             } catch (e: Exception) {
                 _eventFlow.emit("Gagal mengubah status catatan.")
             }
         }
     }
 
-    fun toggleBookmarkStatus(noteId: String) {
+    fun toggleBookmarkStatus(noteId: String, currentBookmarkStatus: Boolean) {
         viewModelScope.launch {
             try {
-                val currentNote = secretNotes.value.find { it.id == noteId }
-                if (currentNote != null) {
-                    // Toggle status bookmark
-                    repository.toggleBookmarkStatus(noteId, isBookmarked =true)
-                    _eventFlow.emit("Status bookmark catatan diubah.")
-                } else {
-                    _eventFlow.emit("Catatan tidak ditemukan.")
-                }
+                // Gunakan currentBookmarkStatus yang diterima dari UI
+                val newBookmarkStatus = !currentBookmarkStatus
+                repository.toggleBookmarkStatus(noteId, newBookmarkStatus)
+
+                val message = if (newBookmarkStatus) "Catatan ditambahkan ke bookmark." else "Catatan dihapus dari bookmark."
+                _eventFlow.emit(message)
+
             } catch (e: Exception) {
                 _eventFlow.emit("Gagal mengubah status bookmark catatan: ${e.localizedMessage}")
             }
