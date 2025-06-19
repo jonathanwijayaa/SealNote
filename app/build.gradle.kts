@@ -104,6 +104,9 @@ dependencies {
     // Compose Icons
     implementation(libs.androidx.material.icons.core)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.storage)
+    implementation(libs.androidx.benchmark.macro)
+    implementation(libs.androidx.storage)
 
     // --- Testing Dependencies ---
     testImplementation(libs.junit)
