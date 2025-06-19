@@ -43,6 +43,7 @@ fun HomepageRoute(
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
+    val onToggleBookmark: (String) -> Unit = viewModel::toggleBookmarkStatus
 
     HomepageScreen(
         currentRoute = currentRoute,
@@ -69,7 +70,8 @@ fun HomepageRoute(
             navController.navigate("stealthCalculator") {
                 popUpTo("homepage") { inclusive = true }
             }
-        }
+        },
+        onBookmarkClick = { noteId, _ -> onToggleBookmark(noteId)}
     )
 }
 
@@ -87,7 +89,8 @@ fun HomepageScreen(
     onNavigateToAddNote: () -> Unit, // Parameter ditambahkan kembali
     onToggleSecretClick: (String, Boolean) -> Unit,
     onNavigate: (String) -> Unit,
-    onNavigateToCalculator: () -> Unit
+    onNavigateToCalculator: () -> Unit,
+    onBookmarkClick: (String,Boolean) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -273,7 +276,8 @@ fun HomepageScreen(
                                 note = note,
                                 onEditClick = { onNoteClick(note.id) },
                                 onDeleteClick = { onDeleteNoteClick(note.id) },
-                                onToggleSecretClick = { onToggleSecretClick(note.id, note.secret) }
+                                onToggleSecretClick = { onToggleSecretClick(note.id, note.secret) },
+                                onBookmarkClick = { onBookmarkClick(note.id,note.bookmarked) }
                             )
                         }
                     }

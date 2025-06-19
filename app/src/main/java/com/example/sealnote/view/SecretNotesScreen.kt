@@ -44,6 +44,7 @@ fun SecretNotesRoute(
     // Ambil fungsi dari ViewModel yang akan digunakan di UI
     val onDeleteNote: (String) -> Unit = viewModel::trashNote
     val onToggleSecret: (String) -> Unit = viewModel::toggleSecretStatus
+    val onToggleBookmark: (String) -> Unit = viewModel::toggleBookmarkStatus
 
     SecretNotesScreen(
         currentRoute = currentRoute,
@@ -71,7 +72,8 @@ fun SecretNotesRoute(
         },
         // Teruskan fungsi aksi ke UI
         onDeleteClick = onDeleteNote,
-        onToggleSecretClick = { noteId, _ -> onToggleSecret(noteId) } // isSecret tidak relevan karena akan selalu di-toggle ke false
+        onToggleSecretClick = { noteId, _ -> onToggleSecret(noteId) },
+        onBookmarkClick = { noteId, _ -> onToggleBookmark(noteId)} // isSecret tidak relevan karena akan selalu di-toggle ke false
     )
 }
 
@@ -89,7 +91,8 @@ fun SecretNotesScreen(
     onNavigate: (String) -> Unit,
     onNavigateToCalculator: () -> Unit,
     onDeleteClick: (String) -> Unit, // Tambahkan parameter
-    onToggleSecretClick: (String, Boolean) -> Unit // Tambahkan parameter
+    onToggleSecretClick: (String, Boolean) -> Unit, // Tambahkan parameter
+    onBookmarkClick: (String,Boolean) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -149,7 +152,9 @@ fun SecretNotesScreen(
                             BasicTextField(
                                 value = searchQuery,
                                 onValueChange = onSearchQueryChange,
-                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester),
                                 textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onPrimary),
                                 singleLine = true,
@@ -207,8 +212,12 @@ fun SecretNotesScreen(
                 }
             }
         ) { paddingValues ->
-            Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
-                Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Column(modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Box(modifier = Modifier.align(Alignment.CenterEnd)) {
                         TextButton(onClick = { isSortMenuExpanded = true }) {
                             Text(sortOption.displayName)
@@ -243,7 +252,8 @@ fun SecretNotesScreen(
                                 note = note,
                                 onEditClick = { onNoteClick(note.id) },
                                 onDeleteClick = { onDeleteClick(note.id) },
-                                onToggleSecretClick = { onToggleSecretClick(note.id, note.secret) }
+                                onToggleSecretClick = { onToggleSecretClick(note.id, note.secret) },
+                                onBookmarkClick = { onBookmarkClick(note.id,note.bookmarked) }
                             )
                         }
                     }

@@ -92,5 +92,22 @@ class HomepageViewModel @Inject constructor(
     fun logout() {
         auth.signOut()
     }
+
+    fun toggleBookmarkStatus(noteId: String) {
+        viewModelScope.launch {
+            try {
+                val currentNote = notes.value.find { it.id == noteId }
+                if (currentNote != null) {
+                    // Toggle status bookmark
+                    repository.toggleBookmarkStatus(noteId, isBookmarked =true)
+                    _eventFlow.emit("Status bookmark catatan diubah.")
+                } else {
+                    _eventFlow.emit("Catatan tidak ditemukan.")
+                }
+            } catch (e: Exception) {
+                _eventFlow.emit("Gagal mengubah status bookmark catatan: ${e.localizedMessage}")
+            }
+        }
+    }
     // ---------------------------------------
 }

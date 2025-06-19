@@ -1,9 +1,15 @@
 package com.example.sealnote.view
 
+// Pastikan Anda memiliki impor untuk warna kustom Anda
+// import com.example.sealnote.ui.theme.CardBackgroundColor
+// import com.example.sealnote.ui.theme.PrimaryTextColor
+// import com.example.sealnote.ui.theme.SecondaryTextColor
+// import com.example.sealnote.ui.theme.TertiaryTextColor
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Lock
@@ -17,11 +23,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sealnote.model.Notes
-// Pastikan Anda memiliki impor untuk warna kustom Anda
-// import com.example.sealnote.ui.theme.CardBackgroundColor
-// import com.example.sealnote.ui.theme.PrimaryTextColor
-// import com.example.sealnote.ui.theme.SecondaryTextColor
-// import com.example.sealnote.ui.theme.TertiaryTextColor
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,6 +30,7 @@ import java.util.*
 @Composable
 fun NoteCard(
     note: Notes,
+    onBookmarkClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onToggleSecretClick: () -> Unit
@@ -91,6 +93,14 @@ fun NoteCard(
                     expanded = isMenuExpanded,
                     onDismissRequest = { isMenuExpanded = false }
                 ) {
+                    DropdownMenuItem(
+                        text = { Text("Add to Bookmark") },
+                        onClick = {
+                            onBookmarkClick()
+                            isMenuExpanded = false
+                        },
+                        leadingIcon = { Icon(Icons.Outlined.BookmarkBorder, "Add to Bookmark") }
+                    )
                     DropdownMenuItem(
                         text = { Text("Edit") },
                         onClick = {
