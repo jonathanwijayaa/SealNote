@@ -32,7 +32,9 @@ class NotesRepository @Inject constructor(
     // ... (saya tidak akan menuliskannya lagi untuk keringkasan)
     fun getAllNotes(): Flow<List<Notes>> {
         val collection = getUserNotesCollection() ?: return flowOf(emptyList())
-        return collection.whereEqualTo("trashed", false)
+        return collection
+            .whereEqualTo("trashed", false)
+            .whereEqualTo("secret", false) // <-- TAMBAHKAN INI
             .orderBy("updatedAt", Query.Direction.DESCENDING)
             .snapshots()
             .map { snapshot -> snapshot.documents.mapNotNull { it.toObject<Notes>() } }
@@ -60,6 +62,7 @@ class NotesRepository @Inject constructor(
         val collection = getUserNotesCollection() ?: return flowOf(emptyList())
         return collection
             .whereEqualTo("bookmarked", true)
+            .whereEqualTo("secret", false)
             .whereEqualTo("trashed", false)
             .orderBy("updatedAt", Query.Direction.DESCENDING)
             .snapshots()

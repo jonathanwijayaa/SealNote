@@ -1,5 +1,3 @@
-// path: app/src/main/java/com/example/sealnote/view/HomepageScreen.kt
-
 package com.example.sealnote.view
 
 import androidx.compose.foundation.layout.*
@@ -30,7 +28,7 @@ import com.example.sealnote.viewmodel.HomepageViewModel
 import kotlinx.coroutines.launch
 
 // Pastikan import NoteCard dari filenya sendiri
-import com.example.sealnote.view.NoteCard
+// import com.example.sealnote.view.NoteCard // Contoh import jika NoteCard di file terpisah
 
 @Composable
 fun HomepageRoute(
@@ -44,6 +42,11 @@ fun HomepageRoute(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
 
+    // Referensi fungsi dari ViewModel, yang sekarang hanya menerima String noteId
+    val onDeleteNote: (String) -> Unit = viewModel::trashNote
+    val onToggleSecret: (String, Boolean) -> Unit = viewModel::toggleSecretStatus
+    val onToggleBookmark: (String, Boolean) -> Unit = viewModel::toggleBookmarkStatus
+
     HomepageScreen(
         currentRoute = currentRoute,
         notes = notes,
@@ -54,8 +57,9 @@ fun HomepageRoute(
         onNoteClick = { noteId ->
             navController.navigate("add_edit_note_screen/$noteId")
         },
-        onDeleteNoteClick = viewModel::trashNote,
-        onToggleSecretClick = viewModel::toggleSecretStatus,
+        onDeleteNoteClick = onDeleteNote,
+        // HANYA meneruskan referensi fungsi. VM akan menangani logikanya.
+        onToggleSecretClick = onToggleSecret,
         // Navigasi untuk tombol FAB ditambahkan kembali
         onNavigateToAddNote = {
             navController.navigate("add_edit_note_screen/null")
@@ -69,7 +73,9 @@ fun HomepageRoute(
             navController.navigate("stealthCalculator") {
                 popUpTo("homepage") { inclusive = true }
             }
-        }
+        },
+        // HANYA meneruskan referensi fungsi. VM akan menangani logikanya.
+        onBookmarkClick = onToggleBookmark
     )
 }
 
@@ -85,9 +91,12 @@ fun HomepageScreen(
     onNoteClick: (String) -> Unit,
     onDeleteNoteClick: (String) -> Unit,
     onNavigateToAddNote: () -> Unit, // Parameter ditambahkan kembali
+    // PERBAIKAN DI SINI: Ubah signature agar hanya menerima String noteId
     onToggleSecretClick: (String, Boolean) -> Unit,
     onNavigate: (String) -> Unit,
-    onNavigateToCalculator: () -> Unit
+    onNavigateToCalculator: () -> Unit,
+    // PERBAIKAN DI SINI: Ubah signature agar hanya menerima String noteId
+    onBookmarkClick: (String, Boolean) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -99,7 +108,7 @@ fun HomepageScreen(
     val menuItems = listOf(
         "homepage" to ("All Notes" to Icons.Default.Home),
         "bookmarks" to ("Bookmarks" to Icons.Default.BookmarkBorder),
-        "secretNotesLocked" to ("Secret Notes" to Icons.Default.Lock),
+        "secretNotes" to ("Secret Notes" to Icons.Default.Lock),
         "trash" to ("Trash" to Icons.Default.Delete),
         "settings" to ("Settings" to Icons.Default.Settings),
         "profile" to ("Profile" to Icons.Default.Person)
@@ -212,7 +221,6 @@ fun HomepageScreen(
                     )
                 )
             },
-            // --- FAB DITAMBAHKAN KEMBALI DI SINI ---
             floatingActionButton = {
                 FloatingActionButton(onClick = onNavigateToAddNote) {
                     Icon(Icons.Default.Add, contentDescription = "Add Note")
@@ -273,7 +281,9 @@ fun HomepageScreen(
                                 note = note,
                                 onEditClick = { onNoteClick(note.id) },
                                 onDeleteClick = { onDeleteNoteClick(note.id) },
-                                onToggleSecretClick = { onToggleSecretClick(note.id, note.secret) }
+                                // PERBAIKAN UTAMA DI SINI: Hanya meneruskan note.id
+                                onToggleSecretClick = { onToggleSecretClick(note.id, note.secret) },
+                                onBookmarkClick = { onBookmarkClick(note.id, note.bookmarked) }
                             )
                         }
                     }

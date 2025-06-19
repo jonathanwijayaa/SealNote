@@ -10,7 +10,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.*
@@ -26,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.sealnote.ui.theme.SealnoteTheme // <-- IMPORT YANG DIPERLUKAN
+import com.example.sealnote.ui.theme.SealnoteTheme // Pastikan import ini ada
 import com.example.sealnote.viewmodel.AddEditNoteViewModel
 import com.example.sealnote.viewmodel.UiEvent
 
@@ -38,6 +42,12 @@ fun AddEditNoteRoute(
     // Mengambil state dari ViewModel
     val title by viewModel.title.collectAsStateWithLifecycle()
     val content by viewModel.content.collectAsStateWithLifecycle()
+    // Mengambil status bookmark dari ViewModel
+    val isBookmarked by viewModel.isBookmarked.collectAsStateWithLifecycle()
+    // Mengambil status secret dari ViewModel
+    val isSecret by viewModel.isSecret.collectAsStateWithLifecycle()
+
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     // State untuk URI gambar, dikelola di UI level
@@ -82,18 +92,24 @@ fun AddEditNoteRoute(
     AddEditNoteScreen(
         title = title,
         content = content,
+        isBookmarked = isBookmarked, // Teruskan status bookmark
+        isSecret = isSecret, // Teruskan status secret
         imageUri = imageUri,
         onTitleChange = { viewModel.title.value = it },
         onContentChange = { viewModel.content.value = it },
         snackbarHostState = snackbarHostState,
         onBack = onBack,
-        onSaveClick = viewModel::onSaveNoteClick, // Memanggil fungsi yang benar
+        onSaveClick = viewModel::onSaveNoteClick,
         onCameraClick = {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         },
         onGalleryClick = {
             imagePickerLauncher.launch("image/*")
-        }
+        },
+        // Tambahkan fungsi toggle bookmark ke ViewModel
+        onToggleBookmark = viewModel::toggleBookmarkStatus,
+        // Tambahkan fungsi toggle secret ke ViewModel
+        onToggleSecret = viewModel::toggleSecretStatus
     )
 }
 
@@ -102,6 +118,8 @@ fun AddEditNoteRoute(
 fun AddEditNoteScreen(
     title: String,
     content: String,
+    isBookmarked: Boolean, // Tambahkan parameter untuk status bookmark
+    isSecret: Boolean, // Tambahkan parameter untuk status secret
     imageUri: Uri?,
     onTitleChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
@@ -109,7 +127,9 @@ fun AddEditNoteScreen(
     onBack: () -> Unit,
     onSaveClick: () -> Unit,
     onCameraClick: () -> Unit,
-    onGalleryClick: () -> Unit
+    onGalleryClick: () -> Unit,
+    onToggleBookmark: () -> Unit, // Tambahkan callback untuk toggle bookmark
+    onToggleSecret: () -> Unit // Tambahkan callback untuk toggle secret
 ) {
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -122,7 +142,24 @@ fun AddEditNoteScreen(
                     }
                 },
                 actions = {
-                    // Tombol save sekarang menggunakan ikon centang
+                    // --- ICON BOOKMARK ---
+                    IconButton(onClick = onToggleBookmark) {
+                        Icon(
+                            imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                            contentDescription = if (isBookmarked) "Remove Bookmark" else "Add Bookmark",
+                            tint = if (isBookmarked) MaterialTheme.colorScheme.secondary else LocalContentColor.current
+                        )
+                    }
+                    // --- ICON SECRET ---
+                    IconButton(onClick = onToggleSecret) {
+                        Icon(
+                            imageVector = if (isSecret) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                            contentDescription = if (isSecret) "Make Public" else "Make Secret",
+                            tint = if (isSecret) MaterialTheme.colorScheme.error else LocalContentColor.current
+                        )
+                    }
+
+                    // Tombol save (tetap di sini)
                     IconButton(onClick = onSaveClick) {
                         Icon(Icons.Default.Check, contentDescription = "Save Note")
                     }
@@ -224,6 +261,8 @@ fun AddEditNoteScreenPreview() {
         AddEditNoteScreen(
             title = "My Awesome Note",
             content = "This is the content of the note.",
+            isBookmarked = true, // Contoh untuk preview
+            isSecret = false, // Contoh untuk preview
             imageUri = null,
             onTitleChange = {},
             onContentChange = {},
@@ -231,7 +270,9 @@ fun AddEditNoteScreenPreview() {
             onBack = {},
             onSaveClick = {},
             onCameraClick = {},
-            onGalleryClick = {}
+            onGalleryClick = {},
+            onToggleBookmark = {},
+            onToggleSecret = {}
         )
     }
 }

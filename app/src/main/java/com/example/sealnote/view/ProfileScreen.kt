@@ -84,6 +84,18 @@ fun ProfileRoute(
             )
         }
     }
+    // --- Efek samping untuk navigasi Sign Out ---
+    LaunchedEffect(uiState.isSignedOut) {
+        if (uiState.isSignedOut) {
+            navController.navigate("login") {
+                // Hapus semua dari back stack hingga start destination, lalu inklusif
+                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                launchSingleTop = true // Pastikan hanya satu instance LoginScreen
+            }
+            // Reset status isSignedOut di ViewModel setelah navigasi
+            viewModel.onSignOutNavigated()
+        }
+    }
 
     ProfileScreen(
         uiState = uiState,
@@ -93,12 +105,7 @@ fun ProfileRoute(
         onEditToggle = viewModel::onEditToggle,
         onSaveChanges = viewModel::onSaveChanges,
         onTogglePasswordVisibility = viewModel::onTogglePasswordVisibilityRequest,
-        onSignOutClick = {
-            navController.navigate("login") {
-                popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                launchSingleTop = true
-            }
-        },
+        onSignOutClick = viewModel::signOut,
         onNavigate = { route ->
             if (currentRoute != route) {
                 navController.navigate(route) { launchSingleTop = true }
