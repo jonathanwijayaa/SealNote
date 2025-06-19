@@ -45,6 +45,7 @@ fun BookmarksRoute(
 
     // Perhatikan: onToggleBookmark di ViewModel hanya butuh noteId,
     // dan NoteCard juga hanya memanggil tanpa parameter boolean
+    val onToggleSecret: (String, Boolean) -> Unit = { noteId, isSecret -> viewModel.toggleSecretStatus(noteId, isSecret) }
     val onToggleBookmark: (String,Boolean) -> Unit = viewModel::toggleBookmarkStatus
 
 
@@ -59,7 +60,7 @@ fun BookmarksRoute(
             navController.navigate("add_edit_note_screen/$noteId")
         },
         onDeleteNoteClick = viewModel::trashNote,
-        onToggleSecretClick = viewModel::toggleSecretStatus, // Tetap gunakan signature (String, Boolean) -> Unit
+        onToggleSecretClick = onToggleSecret, // Tetap gunakan signature (String, Boolean) -> Unit
         onNavigate = { route ->
             navController.navigate(route) {
                 launchSingleTop = true
