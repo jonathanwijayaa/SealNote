@@ -7,7 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.*
+import androidx.compose.material3.* // Memastikan semua komponen Material 3 diimpor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.sp // Tetap gunakan untuk beberapa kasus spesifik jika diperlukan
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -46,12 +46,13 @@ import com.example.sealnote.ui.theme.SciCalcBasicButtonTextColor
 
 import com.example.sealnote.viewmodel.StealthScientificViewModel
 import com.example.sealnote.viewmodel.CalculatorHistoryViewModel
+import com.example.sealnote.ui.theme.SealnoteTheme // Import SealnoteTheme
 
 // --- Data Class dan Enum untuk Tombol ---
 private data class SciCalcButtonUIData(
     val symbol: String,
     val description: String,
-    val textSize: TextUnit,
+    val textSize: TextUnit, // Tetap gunakan TextUnit untuk fleksibilitas ukuran teks tombol
     val type: SciButtonType,
     val icon: ImageVector? = null
 )
@@ -93,9 +94,14 @@ fun StealthScientificScreen(
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(Modifier.height(16.dp))
-                Text("Mode Kalkulator", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "Mode Kalkulator",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleLarge, // Tipografi dari tema
+                    color = MaterialTheme.colorScheme.onSurface // Warna teks dari tema
+                )
                 NavigationDrawerItem(
-                    label = { Text("Kalkulator Standar") },
+                    label = { Text("Kalkulator Standar", style = MaterialTheme.typography.bodyLarge) }, // Tipografi dari tema
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -103,18 +109,28 @@ fun StealthScientificScreen(
                             popUpTo("stealthScientific") { inclusive = true }
                         }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 NavigationDrawerItem(
-                    label = { Text("Kalkulator Ilmiah") },
+                    label = { Text("Kalkulator Ilmiah", style = MaterialTheme.typography.bodyLarge) }, // Tipografi dari tema
                     selected = true,
                     onClick = {
                         scope.launch { drawerState.close() }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 )
                 NavigationDrawerItem(
-                    label = { Text("Riwayat Kalkulasi") },
+                    label = { Text("Riwayat Kalkulasi", style = MaterialTheme.typography.bodyLarge) }, // Tipografi dari tema
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -122,30 +138,41 @@ fun StealthScientificScreen(
                             popUpTo("stealthScientific") { inclusive = true }
                         }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
             }
         },
         gesturesEnabled = drawerState.isOpen
     ) {
         Scaffold(
+            containerColor = MaterialTheme.colorScheme.background, // Latar belakang Scaffold dari tema
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = {
                         Text(
                             text = "Scientific Calculator",
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.headlineSmall // Tipografi judul dari tema
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            Icon(
+                                Icons.Filled.Menu,
+                                contentDescription = "Menu",
+                                tint = MaterialTheme.colorScheme.onSurface // Warna ikon dari tema
+                            )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = SciCalcScreenBackground,
-                        titleContentColor = SciCalcDisplayResultColor
+                        containerColor = MaterialTheme.colorScheme.surface, // Warna container TopAppBar dari tema
+                        titleContentColor = MaterialTheme.colorScheme.onSurface // Warna teks judul dari tema
                     )
                 )
             }
@@ -164,14 +191,14 @@ fun StealthScientificScreen(
                 )
 
                 ScientificFunctionsGrid(
-                    onButtonClick = { symbol -> viewModel.onScientificButtonClick(symbol, onNavigateToLogin) }, // Teruskan onNavigateToLogin
+                    onButtonClick = { symbol -> viewModel.onScientificButtonClick(symbol, onNavigateToLogin) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 4.dp, vertical = 8.dp)
                 )
 
                 BasicCalculatorPad(
-                    onButtonClick = { symbol -> viewModel.onScientificButtonClick(symbol, onNavigateToLogin) }, // Teruskan onNavigateToLogin
+                    onButtonClick = { symbol -> viewModel.onScientificButtonClick(symbol, onNavigateToLogin) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 4.dp)
@@ -181,8 +208,7 @@ fun StealthScientificScreen(
     }
 }
 
-// ... (ScientificCalculatorDisplay, ScientificFunctionsGrid, BasicCalculatorPad, SciCalcActualButton tetap sama)
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScientificCalculatorDisplay(
     mode: String,
@@ -192,6 +218,7 @@ private fun ScientificCalculatorDisplay(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(0.dp),
+        // Menggunakan warna kustom untuk background card display
         colors = CardDefaults.cardColors(containerColor = SciCalcDisplayCardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -204,16 +231,17 @@ private fun ScientificCalculatorDisplay(
             ) {
                 Text(
                     text = mode,
+                    // Menggunakan warna kustom untuk teks mode
                     color = SciCalcDisplayModeColor,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.bodyLarge, // Tipografi dari tema
                     modifier = Modifier.padding(start = 16.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = result,
+                    // Menggunakan warna kustom untuk teks hasil
                     color = SciCalcDisplayResultColor,
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold), // Tipografi hasil yang besar dan tebal
                     textAlign = TextAlign.End,
                     modifier = Modifier.padding(end = 16.dp),
                     maxLines = 1,
@@ -221,6 +249,7 @@ private fun ScientificCalculatorDisplay(
                 )
             }
             HorizontalDivider(
+                // Menggunakan warna kustom untuk divider
                 color = SciCalcDividerColor,
                 thickness = 1.dp,
                 modifier = Modifier.padding(top = 4.dp)
@@ -349,31 +378,31 @@ private fun SciCalcActualButton(
 
     when (info.type) {
         SciButtonType.SCIENTIFIC -> {
-            backgroundColor = SciCalcScientificButtonBg
+            backgroundColor = SciCalcScientificButtonBg // Warna kustom
             backgroundBrush = null
-            textColor = SciCalcScientificButtonTextColor
+            textColor = SciCalcScientificButtonTextColor // Warna kustom
         }
         SciButtonType.BASIC_NUMBER, SciButtonType.BASIC_CLEAR, SciButtonType.BASIC_DECIMAL -> {
-            backgroundColor = SciCalcBasicNumberButtonBg
+            backgroundColor = SciCalcBasicNumberButtonBg // Warna kustom
             backgroundBrush = null
-            textColor = SciCalcBasicButtonTextColor
+            textColor = SciCalcBasicButtonTextColor // Warna kustom
         }
         SciButtonType.BASIC_FUNCTION -> {
-            backgroundColor = SciCalcBasicFunctionButtonBg
+            backgroundColor = SciCalcBasicFunctionButtonBg // Warna kustom
             backgroundBrush = null
-            textColor = SciCalcBasicButtonTextColor
+            textColor = SciCalcBasicButtonTextColor // Warna kustom
         }
         SciButtonType.BASIC_OPERATOR -> {
             backgroundColor = null
-            backgroundBrush = basicOperatorGradient
-            textColor = SciCalcBasicButtonTextColor
+            backgroundBrush = basicOperatorGradient // Gradien kustom
+            textColor = SciCalcBasicButtonTextColor // Warna kustom
         }
     }
 
     val finalBackgroundModifier = when {
         backgroundBrush != null -> Modifier.background(brush = backgroundBrush, shape = buttonShape)
         backgroundColor != null -> Modifier.background(color = backgroundColor, shape = buttonShape)
-        else -> Modifier.background(Color.DarkGray, shape = buttonShape)
+        else -> Modifier.background(MaterialTheme.colorScheme.surfaceVariant, shape = buttonShape) // Fallback ke warna tema
     }
 
     Box(
@@ -393,11 +422,19 @@ private fun SciCalcActualButton(
                 modifier = Modifier.size(if (info.type == SciButtonType.SCIENTIFIC) 18.dp else 22.dp)
             )
         } else {
+            // Gunakan TextStyle dari MaterialTheme.typography dan sesuaikan fontSize/fontWeight
+            val baseTextStyle = when (info.type) {
+                SciButtonType.SCIENTIFIC -> MaterialTheme.typography.labelSmall
+                SciButtonType.BASIC_NUMBER, SciButtonType.BASIC_FUNCTION, SciButtonType.BASIC_DECIMAL -> MaterialTheme.typography.bodyLarge
+                SciButtonType.BASIC_CLEAR -> MaterialTheme.typography.bodyLarge
+                SciButtonType.BASIC_OPERATOR -> MaterialTheme.typography.headlineSmall
+            }
+
             Text(
                 text = info.symbol,
-                color = textColor,
-                fontSize = info.textSize,
-                fontWeight = if (info.type == SciButtonType.BASIC_OPERATOR || info.type == SciButtonType.SCIENTIFIC) FontWeight.Normal else FontWeight.Medium
+                color = textColor, // Warna teks dari custom colors
+                style = baseTextStyle.copy(fontSize = info.textSize,
+                    fontWeight = if (info.type == SciButtonType.BASIC_OPERATOR || info.type == SciButtonType.SCIENTIFIC) FontWeight.Normal else FontWeight.Medium)
             )
         }
     }
@@ -406,7 +443,7 @@ private fun SciCalcActualButton(
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun ScientificCalculatorScreenPreview() {
-    MaterialTheme {
+    SealnoteTheme { // Gunakan SealnoteTheme untuk preview
         // Untuk preview, buat NavController dummy dan onNavigateToLogin lambda
         StealthScientificScreen(navController = rememberNavController(), onNavigateToLogin = {})
     }

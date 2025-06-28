@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -116,30 +117,49 @@ fun TrashScreen(
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(Modifier.height(12.dp))
-                Text("SealNote Menu", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp))
+                Text(
+                    "SealNote Menu",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 menuItems.forEach { (route, details) ->
                     val (label, icon) = details
                     NavigationDrawerItem(
                         icon = { Icon(icon, contentDescription = label) },
-                        label = { Text(label) },
+                        label = { Text(label, style = MaterialTheme.typography.bodyLarge) },
                         selected = currentRoute == route,
                         onClick = { scope.launch { drawerState.close() }; onNavigate(route) },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            unselectedContainerColor = Color.Transparent,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
                 Divider(modifier = Modifier.padding(vertical = 16.dp))
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Outlined.Calculate, "Back to Calculator") },
-                    label = { Text("Back to Calculator") },
+                    label = { Text("Back to Calculator", style = MaterialTheme.typography.bodyLarge) }, // Tipografi dari tema
                     selected = false,
                     onClick = { scope.launch { drawerState.close() }; onNavigateToCalculator() },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
             }
         }
     ) {
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            containerColor = MaterialTheme.colorScheme.background,
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
@@ -148,13 +168,17 @@ fun TrashScreen(
                                 value = searchQuery,
                                 onValueChange = onSearchQueryChange,
                                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-                                textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onPrimary),
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onPrimary),
                                 singleLine = true,
                                 decorationBox = { innerTextField ->
                                     Box(contentAlignment = Alignment.CenterStart) {
                                         if (searchQuery.isEmpty()) {
-                                            Text("Search in trash...", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f))
+                                            Text(
+                                                "Search in trash...",
+                                                style = MaterialTheme.typography.bodyLarge, // Tipografi dari tema
+                                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f) // Warna placeholder dari tema
+                                            )
                                         }
                                         innerTextField()
                                     }
@@ -162,17 +186,21 @@ fun TrashScreen(
                             )
                             LaunchedEffect(Unit) { focusRequester.requestFocus() }
                         } else {
-                            Text("Trash")
+                            Text(
+                                "Trash",
+                                style = MaterialTheme.typography.headlineSmall, // Tipografi judul dari tema
+                                color = MaterialTheme.colorScheme.onPrimary // Warna judul dari tema
+                            )
                         }
                     },
                     navigationIcon = {
                         if (isSearchActive) {
                             IconButton(onClick = { isSearchActive = false; onSearchQueryChange("") }) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back",tint = MaterialTheme.colorScheme.onPrimary)
                             }
                         } else {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, "Open Menu")
+                                Icon(Icons.Default.Menu, "Open Menu", tint = MaterialTheme.colorScheme.onPrimary)
                             }
                         }
                     },
@@ -180,12 +208,12 @@ fun TrashScreen(
                         if (isSearchActive) {
                             if (searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { onSearchQueryChange("") }) {
-                                    Icon(Icons.Default.Close, "Clear Search")
+                                    Icon(Icons.Default.Close, "Clear Search", tint = MaterialTheme.colorScheme.onPrimary)
                                 }
                             }
                         } else {
                             IconButton(onClick = { isSearchActive = true }) {
-                                Icon(Icons.Default.Search, "Search Trash")
+                                Icon(Icons.Default.Search, "Search Trash", tint = MaterialTheme.colorScheme.onPrimary)
                             }
                         }
                     },
@@ -201,14 +229,23 @@ fun TrashScreen(
             Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Box(modifier = Modifier.align(Alignment.CenterEnd)) {
-                        TextButton(onClick = { isSortMenuExpanded = true }) {
-                            Text(sortOption.displayName)
+                        TextButton(
+                            onClick = { isSortMenuExpanded = true },
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant) // Warna teks tombol dari tema
+                        ) {
+                            Text(sortOption.displayName, style = MaterialTheme.typography.labelLarge) // Tipografi dari tema
                             Spacer(Modifier.width(4.dp))
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Sort Options")
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Sort Options", tint = MaterialTheme.colorScheme.onSurfaceVariant) // Warna ikon dari tema
                         }
-                        DropdownMenu(expanded = isSortMenuExpanded, onDismissRequest = { isSortMenuExpanded = false }) {
+                        DropdownMenu(
+                            expanded = isSortMenuExpanded,
+                            onDismissRequest = { isSortMenuExpanded = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        ) {
                             SortOption.entries.forEach { option ->
-                                DropdownMenuItem(text = { Text(option.displayName) }, onClick = {
+                                DropdownMenuItem(
+                                    text = { Text(option.displayName, style = MaterialTheme.typography.bodyLarge) },
+                                    onClick = {
                                     onSortOptionChange(option)
                                     isSortMenuExpanded = false
                                 })
@@ -226,7 +263,11 @@ fun TrashScreen(
                 )
                 if (trashedNotes.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(if(searchQuery.isNotEmpty()) "No results found" else "Trash is empty.")
+                        Text(
+                            if (searchQuery.isNotEmpty()) "No results found" else "Trash is empty.",
+                            style = MaterialTheme.typography.bodyLarge, // Tipografi dari tema
+                            color = MaterialTheme.colorScheme.onSurfaceVariant // Warna teks dari tema
+                        )
                     }
                 } else {
                     LazyVerticalGrid(
@@ -262,7 +303,7 @@ fun TrashNoteCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant) // Warna container dari tema
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -275,50 +316,54 @@ fun TrashNoteCard(
             ) {
                 Text(
                     text = note.title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), // Tipografi dari tema
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurface // Warna teks dari tema
                 )
                 Box {
                     IconButton(
                         onClick = { isMenuExpanded = true },
                         modifier = Modifier.size(24.dp)
                     ) {
-                        Icon(Icons.Default.MoreVert, "More Options", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.MoreVert, "More Options", tint = MaterialTheme.colorScheme.onSurfaceVariant) // Warna ikon dari tema
                     }
                     DropdownMenu(
                         expanded = isMenuExpanded,
                         onDismissRequest = { isMenuExpanded = false },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        modifier = Modifier.background(MaterialTheme.colorScheme.surface) // Latar belakang menu dari tema
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Restore", color = MaterialTheme.colorScheme.onSurface) },
+                            text = { Text("Restore", style = MaterialTheme.typography.bodyLarge) }, // Tipografi dari tema
                             onClick = { onRestore(); isMenuExpanded = false },
-                            leadingIcon = { Icon(Icons.Outlined.Restore, "Restore", tint = MaterialTheme.colorScheme.onSurface) }
+                            leadingIcon = { Icon(Icons.Outlined.Restore, "Restore", tint = MaterialTheme.colorScheme.onSurface) }, // Warna ikon dari tema
+                            colors = MenuDefaults.itemColors(
+                                textColor = MaterialTheme.colorScheme.onSurface // Warna teks dari tema
+                            )
                         )
                         DropdownMenuItem(
-                            text = { Text("Delete forever", color = MaterialTheme.colorScheme.error) },
+                            text = { Text("Delete forever", style = MaterialTheme.typography.bodyLarge) }, // Tipografi dari tema
                             onClick = { onPermanentlyDelete(); isMenuExpanded = false },
-                            leadingIcon = { Icon(Icons.Outlined.DeleteForever, "Delete Forever", tint = MaterialTheme.colorScheme.error) }
+                            leadingIcon = { Icon(Icons.Outlined.DeleteForever, "Delete Forever", tint = MaterialTheme.colorScheme.error) }, // Warna ikon dari tema
+                            colors = MenuDefaults.itemColors(
+                                textColor = MaterialTheme.colorScheme.error // Warna teks error dari tema
+                            )
                         )
                     }
                 }
             }
             Text(
                 text = note.content,
-                fontSize = 13.sp,
-                lineHeight = 18.sp,
+                style = MaterialTheme.typography.bodyMedium, // Tipografi dari tema
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f) // Warna teks dari tema dengan alpha
             )
             Text(
                 text = "Deleted: ${note.updatedAt.toRelativeTimeString()}",
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.outline
+                style = MaterialTheme.typography.labelSmall, // Tipografi dari tema
+                color = MaterialTheme.colorScheme.outline // Warna teks dari tema
             )
         }
     }
@@ -353,17 +398,14 @@ fun TrashScreenPreview() {
         )
     }
 
-    // Panggil `remember` di level atas dari composable
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Panggil SealnoteTheme dengan parameter `themeOption` yang baru
     SealnoteTheme(themeOption = ThemeOption.DARK) {
         TrashScreen(
             currentRoute = "trash",
             trashedNotes = sampleNotes,
             searchQuery = "",
             sortOption = SortOption.BY_DATE_DESC,
-            // Teruskan state yang sudah di-"remember"
             snackbarHostState = snackbarHostState,
             onSearchQueryChange = {},
             onSortOptionChange = {},

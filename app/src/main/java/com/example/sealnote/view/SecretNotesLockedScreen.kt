@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme // Import MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,9 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.sealnote.R
-import com.example.sealnote.ui.theme.SealnoteTheme // Asumsi AppTheme Anda
+import com.example.sealnote.ui.theme.SealnoteTheme
 
 // Definisi Warna dari XML
 val LockedScreenBackground = Color(0xFF152332)
@@ -30,7 +31,7 @@ fun SecretNotesLockedScreen(
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = LockedScreenBackground
+        color = MaterialTheme.colorScheme.background
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -51,9 +52,8 @@ fun SecretNotesLockedScreen(
 
                 Text(
                     text = "Notes Locked",
-                    color = LockedScreenTextColor,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground, // Menggunakan warna teks di atas latar belakang
+                    style = MaterialTheme.typography.headlineMedium, // Menggunakan gaya tipografi headline yang sesuai
                     textAlign = TextAlign.Center
                 )
 
@@ -66,11 +66,11 @@ fun SecretNotesLockedScreen(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Preview(showBackground = true)
 @Composable
 fun NotesLockedScreenPreviewWithOuterBackground() {
     SealnoteTheme {
-        Box(Modifier.fillMaxSize().background(Color.White)) {
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant)) {
             SecretNotesLockedScreen(onAuthenticate = {}) // Lambda kosong untuk preview
         }
     }

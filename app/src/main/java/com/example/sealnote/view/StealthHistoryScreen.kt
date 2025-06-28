@@ -22,7 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import kotlinx.coroutines.launch // Untuk CoroutineScope
 import androidx.compose.runtime.rememberCoroutineScope
-
+import com.example.sealnote.ui.theme.SealnoteTheme
 import com.example.sealnote.viewmodel.CalculatorHistoryViewModel // Import History ViewModel
 
 // Definisi Warna dari XML
@@ -52,7 +52,12 @@ fun StealthHistoryScreen(
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(Modifier.height(16.dp))
-                Text("Mode Kalkulator", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "Mode Kalkulator",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleLarge, // Menggunakan tipografi dari tema
+                    color = MaterialTheme.colorScheme.onSurface // Menggunakan warna dari tema
+                )
                 NavigationDrawerItem(
                     label = { Text("Kalkulator Standar") },
                     selected = false,
@@ -62,10 +67,15 @@ fun StealthHistoryScreen(
                             popUpTo("stealthHistory") { inclusive = true }
                         }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 NavigationDrawerItem(
-                    label = { Text("Kalkulator Ilmiah") },
+                    label = { Text("Kalkulator Ilmiah",style = MaterialTheme.typography.bodyLarge) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -73,26 +83,41 @@ fun StealthHistoryScreen(
                             popUpTo("stealthHistory") { inclusive = true }
                         }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 NavigationDrawerItem(
-                    label = { Text("Riwayat Kalkulasi") },
+                    label = { Text("Riwayat Kalkulasi",style = MaterialTheme.typography.bodyLarge) },
                     selected = true, // Ini adalah halaman saat ini
                     onClick = {
                         scope.launch { drawerState.close() }
                         // Tidak perlu navigasi, karena sudah di halaman ini
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer, // Warna terpilih dari tema
+                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer, // Warna teks terpilih dari tema
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer // Warna ikon terpilih dari tema
+                    )
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 NavigationDrawerItem(
-                    label = { Text("Bersihkan Riwayat") },
+                    label = { Text("Bersihkan Riwayat",style = MaterialTheme.typography.bodyLarge) },
                     selected = false,
                     onClick = {
                         historyViewModel.clearHistory()
                         scope.launch { drawerState.close() }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
             }
         },
@@ -100,22 +125,27 @@ fun StealthHistoryScreen(
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = {
                         Text(
                             text = "Riwayat Kalkulasi",
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.headlineSmall
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            Icon(
+                                Icons.Filled.Menu,
+                                contentDescription = "Menu",
+                                tint = MaterialTheme.colorScheme.onSurface // Warna ikon dari tema
+                            )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = HistoryScreenBackground, // Sesuaikan dengan background riwayat
-                        titleContentColor = HistoryItemResultColor // Warna teks judul
+                        containerColor = MaterialTheme.colorScheme.surface, // Warna container TopAppBar dari tema
+                        titleContentColor = MaterialTheme.colorScheme.onSurface // Warna teks judul dari tema
                     )
                 )
             }
@@ -124,32 +154,28 @@ fun StealthHistoryScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues), // Penting untuk apply padding dari Scaffold
-                color = HistoryScreenBackground
+                color = MaterialTheme.colorScheme.background
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Gunakan LazyColumn untuk riwayat yang efisien
-                    // Karena `offset` dan `height` yang hardcoded dari XML lama,
-                    // mungkin perlu penyesuaian jika ingin responsif.
-                    // Untuk menjaga kesesuaian visual dengan preview, saya akan biarkan offset-nya.
                     Column(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .offset(y = 0.dp) // Sesuaikan offset setelah TopAppBar
                             .fillMaxSize() // Gunakan fillMaxSize dan biarkan scroll mengisi sisanya
-                            .background(HistoryScreenBackground)
+                            .background(MaterialTheme.colorScheme.background)
                             .verticalScroll(rememberScrollState())
                     ) {
                         if (historyViewModel.historyEntries.isEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .fillMaxHeight(), // Untuk membuat teks di tengah jika kosong
+                                    .fillMaxHeight(),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = "Tidak ada riwayat kalkulasi.",
-                                    color = HistoryItemExpressionColor,
-                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyLarge,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.padding(16.dp)
                                 )
@@ -171,7 +197,7 @@ private fun HistoryItemView(entry: CalculationHistoryEntry) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(HistoryScreenBackground)
+            .background(MaterialTheme.colorScheme.background)
             .padding(vertical = 15.dp)
     ) {
         Box(
@@ -187,22 +213,21 @@ private fun HistoryItemView(entry: CalculationHistoryEntry) {
             ) {
                 Text(
                     text = entry.expression,
-                    color = HistoryItemExpressionColor,
-                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.End
                 )
                 Text(
                     text = entry.result,
-                    color = HistoryItemResultColor,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     textAlign = TextAlign.End,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
         HorizontalDivider(
-            color = HistoryItemDividerColor,
+            color = MaterialTheme.colorScheme.outlineVariant,
             thickness = 1.dp,
             modifier = Modifier.fillMaxWidth()
         )

@@ -34,25 +34,15 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sealnote.R
 import com.example.sealnote.ui.theme.SealnoteTheme
 import com.example.sealnote.viewmodel.LoginViewModel
 
 // Definisi Warna
-val LoginScreenBackground = Color(0xFF152332)
-val LoginWelcomeTextColor = Color(0xFFFDFDFD)
-val LoginInfoTextColor = Color(0xFFEDEDED)
-val LoginInputFieldBackground = Color(0xFF2A2E45)
-val LoginInputTextHintColor = Color(0xFFBBBBBB)
-val LoginInputTextColor = Color.White
+
 val LoginButtonGradientStart = Color(0xFF8000FF)
 val LoginButtonGradientEnd = Color(0xFF00D1FF)
-val LoginButtonTextColor = Color.White
-val ForgotPasswordTextColor = Color(0xFF2493D7)
-val NoAccountTextColor = Color(0xFFF8F8F8)
-val SignUpLinkColor = Color(0xFFEDEDED)
 val GoogleButtonBackground = Color(0xFF3E5166)
 val GoogleButtonTextColor = Color.White
 
@@ -96,7 +86,7 @@ fun LoginScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = LoginScreenBackground
+            color = MaterialTheme.colorScheme.background
         ) {
             Column(
                 modifier = Modifier
@@ -118,9 +108,8 @@ fun LoginScreen(
 
                 Text(
                     text = "Welcome Back!",
-                    color = LoginWelcomeTextColor,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier.align(Alignment.Start)
                 )
 
@@ -128,8 +117,8 @@ fun LoginScreen(
 
                 Text(
                     text = "Enter your login information to continue",
-                    color = LoginInfoTextColor,
-                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.align(Alignment.Start)
                 )
 
@@ -140,13 +129,19 @@ fun LoginScreen(
                     value = email,
                     onValueChange = { email = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Email", color = LoginInputTextHintColor) },
-                    placeholder = { Text("youremail@gmail.com", color = LoginInputTextHintColor) },
+                    label = { Text("Email", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                    placeholder = {
+                        Text(
+                            "youremail@gmail.com",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_email),
                             contentDescription = "Email Icon",
-                            tint = LoginInputTextHintColor
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     singleLine = true,
@@ -154,13 +149,13 @@ fun LoginScreen(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     ),
-                    textStyle = TextStyle(color = LoginInputTextColor, fontSize = 14.sp),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     shape = RoundedCornerShape(8.dp),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = LoginInputFieldBackground,
-                        unfocusedContainerColor = LoginInputFieldBackground,
-                        disabledContainerColor = LoginInputFieldBackground,
-                        cursorColor = LoginInputTextColor,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        cursorColor = MaterialTheme.colorScheme.primary,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                     )
@@ -173,13 +168,24 @@ fun LoginScreen(
                     value = password,
                     onValueChange = { password = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Password", color = LoginInputTextHintColor) },
-                    placeholder = { Text("password", color = LoginInputTextHintColor) },
+                    label = {
+                        Text(
+                            "Password",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    placeholder = {
+                        Text(
+                            "password",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_lock),
                             contentDescription = "Password Icon",
-                            tint = LoginInputTextHintColor
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
                     singleLine = true,
@@ -194,13 +200,13 @@ fun LoginScreen(
                             viewModel.login(email, password)
                         }
                     ),
-                    textStyle = TextStyle(color = LoginInputTextColor, fontSize = 14.sp),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     shape = RoundedCornerShape(8.dp),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = LoginInputFieldBackground,
-                        unfocusedContainerColor = LoginInputFieldBackground,
-                        disabledContainerColor = LoginInputFieldBackground,
-                        cursorColor = LoginInputTextColor,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        cursorColor = MaterialTheme.colorScheme.primary,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                     )
@@ -210,8 +216,8 @@ fun LoginScreen(
 
                 Text(
                     text = "Forgot Password?",
-                    color = ForgotPasswordTextColor,
-                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier
                         .align(Alignment.End)
                         .clickable { onForgotPasswordClick() }
@@ -246,9 +252,8 @@ fun LoginScreen(
                     ) {
                         Text(
                             text = "Login",
-                            color = LoginButtonTextColor,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )
                     }
                 }
@@ -276,8 +281,8 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = "Continue with Google",
-                            fontSize = 16.sp,
-                            color = GoogleButtonTextColor
+                            style = MaterialTheme.typography.labelLarge, // Tipografi untuk teks tombol
+                            color = GoogleButtonTextColor // Warna teks spesifik untuk tombol Google
                         )
                     }
                 }
@@ -301,17 +306,20 @@ fun LoginScreen(
 @Composable
 private fun ClickableSignUpText(onSignUpClick: () -> Unit) {
     val annotatedText = buildAnnotatedString {
-        withStyle(style = SpanStyle(color = NoAccountTextColor, fontSize = 13.sp)) {
+        // PERBAIKAN: Gunakan copy() pada TextStyle lalu toSpanStyle()
+        withStyle(style = MaterialTheme.typography.labelMedium.copy(
+            color = MaterialTheme.colorScheme.onBackground
+        ).toSpanStyle()) {
             append("Don’t have an account? ")
         }
         pushStringAnnotation(tag = "SIGNUP", annotation = "signup")
+        // PERBAIKAN: Gunakan copy() pada TextStyle lalu toSpanStyle() untuk bagian "Sign Up"
         withStyle(
-            style = SpanStyle(
-                color = SignUpLinkColor,
-                fontSize = 13.sp,
+            style = MaterialTheme.typography.labelMedium.copy(
+                color = MaterialTheme.colorScheme.primary, // Gunakan warna utama untuk tautan
                 fontWeight = FontWeight.Bold,
                 textDecoration = TextDecoration.Underline
-            )
+            ).toSpanStyle()
         ) {
             append("Sign Up")
         }
@@ -330,7 +338,7 @@ private fun ClickableSignUpText(onSignUpClick: () -> Unit) {
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF152332)
+@Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
     SealnoteTheme {
