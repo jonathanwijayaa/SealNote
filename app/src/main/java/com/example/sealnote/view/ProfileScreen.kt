@@ -47,12 +47,6 @@ import com.example.sealnote.viewmodel.ProfileViewModel
 import kotlinx.coroutines.launch
 
 // --- Warna ---
-val ProfilePageBackgroundColor = Color(0xFF152332)
-val ProfileNameTextColor = Color.White
-val ProfileLabelTextColor = Color.White
-val ProfileInputBackgroundColor = Color(0xFF2A2E45)
-val ProfileInputTextColor = Color(0xFFFFF3DB)
-val ProfileButtonTextColor = Color.White
 val ProfileButtonGradientStart = Color(0xFF8000FF)
 val ProfileButtonGradientEnd = Color(0xFF00D1FF)
 
@@ -296,10 +290,10 @@ private fun ProfileTextFieldItem(
             textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface), // Typography and color for input text
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = ProfileInputBackgroundColor,
-                unfocusedContainerColor = ProfileInputBackgroundColor,
-                disabledContainerColor = ProfileInputBackgroundColor,
-                cursorColor = ProfileInputTextColor,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent
