@@ -31,8 +31,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,12 +47,6 @@ import com.example.sealnote.viewmodel.ProfileViewModel
 import kotlinx.coroutines.launch
 
 // --- Warna ---
-val ProfilePageBackgroundColor = Color(0xFF152332)
-val ProfileNameTextColor = Color.White
-val ProfileLabelTextColor = Color.White
-val ProfileInputBackgroundColor = Color(0xFF2A2E45)
-val ProfileInputTextColor = Color(0xFFFFF3DB)
-val ProfileButtonTextColor = Color.White
 val ProfileButtonGradientStart = Color(0xFF8000FF)
 val ProfileButtonGradientEnd = Color(0xFF00D1FF)
 
@@ -175,7 +169,7 @@ fun ProfileScreen(
         }
     ) {
         Scaffold(
-            containerColor = ProfilePageBackgroundColor,
+            containerColor = MaterialTheme.colorScheme.background,
             topBar = {
                 CenterAlignedTopAppBar(
                     title = { Text("Profile") },
@@ -185,9 +179,9 @@ fun ProfileScreen(
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = ProfilePageBackgroundColor,
-                        titleContentColor = ProfileNameTextColor,
-                        navigationIconContentColor = ProfileNameTextColor
+                        containerColor = MaterialTheme.colorScheme.surface, // Or surfaceColorAtElevation(1.dp)
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
             }
@@ -205,7 +199,12 @@ fun ProfileScreen(
                     ) {
                         Image(painter = painterResource(id = R.drawable.logo_sealnote), contentDescription = "Profile Image", modifier = Modifier.size(100.dp).clip(CircleShape), contentScale = ContentScale.Crop)
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text(text = uiState.user.fullName, color = ProfileNameTextColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = uiState.user.fullName,
+                            // Use MaterialTheme typography for name
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onBackground // Text color on background
+                        )
                         Spacer(modifier = Modifier.height(32.dp))
 
                         // --- Fields ---
@@ -244,7 +243,7 @@ fun ProfileScreen(
                                 shape = RoundedCornerShape(12.dp),
                                 border = BorderStroke(1.dp, Color.Gray)
                             ) {
-                                Text("Edit Profile", fontWeight = FontWeight.Bold)
+                                Text("Edit Profile", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                             }
                         }
                         Spacer(modifier = Modifier.height(16.dp))
@@ -269,21 +268,32 @@ private fun ProfileTextFieldItem(
     isPassword: Boolean = false, onVisibilityToggle: (() -> Unit)? = null, placeholder: String? = null
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = label, color = ProfileLabelTextColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = label,
+            color = MaterialTheme.colorScheme.onSurfaceVariant, // Text color for labels
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold) // Use typography
+        )
         Spacer(modifier = Modifier.height(10.dp))
         TextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             readOnly = readOnly,
-            placeholder = { if (placeholder != null) Text(placeholder) },
-            textStyle = TextStyle(color = ProfileInputTextColor, fontSize = 14.sp),
+            placeholder = {
+                if (placeholder != null) {
+                    Text(
+                        placeholder,
+                        style = MaterialTheme.typography.bodyMedium // Typography for placeholder
+                    )
+                }
+            },
+            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface), // Typography and color for input text
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = ProfileInputBackgroundColor,
-                unfocusedContainerColor = ProfileInputBackgroundColor,
-                disabledContainerColor = ProfileInputBackgroundColor,
-                cursorColor = ProfileInputTextColor,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent
@@ -315,7 +325,11 @@ fun GradientButton(text: String, onClick: () -> Unit, modifier: Modifier = Modif
             modifier = Modifier.fillMaxSize().background(brush = Brush.horizontalGradient(listOf(ProfileButtonGradientStart, ProfileButtonGradientEnd))),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = text, color = ProfileButtonTextColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = text,
+                color = MaterialTheme.colorScheme.onPrimary, // Text color on primary-like background
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold) // Use typography
+            )
         }
     }
 }
@@ -343,3 +357,39 @@ private fun showBiometricPrompt(activity: FragmentActivity, onSuccess: () -> Uni
         .build()
     biometricPrompt.authenticate(promptInfo)
 }
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
+    SealnoteTheme {
+        // Create a dummy ProfileUiState for preview purposes
+        val previewUiState = ProfileUiState(
+            user = User(
+                fullName = "John Doe",
+                email = "john.doe@example.com",
+                passwordHash = "somehash",
+            ),
+            editedName = "John Doe",
+            editedPassword = "", // Empty for preview
+            isEditing = false,
+            isPasswordVisible = false,
+            isLoading = false,
+            triggerBiometric = false,
+            errorMessage = null,
+            infoMessage = null,
+            isSignedOut = false
+        )
+        ProfileScreen(
+            uiState = previewUiState,
+            currentRoute = "profile", // Set current route for selected drawer item
+            onNameChange = {},
+            onPasswordChange = {},
+            onEditToggle = {},
+            onSaveChanges = {},
+            onTogglePasswordVisibility = {},
+            onSignOutClick = {},
+            onNavigate = {},
+            onNavigateToCalculator = {}
+        )
+    }
+}
+

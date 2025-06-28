@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sealnote.R
@@ -30,12 +29,7 @@ import com.example.sealnote.viewmodel.AuthViewModel
 import com.example.sealnote.viewmodel.AuthenticatorType
 import com.example.sealnote.viewmodel.BiometricAuthState
 
-val AuthScreenBackground = Color(0xFF0A0F1E)
-val AuthCardBackgroundColor = Color(0xFF10182C)
-val AuthTextColor = Color.White
-val AuthTabLayoutBackgroundColor = Color(0xFF0D1326)
 val AuthSelectedTabBrush = Brush.horizontalGradient(listOf(Color(0xFF7B5DFF), Color(0xFF5D7FFF)))
-val AuthUnselectedTabColor = Color.Transparent
 
 @Composable
 fun AuthenticationRoute(
@@ -96,7 +90,7 @@ fun AuthenticationScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = AuthScreenBackground
+        color = MaterialTheme.colorScheme.background
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -107,7 +101,7 @@ fun AuthenticationScreen(
                     .width(332.dp)
                     .height(305.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = AuthCardBackgroundColor)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             ) {
                 Column(
                     modifier = Modifier
@@ -124,9 +118,8 @@ fun AuthenticationScreen(
 
                     Text(
                         text = "Unlock to open secret notes",
-                        color = AuthTextColor,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleMedium,
                         textAlign = TextAlign.Center
                     )
 
@@ -146,8 +139,8 @@ fun AuthenticationScreen(
 
                     Text(
                         text = if (isBiometricAvailable) currentAuthMethod.authText else "This biometric type is not available or not set up.",
-                        color = AuthTextColor,
-                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, // Use onSurfaceVariant for secondary text
+                        style = MaterialTheme.typography.bodyMedium, // Use a suitable typography style
                         textAlign = TextAlign.Center
                     )
 
@@ -155,9 +148,8 @@ fun AuthenticationScreen(
 
                     Text(
                         text = "Use PIN",
-                        color = AuthTextColor,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary, // Use primary color for clickable text
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), // Use labelLarge and bold
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
                             .clickable { onUsePinClick() }
@@ -179,7 +171,7 @@ private fun AuthCustomTabLayout(
         modifier = Modifier
             .fillMaxWidth()
             .height(40.dp)
-            .background(AuthTabLayoutBackgroundColor, shape = RoundedCornerShape(8.dp))
+            .background(Color.Transparent, shape = RoundedCornerShape(8.dp))
             .padding(4.dp)
     ) {
         tabs.forEachIndexed { index, title ->
@@ -187,7 +179,7 @@ private fun AuthCustomTabLayout(
             val tabBackgroundModifier = if (isSelected) {
                 Modifier.background(AuthSelectedTabBrush, shape = RoundedCornerShape(6.dp))
             } else {
-                Modifier.background(AuthUnselectedTabColor, shape = RoundedCornerShape(6.dp))
+                Modifier.background(Color.Transparent, shape = RoundedCornerShape(6.dp))
             }
             Box(
                 modifier = Modifier
@@ -198,7 +190,11 @@ private fun AuthCustomTabLayout(
                     .clickable { onTabSelected(index) },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = title, color = AuthTextColor, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = title,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, // Text color based on selection
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold) // Use labelLarge and bold
+                )
             }
         }
     }
@@ -218,7 +214,7 @@ private enum class AuthMethod(val iconRes: Int, val authText: String, val conten
     )
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0F1E)
+@Preview(showBackground = true)
 @Composable
 fun AuthenticationScreenPreview() {
     SealnoteTheme {
