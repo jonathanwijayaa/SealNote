@@ -7,10 +7,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Calculate
-import androidx.compose.material3.*
+import androidx.compose.material3.* // Memastikan semua komponen Material 3 diimpor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -88,7 +89,12 @@ fun SettingsScreen(
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(Modifier.height(12.dp))
-                Text("SealNote Menu", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp))
+                Text(
+                    "SealNote Menu",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.onSurface // Pastikan warna teks sesuai tema
+                )
                 menuItems.forEach { (route, details) ->
                     val (label, icon) = details
                     NavigationDrawerItem(
@@ -99,7 +105,15 @@ fun SettingsScreen(
                             scope.launch { drawerState.close() }
                             onNavigate(route)
                         },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            unselectedContainerColor = Color.Transparent,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
                 Divider(modifier = Modifier.padding(vertical = 16.dp))
@@ -111,7 +125,12 @@ fun SettingsScreen(
                         scope.launch { drawerState.close() }
                         onNavigateToCalculator()
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
             }
         }
@@ -119,9 +138,12 @@ fun SettingsScreen(
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Settings") },
-                    // --- PERUBAHAN UTAMA DI SINI ---
-                    // Mengganti tombol kembali dengan ikon menu untuk membuka drawer
+                    title = {
+                        Text(
+                            "Settings",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
@@ -129,7 +151,12 @@ fun SettingsScreen(
                                 contentDescription = "Open Menu"
                             )
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                    )
                 )
             }
         ) { innerPadding ->
