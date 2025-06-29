@@ -3,8 +3,6 @@
 package com.example.sealnote.view
 
 import android.widget.Toast
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -33,7 +30,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,9 +40,22 @@ import com.example.sealnote.model.User
 import com.example.sealnote.ui.theme.SealnoteTheme
 import com.example.sealnote.viewmodel.ProfileUiState
 import com.example.sealnote.viewmodel.ProfileViewModel
+import com.example.sealnote.viewmodel.ProfileEvent // <--- Import ProfileEvent
 import kotlinx.coroutines.launch
+import android.util.Log // <--- Import Log untuk logging
+import androidx.activity.compose.LocalActivity
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.compose.ui.layout.ContentScale
+import androidx.core.content.ContextCompat
 
 // --- Warna ---
+val ProfilePageBackgroundColor = Color(0xFF152332)
+val ProfileNameTextColor = Color.White
+val ProfileLabelTextColor = Color.White
+val ProfileInputBackgroundColor = Color(0xFF2A2E45)
+val ProfileInputTextColor = Color(0xFFFFF3DB)
+val ProfileButtonTextColor = Color.White
 val ProfileButtonGradientStart = Color(0xFF8000FF)
 val ProfileButtonGradientEnd = Color(0xFF00D1FF)
 
@@ -56,40 +65,63 @@ fun ProfileRoute(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val profileEvent by viewModel.profileEvent.collectAsState(initial = ProfileEvent.Idle)
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val context = LocalContext.current
+    val activity = LocalActivity.current as FragmentActivity
 
-    // Menangani pesan error/info
+    // Menangani pesan error/info dari uiState
     LaunchedEffect(uiState.errorMessage, uiState.infoMessage) {
         uiState.errorMessage?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
         uiState.infoMessage?.let { Toast.makeText(context, it, Toast.LENGTH_SHORT).show() }
         viewModel.clearMessages()
     }
 
-    // Menangani pemicu biometrik
-    val activity = context as FragmentActivity
-    LaunchedEffect(uiState.triggerBiometric) {
-        if (uiState.triggerBiometric) {
-            showBiometricPrompt(
-                activity = activity,
-                onSuccess = { viewModel.onBiometricAuthResult(true) },
-                onFailure = { viewModel.onBiometricAuthResult(false) }
-            )
+    // Menangani event satu kali dari ProfileViewModel
+    LaunchedEffect(profileEvent) {
+        when (val event = profileEvent) {
+            is ProfileEvent.ShowToast -> {
+                Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                Log.d("ProfileRoute", "ProfileEvent.ShowToast: ${event.message}")
+            }
+            is ProfileEvent.Error -> {
+                Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
+                Log.e("ProfileRoute", "ProfileEvent.Error: ${event.message}")
+            }
+            ProfileEvent.TogglePasswordVisibilitySuccess -> {
+                Log.d("ProfileRoute", "ProfileEvent.TogglePasswordVisibilitySuccess detected.")
+                // Panggil fungsi di ViewModel yang akan memicu toggle password visibility di UI state
+                viewModel.onTogglePasswordVisibilityRequest(activity, context)
+            }
+            ProfileEvent.SignOutSuccess -> {
+                Log.d("ProfileRoute", "ProfileEvent.SignOutSuccess detected. Navigating to login.")
+                navController.navigate("login") {
+                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    launchSingleTop = true
+                }
+                viewModel.onSignOutNavigated() // Reset status isSignedOut di ViewModel
+            }
+            else -> {
+                // Tangani Idle atau Loading jika diperlukan
+                Log.d("ProfileRoute", "Unhandled ProfileEvent: $event")
+            }
         }
     }
-    // --- Efek samping untuk navigasi Sign Out ---
+
+    // VVVVVV KODE INI DIHAPUS UNTUK MENGHINDARI DUPLIKASI VVVVVV
+    /*
     LaunchedEffect(uiState.isSignedOut) {
         if (uiState.isSignedOut) {
             navController.navigate("login") {
-                // Hapus semua dari back stack hingga start destination, lalu inklusif
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                launchSingleTop = true // Pastikan hanya satu instance LoginScreen
+                launchSingleTop = true
             }
-            // Reset status isSignedOut di ViewModel setelah navigasi
             viewModel.onSignOutNavigated()
         }
     }
+    */
+    // ^^^^^^ KODE INI DIHAPUS UNTUK MENGHINDARI DUPLIKASI ^^^^^^
 
     ProfileScreen(
         uiState = uiState,
@@ -98,7 +130,9 @@ fun ProfileRoute(
         onPasswordChange = viewModel::onPasswordChange,
         onEditToggle = viewModel::onEditToggle,
         onSaveChanges = viewModel::onSaveChanges,
-        onTogglePasswordVisibility = viewModel::onTogglePasswordVisibilityRequest,
+        onTogglePasswordVisibility = {
+            viewModel.onTogglePasswordVisibilityRequest(activity, context)
+        },
         onSignOutClick = viewModel::signOut,
         onNavigate = { route ->
             if (currentRoute != route) {
@@ -130,8 +164,6 @@ fun ProfileScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // --- PERBAIKAN DI SINI ---
-    // Menggunakan Icons.Default untuk semua ikon standar
     val menuItems = listOf(
         "homepage" to ("All Notes" to Icons.Default.Home),
         "bookmarks" to ("Bookmarks" to Icons.Default.BookmarkBorder),
@@ -179,7 +211,7 @@ fun ProfileScreen(
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface, // Or surfaceColorAtElevation(1.dp)
+                        containerColor = MaterialTheme.colorScheme.surface,
                         titleContentColor = MaterialTheme.colorScheme.onSurface,
                         navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     )
@@ -201,9 +233,8 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = uiState.user.fullName,
-                            // Use MaterialTheme typography for name
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onBackground // Text color on background
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(modifier = Modifier.height(32.dp))
 
@@ -218,7 +249,7 @@ fun ProfileScreen(
                             onValueChange = onPasswordChange,
                             readOnly = !uiState.isEditing,
                             isPassword = !uiState.isPasswordVisible,
-                            onVisibilityToggle = if(uiState.isEditing) onTogglePasswordVisibility else null,
+                            onVisibilityToggle = if(uiState.isEditing && !uiState.isPasswordVisible) onTogglePasswordVisibility else null,
                             placeholder = if (!uiState.isEditing) "••••••••" else "Enter new password (optional)"
                         )
 
@@ -270,8 +301,8 @@ private fun ProfileTextFieldItem(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, // Text color for labels
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold) // Use typography
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
         )
         Spacer(modifier = Modifier.height(10.dp))
         TextField(
@@ -283,16 +314,16 @@ private fun ProfileTextFieldItem(
                 if (placeholder != null) {
                     Text(
                         placeholder,
-                        style = MaterialTheme.typography.bodyMedium // Typography for placeholder
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             },
-            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface), // Typography and color for input text
+            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
             shape = RoundedCornerShape(8.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
@@ -327,8 +358,8 @@ fun GradientButton(text: String, onClick: () -> Unit, modifier: Modifier = Modif
         ) {
             Text(
                 text = text,
-                color = MaterialTheme.colorScheme.onPrimary, // Text color on primary-like background
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold) // Use typography
+                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
             )
         }
     }
@@ -392,4 +423,3 @@ fun ProfileScreenPreview() {
         )
     }
 }
-

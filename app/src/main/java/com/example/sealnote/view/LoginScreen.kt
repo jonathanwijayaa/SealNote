@@ -1,6 +1,10 @@
 package com.example.sealnote.view
 
+import android.app.Activity
+import android.content.Intent
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,6 +42,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sealnote.R
 import com.example.sealnote.ui.theme.SealnoteTheme
 import com.example.sealnote.viewmodel.LoginViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.launch
+import android.util.Log // <--- PASTIKAN INI DIIMPOR UNTUK LOGGING
 
 // Definisi Warna
 
@@ -58,27 +69,90 @@ fun LoginScreen(
     var password by rememberSaveable { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
+    val firebaseAuth = remember { FirebaseAuth.getInstance() }
+    val scope = rememberCoroutineScope()
+
+    // Deklarasi variabel isLoading di sini
+    val isLoading = remember { mutableStateOf(false) }
 
     val loginResult by viewModel.loginResult.observeAsState()
     val isLoggedIn by viewModel.isLoggedIn.observeAsState()
 
-    // Menangani hasil dari proses login
+    // Objek GoogleSignInClient
+    val gso = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+    }
+    val googleSignInClient = remember { GoogleSignIn.getClient(context, gso) }
+
+    // Launcher untuk Google Sign-In Activity
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        isLoading.value = false // Sembunyikan loading setelah hasil diterima dari Google Activity
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)!!
+                val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+
+                // VVVVVV KODE YANG ANDA TANYAKAN DIMULAI DI SINI VVVVVV
+                isLoading.value = true // Tampilkan loading lagi saat autentikasi Firebase dimulai
+                firebaseAuth.signInWithCredential(credential)
+                    .addOnCompleteListener { taskResult ->
+                        isLoading.value = false // Sembunyikan loading setelah Firebase Auth selesai
+                        if (taskResult.isSuccessful) {
+                            Toast.makeText(context, "Google Sign-In successful!", Toast.LENGTH_SHORT).show()
+                            onLoginSuccess()
+                            Log.d("GoogleSignIn", "Firebase Auth with Google SUCCESS. User: ${firebaseAuth.currentUser?.email}") // <--- Pesan Log Sukses
+                        } else {
+                            // TANGKAP ERROR DENGAN LOG DI SINI
+                            val errorMessage = taskResult.exception?.message ?: "Unknown Firebase authentication error."
+                            Toast.makeText(context, "Firebase authentication with Google failed: $errorMessage", Toast.LENGTH_LONG).show()
+                            Log.e("GoogleSignIn", "Firebase Auth with Google FAILED. Error: $errorMessage", taskResult.exception) // <--- Pesan Log Error
+                        }
+                    }
+                // ^^^^^^ KODE YANG ANDA TANYAKAN BERAKHIR DI SINI ^^^^^^
+            } catch (e: ApiException) {
+                Toast.makeText(context, "Google Sign-In failed: ${e.statusCode}", Toast.LENGTH_LONG).show()
+                Log.e("GoogleSignIn", "Google sign in task failed (ApiException): ${e.statusCode}", e) // Log error ApiException
+            } catch (e: Exception) {
+                Toast.makeText(context, "An unexpected error occurred: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("GoogleSignIn", "An unexpected error occurred during Google sign in: ${e.message}", e) // Log error umum
+            }
+        } else {
+            Toast.makeText(context, "Google Sign-In cancelled or failed", Toast.LENGTH_SHORT).show()
+            Log.d("GoogleSignIn", "Google sign in activity result not OK. Result code: ${result.resultCode}")
+        }
+    }
+
+    // Menangani hasil dari proses login email/kata sandi
     LaunchedEffect(loginResult) {
         when (val result = loginResult) {
             is LoginViewModel.LoginResult.Success -> {
                 Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
                 onLoginSuccess()
+                isLoading.value = false // Sembunyikan loading
             }
             is LoginViewModel.LoginResult.Error -> {
                 Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+                isLoading.value = false // Sembunyikan loading
             }
-            else -> {}
+            LoginViewModel.LoginResult.Loading -> {
+                isLoading.value = true // Tampilkan loading
+            }
+            else -> {
+                isLoading.value = false // Default ke false jika Idle atau state lain
+            }
         }
     }
 
-    // Menangani kasus jika pengguna sudah login
-    LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn == true) {
+    // Menangani kasus jika pengguna sudah login (auto-login Firebase)
+    LaunchedEffect(isLoggedIn, firebaseAuth.currentUser) {
+        // Jika isLoggedIn dari ViewModel true, atau ada pengguna Firebase yang aktif
+        if (isLoggedIn == true || firebaseAuth.currentUser != null) {
             onLoginSuccess()
         }
     }
@@ -231,7 +305,7 @@ fun LoginScreen(
                         focusManager.clearFocus()
                         viewModel.login(email, password)
                     },
-                    enabled = loginResult !is LoginViewModel.LoginResult.Loading,
+                    enabled = !isLoading.value, // Gunakan isLoading global
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .width(143.dp)
@@ -262,7 +336,12 @@ fun LoginScreen(
 
                 // Google Sign-In Button
                 Button(
-                    onClick = onGoogleSignInClick,
+                    onClick = {
+                        isLoading.value = true // Tampilkan loading saat memulai Google Sign-In
+                        val signInIntent = googleSignInClient.signInIntent
+                        googleSignInLauncher.launch(signInIntent)
+                    },
+                    enabled = !isLoading.value, // Gunakan isLoading global
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = GoogleButtonBackground,
@@ -281,8 +360,8 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = "Continue with Google",
-                            style = MaterialTheme.typography.labelLarge, // Tipografi untuk teks tombol
-                            color = GoogleButtonTextColor // Warna teks spesifik untuk tombol Google
+                            style = MaterialTheme.typography.labelLarge,
+                            color = GoogleButtonTextColor
                         )
                     }
                 }
@@ -295,9 +374,10 @@ fun LoginScreen(
             }
         }
 
-        if (loginResult is LoginViewModel.LoginResult.Loading) {
+        if (isLoading.value) { // Tampilkan indikator loading global
             CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -306,17 +386,15 @@ fun LoginScreen(
 @Composable
 private fun ClickableSignUpText(onSignUpClick: () -> Unit) {
     val annotatedText = buildAnnotatedString {
-        // PERBAIKAN: Gunakan copy() pada TextStyle lalu toSpanStyle()
         withStyle(style = MaterialTheme.typography.labelMedium.copy(
             color = MaterialTheme.colorScheme.onBackground
         ).toSpanStyle()) {
             append("Don’t have an account? ")
         }
         pushStringAnnotation(tag = "SIGNUP", annotation = "signup")
-        // PERBAIKAN: Gunakan copy() pada TextStyle lalu toSpanStyle() untuk bagian "Sign Up"
         withStyle(
             style = MaterialTheme.typography.labelMedium.copy(
-                color = MaterialTheme.colorScheme.primary, // Gunakan warna utama untuk tautan
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 textDecoration = TextDecoration.Underline
             ).toSpanStyle()
