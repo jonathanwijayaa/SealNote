@@ -49,7 +49,7 @@ class SignUpViewModel : ViewModel() {
                     val hashedPassword = hashPassword(password)
 
                     val user = User(
-                        id = firebaseUser.uid,
+                        uid = firebaseUser.uid,
                         fullName = fullName,
                         email = email,
                         // Simpan hash, BUKAN password asli

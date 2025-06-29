@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "393292911710-inatfs4rtatd8la504vndl5pev9uc8ek.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sealnote",
+            "certificate_hash": "6959f5f6f6ae63934d668a76afa4a2a5b10a88c5"
+          }
+        },
+        {
           "client_id": "393292911710-om2jfnkrnjoer3utams25kvpo8034r0c.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

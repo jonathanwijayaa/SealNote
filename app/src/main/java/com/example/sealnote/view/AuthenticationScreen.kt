@@ -26,8 +26,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.sealnote.R
 import com.example.sealnote.ui.theme.SealnoteTheme
 import com.example.sealnote.viewmodel.AuthViewModel
-import com.example.sealnote.viewmodel.AuthenticatorType
-import com.example.sealnote.viewmodel.BiometricAuthState
+import com.example.sealnote.data.AuthenticatorType
+import com.example.sealnote.viewmodel.AuthEvent // <--- Import AuthEvent yang baru
 
 val AuthSelectedTabBrush = Brush.horizontalGradient(listOf(Color(0xFF7B5DFF), Color(0xFF5D7FFF)))
 
@@ -38,7 +38,8 @@ fun AuthenticationRoute(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val authState by viewModel.authState.collectAsState()
+    // Mengamati authEvent dari ViewModel yang baru
+    val authEvent by viewModel.authEvent.collectAsState(initial = AuthEvent.Idle) // <--- PERBAIKAN DI SINI
 
     // Hoist state tab ke sini
     var selectedTabIndex by remember { mutableStateOf(1) }
@@ -49,20 +50,29 @@ fun AuthenticationRoute(
         viewModel.canAuthenticate(context, currentAuthType)
     }
 
-    LaunchedEffect(authState) {
-        when (val state = authState) {
-            is BiometricAuthState.Success -> {
-                Toast.makeText(context, "Authentication Succeeded!", Toast.LENGTH_SHORT).show()
+    // Menangani event autentikasi biometrik
+    LaunchedEffect(authEvent) { // <--- PERBAIKAN DI SINI
+        when (val event = authEvent) { // <--- PERBAIKAN DI SINI (menggunakan 'event' dan AuthEvent)
+            is AuthEvent.BiometricSuccess -> { // <--- PERBAIKAN DI SINI
+                Toast.makeText(context, event.message ?: "Authentication Succeeded!", Toast.LENGTH_SHORT).show()
                 onAuthSuccess()
-                viewModel.resetAuthState()
+                // Dengan SharedFlow, event dikonsumsi sekali. Tidak perlu resetState secara eksplisit seperti StateFlow.
+                viewModel.eventHandled() // Panggil eventHandled jika ViewModel Anda memilikinya untuk menandai event telah diproses
             }
-            is BiometricAuthState.Error -> {
-                if (state.message.contains("Cancel", ignoreCase = true).not()) {
-                    Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+            is AuthEvent.BiometricError -> { // <--- PERBAIKAN DI SINI
+                // Hindari Toast untuk pembatalan pengguna, karena sistem Biometric sudah menanganinya secara internal dengan BiometricPrompt
+                if (event.message.contains("Cancel", ignoreCase = true).not()) {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
-                viewModel.resetAuthState()
+                viewModel.eventHandled() // Panggil eventHandled
             }
-            else -> {}
+            is AuthEvent.Loading -> {
+                // Opsional: tampilkan loading indicator jika diperlukan
+            }
+            else -> {
+                // Tangani event lain dari AuthViewModel (misal: GoogleSignInSuccess, GoogleSignInError, etc.)
+                // atau biarkan idle.
+            }
         }
     }
 
@@ -73,7 +83,7 @@ fun AuthenticationRoute(
         onTabSelected = { index -> selectedTabIndex = index },
         onAuthClick = {
             // Kirim tipe autentikasi yang dipilih ke ViewModel
-            viewModel.startAuthentication(context as FragmentActivity, currentAuthType)
+            viewModel.startBiometricAuthentication(context as FragmentActivity, currentAuthType) // <--- PERBAIKAN NAMA FUNGSI
         }
     )
 }
@@ -139,8 +149,8 @@ fun AuthenticationScreen(
 
                     Text(
                         text = if (isBiometricAvailable) currentAuthMethod.authText else "This biometric type is not available or not set up.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, // Use onSurfaceVariant for secondary text
-                        style = MaterialTheme.typography.bodyMedium, // Use a suitable typography style
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center
                     )
 
@@ -148,8 +158,8 @@ fun AuthenticationScreen(
 
                     Text(
                         text = "Use PIN",
-                        color = MaterialTheme.colorScheme.primary, // Use primary color for clickable text
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), // Use labelLarge and bold
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
                             .clickable { onUsePinClick() }
@@ -167,17 +177,21 @@ private fun AuthCustomTabLayout(
     onTabSelected: (Int) -> Unit
 ) {
     val tabs = listOf("Fingerprint", "Face")
+    // Menggunakan Brush lokal yang sudah didefinisikan di atas file.
+    // Jika Anda ingin ini dari tema (ExtendedColorScheme), Anda perlu mengaktifkan kembali ExtendedColorScheme.
+    val selectedTabBrush = AuthSelectedTabBrush
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(40.dp)
-            .background(Color.Transparent, shape = RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), shape = RoundedCornerShape(8.dp)) // Menggunakan warna tema untuk latar belakang tab layout
             .padding(4.dp)
     ) {
         tabs.forEachIndexed { index, title ->
             val isSelected = selectedTabIndex == index
             val tabBackgroundModifier = if (isSelected) {
-                Modifier.background(AuthSelectedTabBrush, shape = RoundedCornerShape(6.dp))
+                Modifier.background(selectedTabBrush, shape = RoundedCornerShape(6.dp))
             } else {
                 Modifier.background(Color.Transparent, shape = RoundedCornerShape(6.dp))
             }
@@ -192,15 +206,14 @@ private fun AuthCustomTabLayout(
             ) {
                 Text(
                     text = title,
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, // Text color based on selection
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold) // Use labelLarge and bold
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
         }
     }
 }
 
-// === Teks instruksi disesuaikan kembali agar lebih spesifik ===
 private enum class AuthMethod(val iconRes: Int, val authText: String, val contentDescription: String) {
     Fingerprint(
         iconRes = R.drawable.ic_finger,
