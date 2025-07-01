@@ -76,7 +76,13 @@ class NotesRepository @Inject constructor(
             .map { it.toObject<Notes>() }
     }
 
-    suspend fun saveNote(noteId: String?, title: String, content: String, isSecret: Boolean) {
+    suspend fun saveNote(
+        noteId: String?,
+        title: String,
+        content: String,
+        isSecret: Boolean,
+        imageUrl: String?
+    ) {
         val userId = getUserId() ?: throw Exception("User is not logged in.")
         val collection = firestore.collection("users").document(userId).collection("notes")
         val currentTime = Date()
