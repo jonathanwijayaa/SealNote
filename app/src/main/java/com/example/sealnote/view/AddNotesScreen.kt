@@ -1,6 +1,10 @@
+// path: app/src/main/java/com/example/sealnote/view/AddEditNote.kt
+
 package com.example.sealnote.view
 
 import android.Manifest
+import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -27,54 +31,67 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.sealnote.ui.theme.SealnoteTheme // Pastikan import ini ada
+import com.example.sealnote.ui.theme.SealnoteTheme
 import com.example.sealnote.viewmodel.AddEditNoteViewModel
 import com.example.sealnote.viewmodel.UiEvent
+import java.io.File
 
 @Composable
 fun AddEditNoteRoute(
     onBack: () -> Unit,
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
-    // Mengambil state dari ViewModel
     val title by viewModel.title.collectAsStateWithLifecycle()
     val content by viewModel.content.collectAsStateWithLifecycle()
-    // Mengambil status bookmark dari ViewModel
     val isBookmarked by viewModel.isBookmarked.collectAsStateWithLifecycle()
-    // Mengambil status secret dari ViewModel
     val isSecret by viewModel.isSecret.collectAsStateWithLifecycle()
-
+    val currentImageUri by viewModel.currentImageUri.collectAsStateWithLifecycle() // Mengamati dari ViewModel
+    val imageUrl by viewModel.imageUrl.collectAsStateWithLifecycle()             // Mengamati dari ViewModel
 
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // State untuk URI gambar, dikelola di UI level
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
 
-    // Launcher untuk memilih gambar dari galeri
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageUri = uri
-        // TODO: Anda perlu logika untuk meng-upload URI ini ke Firebase Storage
-        // dan menyimpan URL-nya di dalam dokumen catatan Anda.
+    var tempImageFileUri: Uri? by remember { mutableStateOf(null) }
+
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success) {
+            viewModel.onImageSelected(tempImageFileUri)
+        } else {
+            Toast.makeText(context, "Failed to capture image.", Toast.LENGTH_SHORT).show()
+            tempImageFileUri = null
+        }
     }
 
-    // Launcher untuk meminta izin kamera
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            Toast.makeText(context, "Camera permission granted. Feature under development.", Toast.LENGTH_SHORT).show()
+            val photoFile = File(context.getExternalFilesDir(null), "Pictures").apply { mkdirs() }
+            val newTempFile = File(photoFile, "IMG_${System.currentTimeMillis()}.jpg")
+            val contentUri = FileProvider.getUriForFile(
+                context,
+                context.packageName + ".fileprovider",
+                newTempFile
+            )
+            tempImageFileUri = contentUri
+            takePictureLauncher.launch(contentUri)
         } else {
-            Toast.makeText(context, "Camera permission is required.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Camera permission is required to take photos.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Mendengarkan event dari ViewModel (misal: "Catatan Disimpan" atau "Error")
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        viewModel.onImageSelected(uri)
+    }
+
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collect { event ->
             when (event) {
@@ -82,7 +99,6 @@ fun AddEditNoteRoute(
                     snackbarHostState.showSnackbar(event.message)
                 }
                 is UiEvent.NoteSaved -> {
-                    // Jika event NoteSaved diterima, panggil onBack untuk kembali
                     onBack()
                 }
             }
@@ -92,9 +108,10 @@ fun AddEditNoteRoute(
     AddEditNoteScreen(
         title = title,
         content = content,
-        isBookmarked = isBookmarked, // Teruskan status bookmark
-        isSecret = isSecret, // Teruskan status secret
-        imageUri = imageUri,
+        isBookmarked = isBookmarked,
+        isSecret = isSecret,
+        imageUri = currentImageUri, // <--- Parameter diteruskan ke Screen
+        imageUrl = imageUrl,       // <--- Parameter diteruskan ke Screen
         onTitleChange = { viewModel.title.value = it },
         onContentChange = { viewModel.content.value = it },
         snackbarHostState = snackbarHostState,
@@ -106,9 +123,7 @@ fun AddEditNoteRoute(
         onGalleryClick = {
             imagePickerLauncher.launch("image/*")
         },
-        // Tambahkan fungsi toggle bookmark ke ViewModel
         onToggleBookmark = viewModel::toggleBookmarkStatus,
-        // Tambahkan fungsi toggle secret ke ViewModel
         onToggleSecret = viewModel::toggleSecretStatus
     )
 }
@@ -118,9 +133,10 @@ fun AddEditNoteRoute(
 fun AddEditNoteScreen(
     title: String,
     content: String,
-    isBookmarked: Boolean, // Tambahkan parameter untuk status bookmark
-    isSecret: Boolean, // Tambahkan parameter untuk status secret
-    imageUri: Uri?,
+    isBookmarked: Boolean,
+    isSecret: Boolean,
+    imageUri: Uri?,    // <--- PASTIKAN PARAMETER INI ADA
+    imageUrl: String?, // <--- PASTIKAN PARAMETER INI ADA
     onTitleChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -128,8 +144,8 @@ fun AddEditNoteScreen(
     onSaveClick: () -> Unit,
     onCameraClick: () -> Unit,
     onGalleryClick: () -> Unit,
-    onToggleBookmark: () -> Unit, // Tambahkan callback untuk toggle bookmark
-    onToggleSecret: () -> Unit // Tambahkan callback untuk toggle secret
+    onToggleBookmark: () -> Unit,
+    onToggleSecret: () -> Unit
 ) {
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -142,7 +158,6 @@ fun AddEditNoteScreen(
                     }
                 },
                 actions = {
-                    // --- ICON BOOKMARK ---
                     IconButton(onClick = onToggleBookmark) {
                         Icon(
                             imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
@@ -150,7 +165,6 @@ fun AddEditNoteScreen(
                             tint = if (isBookmarked) MaterialTheme.colorScheme.secondary else LocalContentColor.current
                         )
                     }
-                    // --- ICON SECRET ---
                     IconButton(onClick = onToggleSecret) {
                         Icon(
                             imageVector = if (isSecret) Icons.Filled.Lock else Icons.Filled.LockOpen,
@@ -158,13 +172,11 @@ fun AddEditNoteScreen(
                             tint = if (isSecret) MaterialTheme.colorScheme.error else LocalContentColor.current
                         )
                     }
-
-                    // Tombol save (tetap di sini)
                     IconButton(onClick = onSaveClick) {
                         Icon(Icons.Default.Check, contentDescription = "Save Note")
                     }
                 },
-                modifier = Modifier.shadow(2.dp) // Shadow yang lebih halus
+                modifier = Modifier.shadow(2.dp)
             )
         },
         bottomBar = {
@@ -191,7 +203,6 @@ fun AddEditNoteScreen(
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            // Text field untuk Judul
             CustomTextField(
                 value = title,
                 onValueChange = onTitleChange,
@@ -202,9 +213,10 @@ fun AddEditNoteScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Menampilkan gambar jika ada
-            if (imageUri != null) {
+            val imageToDisplay = imageUri ?: Uri.parse(imageUrl ?: "") // Memastikan Uri tidak null
+            if (imageToDisplay.toString().isNotEmpty()) { // Hanya tampilkan jika URI/URL tidak kosong
                 AsyncImage(
-                    model = imageUri,
+                    model = imageToDisplay,
                     contentDescription = "Selected Image",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -214,20 +226,18 @@ fun AddEditNoteScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Text field untuk Konten
             CustomTextField(
                 value = content,
                 onValueChange = onContentChange,
                 hint = "Start writing your note here...",
                 textStyle = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 15 // Beri ruang lebih banyak untuk menulis
+                minLines = 15
             )
         }
     }
 }
 
-// Composable terpisah untuk TextField agar lebih bersih
 @Composable
 fun CustomTextField(
     value: String,
@@ -261,9 +271,10 @@ fun AddEditNoteScreenPreview() {
         AddEditNoteScreen(
             title = "My Awesome Note",
             content = "This is the content of the note.",
-            isBookmarked = true, // Contoh untuk preview
-            isSecret = false, // Contoh untuk preview
+            isBookmarked = true,
+            isSecret = false,
             imageUri = null,
+            imageUrl = null,
             onTitleChange = {},
             onContentChange = {},
             snackbarHostState = SnackbarHostState(),

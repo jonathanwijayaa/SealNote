@@ -64,6 +64,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("com.google.firebase:firebase-storage-ktx")
     // --- View System Dependencies (Retained based on your original file) ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -107,7 +108,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.storage)
     implementation(libs.androidx.benchmark.macro)
-    implementation(libs.androidx.storage)
+//    implementation(libs.androidx.ui.desktop)
 
     // --- Testing Dependencies ---
     testImplementation(libs.junit)

@@ -11,6 +11,8 @@ import com.google.firebase.auth.ktx.auth // Import ktx extension
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore // Import ktx extension
 import com.google.firebase.ktx.Firebase // Import Firebase root
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,6 +37,12 @@ object FirebaseModule {
 
     @Provides
     @Singleton
+    fun provideFirebaseStorage(): FirebaseStorage { // <--- SEDIAKAN FirebaseStorage
+        return Firebase.storage
+    }
+
+    @Provides
+    @Singleton
     fun provideGoogleSignInClient(app: Application): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(app.getString(R.string.default_web_client_id))
@@ -45,7 +53,7 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepository( // <--- Sediakan AuthRepository
+    fun provideAuthRepository(
         firebaseAuth: FirebaseAuth,
         googleSignInClient: GoogleSignInClient,
         firestore: FirebaseFirestore,

@@ -1,58 +1,73 @@
-// app/src/main/java/com/example/sealnote/viewmodel/AddEditNoteViewModel.kt
+// path: app/src/main/java/com/example/sealnote/viewmodel/AddEditNoteViewModel.kt
 
 package com.example.sealnote.viewmodel
 
+import android.app.Application
+import android.net.Uri
+import android.util.Log
+// import androidx.compose.ui.window.application // <--- HAPUS BARIS INI
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sealnote.data.NotesRepository
 import com.example.sealnote.model.Notes
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
+import android.webkit.MimeTypeMap // Pastikan import ini ada
+
 
 @HiltViewModel
 class AddEditNoteViewModel @Inject constructor(
     private val repository: NotesRepository,
-    savedStateHandle: SavedStateHandle // Untuk mendapatkan argumen navigasi
+    private val firebaseStorage: FirebaseStorage,
+    savedStateHandle: SavedStateHandle,
+    private val application: Application // Pastikan Application diinject jika digunakan untuk contentResolver
 ) : ViewModel() {
 
-    // State untuk UI
     val title = MutableStateFlow("")
     val content = MutableStateFlow("")
-    val isBookmarked = MutableStateFlow(false) // State untuk bookmark
-    val isSecret = MutableStateFlow(false) // State untuk secret
+    val isBookmarked = MutableStateFlow(false)
+    val isSecret = MutableStateFlow(false)
+    val currentImageUri = MutableStateFlow<Uri?>(null)
+    val imageUrl = MutableStateFlow<String?>(null)
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
-    // ID catatan, null jika ini adalah catatan baru
     private var noteId: String? = null
 
     init {
-        // Ambil noteId dari SavedStateHandle
         noteId = savedStateHandle.get<String>("noteId")
 
-        // Jika ada noteId, berarti ini adalah mode edit
         noteId?.let { id ->
             viewModelScope.launch {
                 repository.getNoteById(id).firstOrNull()?.let { note ->
                     title.value = note.title
                     content.value = note.content
-                    isBookmarked.value = note.bookmarked // Inisialisasi status bookmark
-                    isSecret.value = note.secret // Inisialisasi status secret
+                    isBookmarked.value = note.bookmarked
+                    isSecret.value = note.secret
+                    imageUrl.value = note.imageUrl
                 } ?: run {
                     _eventFlow.emit(UiEvent.ShowSnackbar("Catatan tidak ditemukan."))
                 }
             }
         }
-        // Tangani parameter isSecret dari navigasi untuk catatan baru (jika ada)
         val navIsSecret = savedStateHandle.get<Boolean>("isSecret") ?: false
         isSecret.value = navIsSecret
     }
 
-    // Fungsi yang dipanggil saat tombol simpan diklik
+    fun onImageSelected(uri: Uri?) {
+        currentImageUri.value = uri
+        if (uri != null) {
+            imageUrl.value = null
+        }
+    }
+
     fun onSaveNoteClick() {
         if (title.value.isBlank() && content.value.isBlank()) {
             viewModelScope.launch {
@@ -62,55 +77,61 @@ class AddEditNoteViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            _eventFlow.emit(UiEvent.ShowSnackbar("Menyimpan catatan..."))
+
+            var finalImageUrl: String? = imageUrl.value
+
+            currentImageUri.value?.let { uri ->
+                try {
+                    val storageRef = firebaseStorage.reference
+                    val imageFileName = "notes/${UUID.randomUUID()}.${getImageExtension(uri)}"
+                    val imageRef = storageRef.child(imageFileName)
+
+                    val uploadTask = imageRef.putFile(uri).await()
+                    finalImageUrl = imageRef.downloadUrl.await().toString()
+                    Log.d("AddEditNoteViewModel", "Image uploaded. URL: $finalImageUrl")
+                } catch (e: Exception) {
+                    _eventFlow.emit(UiEvent.ShowSnackbar("Gagal mengunggah gambar: ${e.localizedMessage}"))
+                    Log.e("AddEditNoteViewModel", "Image upload failed: ${e.message}", e)
+                    finalImageUrl = null
+                }
+            }
+
             try {
-                // Simpan catatan dengan status secret dan bookmark saat ini
                 repository.saveNote(
                     noteId = noteId,
                     title = title.value,
                     content = content.value,
-                    isSecret = isSecret.value // Kirim status secret saat ini
+                    isSecret = isSecret.value,
+                    imageUrl = finalImageUrl
                 )
-                // Setelah catatan disimpan/diperbarui, pastikan status bookmark juga diterapkan
-                // Ini penting jika tombol bookmark ditekan sebelum save
+
                 noteId?.let { id ->
                     repository.toggleBookmarkStatus(id, isBookmarked.value)
-                } ?: run {
-                    // Jika ini catatan baru, setelah save, kita akan mendapatkan ID baru.
-                    // Ini sedikit lebih kompleks karena saveNote tidak langsung mengembalikan ID.
-                    // Untuk aplikasi nyata, Anda mungkin perlu mengambil catatan lagi atau mengubah saveNote.
-                    // Untuk demo ini, kita asumsikan status bookmark sudah diatur saat save
-                    // atau akan dihandle saat catatan dimuat ulang.
-                    // Alternatif: Ubah saveNote untuk mengembalikan Notes object yang telah disimpan
                 }
 
                 _eventFlow.emit(UiEvent.ShowSnackbar("Catatan berhasil disimpan!"))
-                _eventFlow.emit(UiEvent.NoteSaved) // Memberi tahu UI untuk kembali
+                _eventFlow.emit(UiEvent.NoteSaved)
             } catch (e: Exception) {
                 _eventFlow.emit(UiEvent.ShowSnackbar("Gagal menyimpan catatan: ${e.localizedMessage}"))
+                Log.e("AddEditNoteViewModel", "Note save failed: ${e.message}", e)
             }
         }
     }
 
-    // Fungsi untuk toggle status bookmark
     fun toggleBookmarkStatus() {
-        // Balikkan nilai bookmark saat ini
         isBookmarked.value = !isBookmarked.value
-        // Anda juga bisa langsung memanggil repository di sini
-        // Tapi jika Anda ingin perubahan visual instan sebelum disimpan ke DB,
-        // ubah state lokal dulu, lalu panggil repo saat onSaveNoteClick()
-        // Atau panggil repo langsung di sini dan biarkan UI refresh dari DB.
-        // Pilihan saat ini: perubahan langsung di state ViewModel
     }
 
-    // Fungsi untuk toggle status secret
     fun toggleSecretStatus() {
-        // Balikkan nilai secret saat ini
         isSecret.value = !isSecret.value
-        // Sama seperti bookmark, Anda bisa langsung memanggil repository di sini
+    }
+
+    private fun getImageExtension(uri: Uri): String {
+        val contentResolver = application.contentResolver
+        return MimeTypeMap.getSingleton().getExtensionFromMimeType(contentResolver.getType(uri)) ?: "jpg"
     }
 }
-
-// Model untuk event UI (tetap sama)
 sealed class UiEvent {
     data class ShowSnackbar(val message: String) : UiEvent()
     object NoteSaved : UiEvent()
