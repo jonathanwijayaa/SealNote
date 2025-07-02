@@ -1,8 +1,10 @@
 package com.example.sealnote.di
 
 import android.app.Application
+import android.content.Context
 import com.example.sealnote.R
 import com.example.sealnote.data.AuthRepository
+import com.example.sealnote.data.UserPreferencesRepository
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -16,6 +18,7 @@ import com.google.firebase.storage.ktx.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 

@@ -8,32 +8,45 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// Definisikan enum ThemeOption jika belum ada di `data` package
 enum class ThemeOption {
-    SYSTEM, LIGHT, DARK
+    LIGHT, DARK, SYSTEM
 }
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
-private val THEME_OPTION_KEY = stringPreferencesKey("theme_option")
+// DataStore instance
+val Context.userPreferencesDataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
 @Singleton
-// --- HAPUS @Inject constructor DAN @ApplicationContext DARI SINI ---
-class UserPreferencesRepository @Inject constructor(private val context: Context) {
-    // ... sisa kodenya sama ...
-    val themeOption: Flow<ThemeOption> = context.dataStore.data
+class UserPreferencesRepository @Inject constructor(
+    @ApplicationContext private val context: Context // Gunakan @ApplicationContext untuk injeksi context
+) {
+    private object PreferencesKeys {
+        val THEME_OPTION = stringPreferencesKey("theme_option")
+    }
+
+    // Aliran pilihan tema dari DataStore
+    val themeOption: Flow<ThemeOption> = context.userPreferencesDataStore.data
         .map { preferences ->
-            val optionName = preferences[THEME_OPTION_KEY] ?: ThemeOption.SYSTEM.name
-            ThemeOption.valueOf(optionName)
+            // Baca string dari DataStore, default ke SYSTEM jika tidak ada atau tidak valid
+            preferences[PreferencesKeys.THEME_OPTION]?.let { themeString ->
+                try {
+                    ThemeOption.valueOf(themeString)
+                } catch (e: IllegalArgumentException) {
+                    ThemeOption.SYSTEM // Fallback jika string tidak valid
+                }
+            } ?: ThemeOption.SYSTEM
         }
 
+    // Fungsi untuk menyimpan pilihan tema
     suspend fun saveThemeOption(themeOption: ThemeOption) {
-        context.dataStore.edit { settings ->
-            settings[THEME_OPTION_KEY] = themeOption.name
+        context.userPreferencesDataStore.edit { preferences ->
+            preferences[PreferencesKeys.THEME_OPTION] = themeOption.name
         }
     }
 }
