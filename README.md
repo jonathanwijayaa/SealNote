@@ -1,4 +1,4 @@
-# UTS Pemrograman Android
+# Project Pemrograman Android
 ## SealNote - Catatan Rahasia yang Terkunci
 
 SealNote menggabungkan konsep "seal" yang berarti anjing laut dalam bahasa Inggris dan segel/kunci untuk keamanan. 
@@ -14,5 +14,5 @@ Anggota Kelompok:
 
 Link Figma : 
 https://www.figma.com/design/6Vcyg34dmujJKQHvaUw4Dd/Project-Android?node-id=0-1&t=nbWAxzoMk2RhoAf5-1
-1. Login menggunakan Username dan Password "admin"
-2. Dari Stealth Mode ke Notes klik "C" di Basic Calculator 3x
+1. Login menggunakan akun yang sudah terdaftarkan (Sign Up) atau menggunakan Gmail
+2. Dari Stealth Mode ke Notes klik "C" di Calculator 3x
