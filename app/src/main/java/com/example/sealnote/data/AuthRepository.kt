@@ -185,13 +185,24 @@ class AuthRepository @Inject constructor(
 
     suspend fun signOut() {
         try {
-            firebaseAuth.signOut()
-            googleSignInClient.revokeAccess().await() // Menggunakan await()
-            _authRepoEvent.emit(AuthRepositoryEvent.SignOutSuccess("Signed out successfully! (Google access revoked)")) // <--- PERBAIKAN DI SINI
-            Log.d("AuthRepository", "User signed out and Google access revoked")
+            firebaseAuth.signOut() // SELALU coba sign out dari Firebase Auth
+
+            // Hanya coba revoke access Google jika pengguna login dengan Google
+            val currentUser = firebaseAuth.currentUser
+            val isGoogleUser = currentUser?.providerData?.any { it.providerId == GoogleAuthProvider.PROVIDER_ID } ?: false
+
+            if (isGoogleUser) {
+                googleSignInClient.revokeAccess().await() // Menggunakan await()
+                Log.d("AuthRepository", "User signed out and Google access revoked")
+            } else {
+                Log.d("AuthRepository", "User signed out (non-Google account). No Google access to revoke.")
+            }
+
+            _authRepoEvent.emit(AuthRepositoryEvent.SignOutSuccess("Signed out successfully!")) // <--- SELALU emit sukses jika firebaseAuth.signOut() berhasil
         } catch (e: Exception) {
+            // Tangkap semua error di sini, ini bisa dari firebaseAuth.signOut() atau googleSignInClient.revokeAccess()
             Log.e("AuthRepository", "Failed to sign out or revoke Google access: ${e.message}", e)
-            _authRepoEvent.emit(AuthRepositoryEvent.GeneralError("Sign out failed: ${e.message}")) // <--- PERBAIKAN DI SINI
+            _authRepoEvent.emit(AuthRepositoryEvent.GeneralError("Sign out failed: ${e.message}"))
             throw e // Propagasi error agar ViewModel yang memanggil bisa menangkapnya
         }
     }
