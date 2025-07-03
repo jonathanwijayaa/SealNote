@@ -5,36 +5,34 @@ package com.example.sealnote.viewmodel
 import android.app.Application
 import android.net.Uri
 import android.util.Log
-// import androidx.compose.ui.window.application // <--- HAPUS BARIS INI
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.sealnote.data.NotesRepository
 import com.example.sealnote.model.Notes
-import com.google.firebase.storage.FirebaseStorage
+// import com.google.firebase.storage.FirebaseStorage // <--- HAPUS IMPORT INI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
+// import kotlinx.coroutines.tasks.await // <--- HAPUS IMPORT INI jika tidak ada lagi tasks Firebase
 import java.util.UUID
 import javax.inject.Inject
 import android.webkit.MimeTypeMap // Pastikan import ini ada
 
-
 @HiltViewModel
 class AddEditNoteViewModel @Inject constructor(
     private val repository: NotesRepository,
-    private val firebaseStorage: FirebaseStorage,
+    // private val firebaseStorage: FirebaseStorage, // <--- HAPUS INJEKSI INI
     savedStateHandle: SavedStateHandle,
-    private val application: Application // Pastikan Application diinject jika digunakan untuk contentResolver
+    private val application: Application
 ) : ViewModel() {
 
     val title = MutableStateFlow("")
     val content = MutableStateFlow("")
     val isBookmarked = MutableStateFlow(false)
     val isSecret = MutableStateFlow(false)
-    val currentImageUri = MutableStateFlow<Uri?>(null)
-    val imageUrl = MutableStateFlow<String?>(null)
+    val currentImageUri = MutableStateFlow<Uri?>(null)  // tetap
+    val imageUrl        = MutableStateFlow<String?>(null)   // nama lama kembali
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -51,7 +49,11 @@ class AddEditNoteViewModel @Inject constructor(
                     content.value = note.content
                     isBookmarked.value = note.bookmarked
                     isSecret.value = note.secret
-                    imageUrl.value = note.imageUrl
+                    // Inisialisasi URI lokal jika ada dari notes
+                    note.imageUrl?.let { uriString ->
+                    currentImageUri.value = Uri.parse(uriString)
+                    imageUrl.value        = uriString
+                    }
                 } ?: run {
                     _eventFlow.emit(UiEvent.ShowSnackbar("Catatan tidak ditemukan."))
                 }
@@ -64,7 +66,7 @@ class AddEditNoteViewModel @Inject constructor(
     fun onImageSelected(uri: Uri?) {
         currentImageUri.value = uri
         if (uri != null) {
-            imageUrl.value = null
+            imageUrl.value = uri?.toString()
         }
     }
 
@@ -79,23 +81,8 @@ class AddEditNoteViewModel @Inject constructor(
         viewModelScope.launch {
             _eventFlow.emit(UiEvent.ShowSnackbar("Menyimpan catatan..."))
 
-            var finalImageUrl: String? = imageUrl.value
-
-            currentImageUri.value?.let { uri ->
-                try {
-                    val storageRef = firebaseStorage.reference
-                    val imageFileName = "notes/${UUID.randomUUID()}.${getImageExtension(uri)}"
-                    val imageRef = storageRef.child(imageFileName)
-
-                    val uploadTask = imageRef.putFile(uri).await()
-                    finalImageUrl = imageRef.downloadUrl.await().toString()
-                    Log.d("AddEditNoteViewModel", "Image uploaded. URL: $finalImageUrl")
-                } catch (e: Exception) {
-                    _eventFlow.emit(UiEvent.ShowSnackbar("Gagal mengunggah gambar: ${e.localizedMessage}"))
-                    Log.e("AddEditNoteViewModel", "Image upload failed: ${e.message}", e)
-                    finalImageUrl = null
-                }
-            }
+            // Gunakan URI lokal yang saat ini dipilih/diambil
+            val finalImageUrl: String? = currentImageUri.value?.toString()
 
             try {
                 repository.saveNote(
@@ -103,7 +90,7 @@ class AddEditNoteViewModel @Inject constructor(
                     title = title.value,
                     content = content.value,
                     isSecret = isSecret.value,
-                    imageUrl = finalImageUrl
+                    imageUrl = finalImageUrl,
                 )
 
                 noteId?.let { id ->
@@ -127,11 +114,16 @@ class AddEditNoteViewModel @Inject constructor(
         isSecret.value = !isSecret.value
     }
 
+    // VVVVVV HAPUS FUNGSI INI KARENA TIDAK ADA LAGI UPLOAD KE FIREBASE STORAGE VVVVVV
+    /*
     private fun getImageExtension(uri: Uri): String {
         val contentResolver = application.contentResolver
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(contentResolver.getType(uri)) ?: "jpg"
     }
+    */
+    // ^^^^^^ HAPUS FUNGSI INI ^^^^^^
 }
+
 sealed class UiEvent {
     data class ShowSnackbar(val message: String) : UiEvent()
     object NoteSaved : UiEvent()

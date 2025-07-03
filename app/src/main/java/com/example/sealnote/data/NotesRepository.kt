@@ -90,15 +90,16 @@ class NotesRepository @Inject constructor(
         if (noteId == null) {
             val newNoteDocument = collection.document()
             val newNote = Notes(
-                id = newNoteDocument.id,
-                userId = userId,
-                title = title,
-                content = content,
-                createdAt = currentTime,
-                updatedAt = currentTime,
-                bookmarked = false,
-                secret = isSecret,
-                trashed = false
+                id          = newNoteDocument.id,
+                userId      = userId,
+                title       = title,
+                content     = content,
+                createdAt   = currentTime,
+                updatedAt   = currentTime,
+                bookmarked  = false,
+                secret      = isSecret,
+                trashed     = false,
+                imageUrl    = imageUrl          // <-- ada
             )
             newNoteDocument.set(newNote).await()
         } else {
@@ -107,7 +108,8 @@ class NotesRepository @Inject constructor(
                     "title" to title,
                     "content" to content,
                     "secret" to isSecret,
-                    "updatedAt" to currentTime
+                    "updatedAt" to currentTime,
+                    "imageUrl"  to imageUrl
                 )
             ).await()
         }

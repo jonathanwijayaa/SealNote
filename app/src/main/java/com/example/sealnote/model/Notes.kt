@@ -25,6 +25,7 @@ data class Notes(
     @ServerTimestamp
     val createdAt: Date? = null,
     val imageUrl: String? = null, // <--- TAMBAHKAN BARIS INI
+    val localImageUri: String? = null,
     @ServerTimestamp
     val updatedAt: Date? = null,
 

@@ -1,3 +1,5 @@
+// path: app/src/main/java/com/example/sealnote/view/AppNavigation.kt
+
 package com.example.sealnote.view
 
 import androidx.compose.runtime.Composable
@@ -20,13 +22,13 @@ import com.example.sealnote.viewmodel.StealthScientificViewModel
 fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = "stealthCalculator"
+    startDestination: String // Terima startDestination dari parameter
 ) {
     val calculatorHistoryViewModel: CalculatorHistoryViewModel = hiltViewModel()
 
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = startDestination, // Gunakan startDestination dari parameter
         modifier = modifier
     ) {
         // --- Stealth Mode ---

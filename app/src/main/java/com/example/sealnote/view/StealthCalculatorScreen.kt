@@ -74,7 +74,12 @@ fun StealthCalculatorScreen(
                     onClick = {
                         scope.launch { drawerState.close() }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors( // Menyesuaikan warna drawer item
+                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 )
                 NavigationDrawerItem(
                     label = { Text("Kalkulator Ilmiah") },
@@ -85,7 +90,12 @@ fun StealthCalculatorScreen(
                             popUpTo("stealthCalculator") { inclusive = true }
                         }
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors( // Menyesuaikan warna drawer item
+                        unselectedContainerColor = Color.Transparent,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 NavigationDrawerItem(
                     label = { Text("Riwayat Kalkulasi") },
@@ -94,30 +104,39 @@ fun StealthCalculatorScreen(
                         scope.launch { drawerState.close() }
                         navController.navigate("stealthHistory")
                     },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                    colors = NavigationDrawerItemDefaults.colors( // Menyesuaikan warna drawer item
+                    unselectedContainerColor = Color.Transparent,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 )
             }
         },
         gesturesEnabled = drawerState.isOpen
     ) {
         Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
             topBar = {
-                TopAppBar(
+                CenterAlignedTopAppBar(
                     title = {
                         Text(
                             text = "Kalkulator",
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.headlineSmall, // Menggunakan tipografi tema
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            Icon(Icons.Filled.Menu, contentDescription = "Menu", tint = MaterialTheme.colorScheme.onSurface)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = CalcScreenBackground,
-                        titleContentColor = CalcDisplayTextColor
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
             }
@@ -125,7 +144,7 @@ fun StealthCalculatorScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(CalcScreenBackground)
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(paddingValues)
             ) {
                 CalculatorDisplay(
@@ -159,7 +178,7 @@ private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CalcDisplayCardBackground),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Box(
@@ -168,9 +187,8 @@ private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier
         ) {
             Text(
                 text = displayText,
-                color = CalcDisplayTextColor,
-                fontSize = 56.sp,
-                fontWeight = FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurface, // Menggunakan warna tema
+                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Normal),
                 textAlign = TextAlign.End,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -261,7 +279,7 @@ private fun CalculatorButtonModified(
             backgroundColor = null; backgroundBrush = CalcOperatorGradient
         }
         else -> {
-            backgroundColor = CalcNonOperatorButtonBg; backgroundBrush = null
+            backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh; backgroundBrush = null
         }
     }
 
@@ -284,21 +302,22 @@ private fun CalculatorButtonModified(
             Icon(
                 imageVector = info.icon,
                 contentDescription = info.description,
-                tint = CalcButtonIconColor,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(28.dp)
             )
         } else {
             Text(
                 text = info.symbol,
-                color = CalcButtonTextColor,
-                fontSize = info.textSize,
-                fontWeight = FontWeight.Medium
-            )
+                color = MaterialTheme.colorScheme.onSurface, // Menggunakan warna tema
+                style = MaterialTheme.typography.bodyLarge.copy( // Menggunakan tipografi tema
+                    fontSize = info.textSize,
+                    fontWeight = if (info.type == ButtonType.OPERATOR || info.type == ButtonType.FUNCTION) FontWeight.Normal else FontWeight.Medium
+            ))
         }
     }
 }
 
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(showBackground = true)
 @Composable
 fun CalculatorScreenModifiedPreview() {
     MaterialTheme {
