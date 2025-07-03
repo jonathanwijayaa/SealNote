@@ -38,11 +38,11 @@ object FirebaseModule {
         return Firebase.firestore
     }
 
-    @Provides
-    @Singleton
-    fun provideFirebaseStorage(): FirebaseStorage { // <--- SEDIAKAN FirebaseStorage
-        return Firebase.storage
-    }
+//    @Provides
+//    @Singleton
+//    fun provideFirebaseStorage(): FirebaseStorage { // <--- SEDIAKAN FirebaseStorage
+//        return Firebase.storage
+//    }
 
     @Provides
     @Singleton

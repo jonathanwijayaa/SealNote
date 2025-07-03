@@ -1,11 +1,9 @@
-// path: app/src/main/java/com/example/sealnote/view/AddEditNote.kt
-
 package com.example.sealnote.view
 
 import android.Manifest
-import android.content.ContentResolver
-import android.content.Context
 import android.net.Uri
+import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,11 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.*
@@ -35,7 +29,10 @@ import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.example.sealnote.di.ImageSaver
 import com.example.sealnote.ui.theme.SealnoteTheme
+import com.example.sealnote.di.MediaStoreHelper
+import com.example.sealnote.di.MediaStoreHelper.createImageUri
 import com.example.sealnote.viewmodel.AddEditNoteViewModel
 import com.example.sealnote.viewmodel.UiEvent
 import java.io.File
@@ -45,86 +42,106 @@ fun AddEditNoteRoute(
     onBack: () -> Unit,
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
-    val title by viewModel.title.collectAsStateWithLifecycle()
-    val content by viewModel.content.collectAsStateWithLifecycle()
-    val isBookmarked by viewModel.isBookmarked.collectAsStateWithLifecycle()
-    val isSecret by viewModel.isSecret.collectAsStateWithLifecycle()
-    val currentImageUri by viewModel.currentImageUri.collectAsStateWithLifecycle() // Mengamati dari ViewModel
-    val imageUrl by viewModel.imageUrl.collectAsStateWithLifecycle()             // Mengamati dari ViewModel
+    val title                by viewModel.title.collectAsStateWithLifecycle()
+    val content              by viewModel.content.collectAsStateWithLifecycle()
+    val isBookmarked         by viewModel.isBookmarked.collectAsStateWithLifecycle()
+    val isSecret             by viewModel.isSecret.collectAsStateWithLifecycle()
+    val currentImageUri      by viewModel.currentImageUri.collectAsStateWithLifecycle()
+    val imageUrl by viewModel.imageUrl.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val context            = LocalContext.current
 
-    var tempImageFileUri: Uri? by remember { mutableStateOf(null) }
+    var tempImageFileUri by remember { mutableStateOf<Uri?>(null) }
+
+    val storagePermission = remember {
+        if (Build.VERSION.SDK_INT >= 33)
+            Manifest.permission.READ_MEDIA_IMAGES
+        else
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    }
+    fun makeTempImageFile(): File {
+        val dir = context.getExternalFilesDir("Pictures") ?: context.filesDir
+        return File(dir, "IMG_${System.currentTimeMillis()}.jpg")
+    }
+
+    /* FileProvider URI */
+    fun tempFileUri(file: File): Uri =
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+
+    var tempTempFile by remember { mutableStateOf<File?>(null) }
 
     val takePictureLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success: Boolean ->
-        if (success) {
-            viewModel.onImageSelected(tempImageFileUri)
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && tempImageFileUri != null && tempTempFile != null) {
+            // salin ke galeri
+            val galleryUri = ImageSaver.copyTempToGallery(context, tempTempFile!!)
+            tempTempFile!!.delete()                       // hapus file sementara
+            viewModel.onImageSelected(galleryUri)
         } else {
             Toast.makeText(context, "Failed to capture image.", Toast.LENGTH_SHORT).show()
-            tempImageFileUri = null
+        }
+    }
+
+
+    fun launchCamera() {
+        val file = makeTempImageFile()
+        val uri  = tempFileUri(file)
+        tempTempFile     = file
+        tempImageFileUri = uri
+        takePictureLauncher.launch(uri)
+    }
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            launchCamera()
+        } else {
+            Toast.makeText(context, "Izin penyimpanan diperlukan", Toast.LENGTH_SHORT).show()
         }
     }
 
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            val photoFile = File(context.getExternalFilesDir(null), "Pictures").apply { mkdirs() }
-            val newTempFile = File(photoFile, "IMG_${System.currentTimeMillis()}.jpg")
-            val contentUri = FileProvider.getUriForFile(
-                context,
-                context.packageName + ".fileprovider",
-                newTempFile
-            )
-            tempImageFileUri = contentUri
-            takePictureLauncher.launch(contentUri)
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            /* setelah kamera diizinkan, minta storage */
+            storagePermissionLauncher.launch(storagePermission)
         } else {
-            Toast.makeText(context, "Camera permission is required to take photos.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Izin kamera diperlukan", Toast.LENGTH_SHORT).show()
         }
     }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        viewModel.onImageSelected(uri)
-    }
+        ActivityResultContracts.GetContent()
+    ) { uri -> viewModel.onImageSelected(uri) }
 
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(Unit) {
         viewModel.eventFlow.collect { event ->
             when (event) {
-                is UiEvent.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(event.message)
-                }
-                is UiEvent.NoteSaved -> {
-                    onBack()
-                }
+                is UiEvent.ShowSnackbar -> snackbarHostState.showSnackbar(event.message)
+                is UiEvent.NoteSaved    -> onBack()
             }
         }
     }
 
     AddEditNoteScreen(
-        title = title,
-        content = content,
-        isBookmarked = isBookmarked,
-        isSecret = isSecret,
-        imageUri = currentImageUri, // <--- Parameter diteruskan ke Screen
-        imageUrl = imageUrl,       // <--- Parameter diteruskan ke Screen
-        onTitleChange = { viewModel.title.value = it },
-        onContentChange = { viewModel.content.value = it },
-        snackbarHostState = snackbarHostState,
-        onBack = onBack,
-        onSaveClick = viewModel::onSaveNoteClick,
-        onCameraClick = {
-            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-        },
-        onGalleryClick = {
-            imagePickerLauncher.launch("image/*")
-        },
-        onToggleBookmark = viewModel::toggleBookmarkStatus,
-        onToggleSecret = viewModel::toggleSecretStatus
+        title                 = title,
+        content               = content,
+        isBookmarked          = isBookmarked,
+        isSecret              = isSecret,
+        imageUri = currentImageUri,
+        imageUrl = imageUrl,
+        onTitleChange         = { viewModel.title.value = it },
+        onContentChange       = { viewModel.content.value = it },
+        snackbarHostState     = snackbarHostState,
+        onBack                = onBack,
+        onSaveClick           = viewModel::onSaveNoteClick,
+        onCameraClick         = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
+        onGalleryClick        = { imagePickerLauncher.launch("image/*") },
+        onToggleBookmark      = viewModel::toggleBookmarkStatus,
+        onToggleSecret        = viewModel::toggleSecretStatus
     )
 }
 
@@ -135,8 +152,8 @@ fun AddEditNoteScreen(
     content: String,
     isBookmarked: Boolean,
     isSecret: Boolean,
-    imageUri: Uri?,    // <--- PASTIKAN PARAMETER INI ADA
-    imageUrl: String?, // <--- PASTIKAN PARAMETER INI ADA
+    imageUri: Uri?,
+    imageUrl: String?,
     onTitleChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -269,21 +286,21 @@ fun CustomTextField(
 fun AddEditNoteScreenPreview() {
     SealnoteTheme {
         AddEditNoteScreen(
-            title = "My Awesome Note",
-            content = "This is the content of the note.",
-            isBookmarked = true,
-            isSecret = false,
-            imageUri = null,
+            title               = "My Awesome Note",
+            content             = "This is the content of the note.",
+            isBookmarked        = true,
+            isSecret            = false,
+            imageUri            = null,
             imageUrl = null,
-            onTitleChange = {},
-            onContentChange = {},
-            snackbarHostState = SnackbarHostState(),
-            onBack = {},
-            onSaveClick = {},
-            onCameraClick = {},
-            onGalleryClick = {},
-            onToggleBookmark = {},
-            onToggleSecret = {}
+            onTitleChange       = {},
+            onContentChange     = {},
+            snackbarHostState   = SnackbarHostState(),
+            onBack              = {},
+            onSaveClick         = {},
+            onCameraClick       = {},
+            onGalleryClick      = {},
+            onToggleBookmark    = {},
+            onToggleSecret      = {}
         )
     }
 }
