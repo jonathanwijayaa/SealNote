@@ -99,7 +99,7 @@ class NotesRepository @Inject constructor(
                 bookmarked  = false,
                 secret      = isSecret,
                 trashed     = false,
-                imageUrl    = imageUrl          // <-- ada
+                imageUrl    = imageUrl
             )
             newNoteDocument.set(newNote).await()
         } else {

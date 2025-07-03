@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.Functions
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.* // Memastikan semua komponen Material 3 diimpor
 import androidx.compose.runtime.*
@@ -26,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp // Tetap gunakan untuk beberapa kasus spesifik jika diperlukan
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 
@@ -77,6 +81,15 @@ fun StealthScientificScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState() // Dapatkan rute saat ini
+    val currentRoute = currentBackStackEntry?.destination?.route
+
+    // Daftar menu navigasi untuk mode kalkulator (konsisten dengan StealthCalculatorScreen)
+    val calculatorMenuItems = listOf(
+        "stealthCalculator" to ("Kalkulator Standar" to Icons.Default.Calculate),
+        "stealthScientific" to ("Kalkulator Ilmiah" to Icons.Filled.Functions),
+        "stealthHistory" to ("Riwayat Kalkulasi" to Icons.Filled.History)
+    )
 
     DisposableEffect(Unit) {
         viewModel.onCalculationFinished = { expression, result ->
@@ -97,54 +110,32 @@ fun StealthScientificScreen(
                 Text(
                     "Mode Kalkulator",
                     modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.titleLarge, // Tipografi dari tema
-                    color = MaterialTheme.colorScheme.onSurface // Warna teks dari tema
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                NavigationDrawerItem(
-                    label = { Text("Kalkulator Standar", style = MaterialTheme.typography.bodyLarge) }, // Tipografi dari tema
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("stealthCalculator") {
-                            popUpTo("stealthScientific") { inclusive = true }
-                        }
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                calculatorMenuItems.forEach { (route, details) ->
+                    val (label, icon) = details
+                    NavigationDrawerItem(
+                        icon = { Icon(icon, contentDescription = label) },
+                        label = { Text(label, style = MaterialTheme.typography.bodyLarge) },
+                        selected = currentRoute == route,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            if (currentRoute != route) {
+                                navController.navigate(route) {
+                                    popUpTo("stealthScientific") { inclusive = true } // Sesuaikan popUpTo
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            unselectedContainerColor = Color.Transparent,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     )
-                )
-                NavigationDrawerItem(
-                    label = { Text("Kalkulator Ilmiah", style = MaterialTheme.typography.bodyLarge) }, // Tipografi dari tema
-                    selected = true,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                )
-                NavigationDrawerItem(
-                    label = { Text("Riwayat Kalkulasi", style = MaterialTheme.typography.bodyLarge) }, // Tipografi dari tema
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("stealthHistory") {
-                            popUpTo("stealthScientific") { inclusive = true }
-                        }
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
+                }
             }
         },
         gesturesEnabled = drawerState.isOpen

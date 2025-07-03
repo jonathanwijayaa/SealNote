@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.Functions
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,11 +29,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState // Import ini
 import androidx.navigation.compose.rememberNavController
 import com.example.sealnote.ui.theme.*
 import com.example.sealnote.viewmodel.CalculatorHistoryViewModel
 import com.example.sealnote.viewmodel.StealthCalculatorViewModel
 import kotlinx.coroutines.launch
+
+// --- Warna Kustom yang Tetap Didefinisikan Secara Lokal ---
+val CalcOperatorGradientStart = Color(0xFF8000FF)
+val CalcOperatorGradientEnd = Color(0xFF00D1FF)
 
 private data class CalcButtonInfo(
     val symbol: String,
@@ -54,8 +62,16 @@ fun StealthCalculatorScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState() // Dapatkan rute saat ini
+    val currentRoute = currentBackStackEntry?.destination?.route
 
-    // Mengatur callback untuk menyimpan riwayat saat composable pertama kali dijalankan
+    // Daftar menu navigasi untuk mode kalkulator
+    val calculatorMenuItems = listOf(
+        "stealthCalculator" to ("Kalkulator Standar" to Icons.Default.Calculate),
+        "stealthScientific" to ("Kalkulator Ilmiah" to Icons.Filled.Functions), // Atau Icons.Filled.Science
+        "stealthHistory" to ("Riwayat Kalkulasi" to Icons.Filled.History)
+    )
+
     LaunchedEffect(historyViewModel) {
         viewModel.onCalculationFinished = { expression, result ->
             historyViewModel.addHistoryEntry(expression, result)
@@ -67,50 +83,38 @@ fun StealthCalculatorScreen(
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(Modifier.height(16.dp))
-                Text("Mode Kalkulator", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
-                NavigationDrawerItem(
-                    label = { Text("Kalkulator Standar") },
-                    selected = true,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = NavigationDrawerItemDefaults.colors( // Menyesuaikan warna drawer item
-                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer
+                Text(
+                    "Mode Kalkulator",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                calculatorMenuItems.forEach { (route, details) ->
+                    val (label, icon) = details
+                    NavigationDrawerItem(
+                        icon = { Icon(icon, contentDescription = label) },
+                        label = { Text(label, style = MaterialTheme.typography.bodyLarge) },
+                        selected = currentRoute == route, // Set `selected` berdasarkan rute saat ini
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            if (currentRoute != route) { // Hanya navigasi jika rute berbeda
+                                navController.navigate(route) {
+                                    popUpTo("stealthCalculator") { inclusive = true } // Sesuaikan popUpTo
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            unselectedContainerColor = Color.Transparent,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
-                )
-                NavigationDrawerItem(
-                    label = { Text("Kalkulator Ilmiah") },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("stealthScientific") {
-                            popUpTo("stealthCalculator") { inclusive = true }
-                        }
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = NavigationDrawerItemDefaults.colors( // Menyesuaikan warna drawer item
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
-                NavigationDrawerItem(
-                    label = { Text("Riwayat Kalkulasi") },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("stealthHistory")
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = NavigationDrawerItemDefaults.colors( // Menyesuaikan warna drawer item
-                    unselectedContainerColor = Color.Transparent,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                )
+                }
+                // Jika ada item khusus seperti "Bersihkan Riwayat", tambahkan secara terpisah di HistoryScreen
             }
         },
         gesturesEnabled = drawerState.isOpen
@@ -124,7 +128,7 @@ fun StealthCalculatorScreen(
                             text = "Kalkulator",
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.headlineSmall, // Menggunakan tipografi tema
+                            style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     },
@@ -160,7 +164,6 @@ fun StealthCalculatorScreen(
                         if (isBackspace) {
                             viewModel.onBackspaceClick()
                         } else {
-                            // Meneruskan aksi navigasi ke ViewModel pada setiap klik
                             viewModel.onCalculatorButtonClick(buttonSymbol, onNavigateToLogin)
                         }
                     },
@@ -187,7 +190,7 @@ private fun CalculatorDisplay(displayText: String, modifier: Modifier = Modifier
         ) {
             Text(
                 text = displayText,
-                color = MaterialTheme.colorScheme.onSurface, // Menggunakan warna tema
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Normal),
                 textAlign = TextAlign.End,
                 maxLines = 2,
@@ -256,6 +259,7 @@ private fun CalculatorButtonsGridModified(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(2.dp))
         }
     }
 }
@@ -308,19 +312,20 @@ private fun CalculatorButtonModified(
         } else {
             Text(
                 text = info.symbol,
-                color = MaterialTheme.colorScheme.onSurface, // Menggunakan warna tema
-                style = MaterialTheme.typography.bodyLarge.copy( // Menggunakan tipografi tema
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyLarge.copy(
                     fontSize = info.textSize,
                     fontWeight = if (info.type == ButtonType.OPERATOR || info.type == ButtonType.FUNCTION) FontWeight.Normal else FontWeight.Medium
-            ))
+                )
+            )
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun CalculatorScreenModifiedPreview() {
-    MaterialTheme {
+    SealnoteTheme {
         StealthCalculatorScreen(onNavigateToLogin = {}, navController = rememberNavController())
     }
 }

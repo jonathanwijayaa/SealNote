@@ -19,9 +19,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel // Import untuk ViewModel
 import androidx.navigation.NavHostController // Import NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Functions
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.runtime.getValue
 import kotlinx.coroutines.launch // Untuk CoroutineScope
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.sealnote.ui.theme.SealnoteTheme
 import com.example.sealnote.viewmodel.CalculatorHistoryViewModel // Import History ViewModel
 
@@ -41,11 +47,20 @@ data class CalculationHistoryEntry(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StealthHistoryScreen(
-    navController: NavHostController, // Tambahkan NavHostController
-    historyViewModel: CalculatorHistoryViewModel = viewModel() // Inject History ViewModel
+    navController: NavHostController,
+    historyViewModel: CalculatorHistoryViewModel = viewModel()
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState() // Dapatkan rute saat ini
+    val currentRoute = currentBackStackEntry?.destination?.route
+
+    // Daftar menu navigasi untuk mode kalkulator (konsisten dengan kalkulator lainnya)
+    val calculatorMenuItems = listOf(
+        "stealthCalculator" to ("Kalkulator Standar" to Icons.Default.Calculate),
+        "stealthScientific" to ("Kalkulator Ilmiah" to Icons.Filled.Functions),
+        "stealthHistory" to ("Riwayat Kalkulasi" to Icons.Filled.History)
+    )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -55,58 +70,39 @@ fun StealthHistoryScreen(
                 Text(
                     "Mode Kalkulator",
                     modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.titleLarge, // Menggunakan tipografi dari tema
-                    color = MaterialTheme.colorScheme.onSurface // Menggunakan warna dari tema
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                NavigationDrawerItem(
-                    label = { Text("Kalkulator Standar") },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("stealthCalculator") {
-                            popUpTo("stealthHistory") { inclusive = true }
-                        }
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                calculatorMenuItems.forEach { (route, details) ->
+                    val (label, icon) = details
+                    NavigationDrawerItem(
+                        icon = { Icon(icon, contentDescription = label) },
+                        label = { Text(label, style = MaterialTheme.typography.bodyLarge) },
+                        selected = currentRoute == route,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            if (currentRoute != route) {
+                                // Navigasi khusus untuk riwayat agar popUpTo tidak mempengaruhi menu utama
+                                navController.navigate(route) {
+                                    popUpTo("stealthHistory") { inclusive = true } // Pop up ke history itu sendiri
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            unselectedContainerColor = Color.Transparent,
+                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
-                )
+                }
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) // Divider setelah item standar
                 NavigationDrawerItem(
-                    label = { Text("Kalkulator Ilmiah",style = MaterialTheme.typography.bodyLarge) },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        navController.navigate("stealthScientific") {
-                            popUpTo("stealthHistory") { inclusive = true }
-                        }
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = NavigationDrawerItemDefaults.colors(
-                        unselectedContainerColor = Color.Transparent,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
-                NavigationDrawerItem(
-                    label = { Text("Riwayat Kalkulasi",style = MaterialTheme.typography.bodyLarge) },
-                    selected = true, // Ini adalah halaman saat ini
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        // Tidak perlu navigasi, karena sudah di halaman ini
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer, // Warna terpilih dari tema
-                        selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer, // Warna teks terpilih dari tema
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer // Warna ikon terpilih dari tema
-                    )
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                NavigationDrawerItem(
-                    label = { Text("Bersihkan Riwayat",style = MaterialTheme.typography.bodyLarge) },
+                    icon = { Icon(Icons.Filled.DeleteSweep, "Bersihkan Riwayat") }, // Ikon untuk bersihkan
+                    label = { Text("Bersihkan Riwayat", style = MaterialTheme.typography.bodyLarge) },
                     selected = false,
                     onClick = {
                         historyViewModel.clearHistory()
