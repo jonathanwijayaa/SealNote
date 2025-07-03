@@ -16,3 +16,5 @@ Link Figma :
 https://www.figma.com/design/6Vcyg34dmujJKQHvaUw4Dd/Project-Android?node-id=0-1&t=nbWAxzoMk2RhoAf5-1
 1. Login menggunakan akun yang sudah terdaftarkan (Sign Up) atau menggunakan Gmail
 2. Dari Stealth Mode ke Notes klik "C" di Calculator 3x
+
+Untuk saat ini, pengembangan fitur gambar hanya local, jadi hanya tersimpan di galeri user, bukan di FIrebase
